@@ -1,5 +1,7 @@
 # XMTP Improvement Proposals (XIPs)
 
+![Lint](https://github.com/xmtp/XIPs/actions/workflows/lint.yml/badge.svg)
+
 XMTP Improvement Proposals are design documents that:
 
 - Provide information to the XMTP community

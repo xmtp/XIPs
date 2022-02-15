@@ -1,5 +1,7 @@
 # XIP Title
 
+![Lint](https://github.com/xmtp/XIPs/actions/workflows/lint.yml/badge.svg)
+
 This is the suggested template for new XIP.
 
 Note that an XIP number will be assigned by an editor. When opening a pull request to submit your XIP, please use an abbreviated title in the filename, `xip-draft_title_abbrev.md`.
