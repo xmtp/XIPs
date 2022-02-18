@@ -1,8 +1,8 @@
-# XIP-1 XIP Purpose, Process, & Guidelines
+# XIP-0 XIP Purpose, Process, & Guidelines
 
 ![Lint](https://github.com/xmtp/XIPs/actions/workflows/lint.yml/badge.svg)
 
-- [XIP-1 XIP Purpose, Process, & Guidelines](#xip-1-xip-purpose-process--guidelines)
+- [XIP-0 XIP Purpose, Process, & Guidelines](#xip-0-xip-purpose-process--guidelines)
   - [What is an XIP?](#what-is-an-xip)
   - [XIP Rationale](#xip-rationale)
   - [XIP Types](#xip-types)

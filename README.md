@@ -24,4 +24,4 @@ The goal of the XIP project is to document standardized protocols for XMTP clien
 
 | ID | Title | Status |
 | -- | -- | -- |
-| 1 | [XIP Purpose, Process, & Guidelines](XIPs/xip-1-purpose-process.md) | Draft |
+| 0 | [XIP Purpose, Process, & Guidelines](XIPs/xip-0-purpose-process.md) | Draft |
