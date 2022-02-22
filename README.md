@@ -6,9 +6,9 @@
 
 XMTP Improvement Proposals are design documents that:
 
-- Provide information to the XMTP community
 - Detail new features for XMTP
 - Process or environment changes for XMTP
+- Provide information to the XMTP community
 
 They:
 
@@ -24,4 +24,4 @@ The goal of the XIP project is to document standardized protocols for XMTP clien
 
 | ID | Title | Status |
 | -- | -- | -- |
-| 0 | [XIP Purpose, Process, & Guidelines](XIPs/xip-0-purpose-process.md) | Draft |
+| 0 | [XIP Purpose, Process, & Guidelines](XIPs/xip-0`g-purpose-process.md) | Draft |
