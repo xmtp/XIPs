@@ -168,7 +168,7 @@ The current XIP editors are
 
 - Matt Galligan (@mg0716)
 - Saul Carlin (@saulmc)
-- Steven Normore (@snormo`re)
+- Steven Normore (@snormore)
 
 ## XIP Editor Responsibilities
 
