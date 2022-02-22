@@ -32,12 +32,12 @@
 
 There are three major category of XIPs, as well as more specific subcategories:
 
-* A **Standards Track XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
-  * **Network**: includes specifications and proposals around networking behavior
-  * **Interface**: includes improvements around client API/RPC specifications and standards
-  * **XRC**: includes application-level standards and conventions, including message format standards
-* A **Process XIP** describes a process surrounding XMTP, or proposes changes to an existing process. They may propose an implementation, but not to XMTP's codebase; they often require community consensus; unlike Informational XIPs, they are more than recommendations, and users are typically not free to ignore them.
-* An **Informational XIP** provides general guidelines or information to the XMTP community, but does not propose a new feature. Informational XIPs do not necessarily represent a XMTP community consensus or recommendation, so users and implementors are free to ignore Informational XMTP or follow their advice.
+- A **Standards Track XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
+  - **Network**: includes specifications and proposals around networking behavior
+  - **Interface**: includes improvements around client API/RPC specifications and standards
+  - **XRC**: includes application-level standards and conventions, including message format standards
+- A **Process XIP** describes a process surrounding XMTP, or proposes changes to an existing process. They may propose an implementation, but not to XMTP's codebase; they often require community consensus; unlike Informational XIPs, they are more than recommendations, and users are typically not free to ignore them.
+- An **Informational XIP** provides general guidelines or information to the XMTP community, but does not propose a new feature. Informational XIPs do not necessarily represent a XMTP community consensus or recommendation, so users and implementors are free to ignore Informational XMTP or follow their advice.
 
 It is highly recommended that a single XIP contain a single key proposal or new idea. The more focused the XIP, the more successful it tends to be. If in doubt, split your XIP into several well-focused ones. A change to one client doesn’t require an XIP; a change that affects multiple clients, or defines a standard for multiple apps to use, does.
 
