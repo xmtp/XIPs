@@ -4,7 +4,7 @@
 
 - **xip:** 0
 - **title:** XIP Purpose, Process, & Guidelines
-- **status:** Living
+- **status:** Draft
 - **type:** Meta
 - **author:** Matt Galligan `<mg@xmtp.com>`, et al
 - **created:** 2022-02-22
