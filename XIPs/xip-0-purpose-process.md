@@ -1,7 +1,5 @@
 # XIP-0 XIP Purpose, Process, & Guidelines
 
-![Lint](https://github.com/xmtp/XIPs/actions/workflows/lint.yml/badge.svg)
-
 - **xip:** 0
 - **title:** XIP Purpose, Process, & Guidelines
 - **discussions-to**: <https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475>
@@ -170,7 +168,7 @@ The current XIP editors are
 
 ## XIP Editor Responsibilities
 
-For each new XIP that comes in, an editor does the following:
+For each new XIP proposal that is submitted as a pull request, an editor does the following:
 
 - Read the XIP to check if it is ready: sound and complete. The ideas must make technical sense, even if they don't seem likely to get to final status.
 - The title should accurately describe the content.
@@ -189,6 +187,10 @@ Many XIPs are written and maintained by developers with write access to the XMTP
 The editors don't pass judgment on XIPs. We merely do the administrative & editorial part.
 
 ## Style Guide
+
+### XIP Pull Request Titles
+
+When assigning a title to a pull request that contains a proposal, it should include the title of said proposal.
 
 ### XIP numbers
 
