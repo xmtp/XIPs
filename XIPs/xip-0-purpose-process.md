@@ -94,7 +94,7 @@ Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style
 
 `type`: *One of `Standards Track`, `Process`, or `Informational`*
 
-`category`: *One of `Network`, `Interface`, or `XRC`* (Optional field, only needed for `Standards Track` XIPs)
+`category`: *One of `Core`, `Network`, `Interface`, or `XRC`* (Optional field, only needed for `Standards Track` XIPs)
 
 `created`: *Date the XIP was created on*
 
