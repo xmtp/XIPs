@@ -146,7 +146,7 @@ XIPs may have a `requires` header, indicating the XIP numbers that this XIP depe
 
 ## Linking to other XIPs
 
-References to other XIPs should follow the format `XIP-N` where `N` is the XIP number you are referring to. Each XIP that is referenced in an XIP **MUST** be accompanied by a relative markdown link the first time it is referenced, and MAY be accompanied by a link on subsequent references. The link MUST always be done via relative paths so that the links work in this GitHub repository, forks of this repository, the main XIPs site, mirrors of the main XIP site, etc. For example, you would link to this XIP with `[XIP-0](/XIPs/xip-0-purpose-process.md))`.
+References to other XIPs should follow the format `XIP-N` where `N` is the XIP number you are referring to. Each XIP that is referenced in an XIP **MUST** be accompanied by a relative markdown link the first time it is referenced, and MAY be accompanied by a link on subsequent references. The link MUST always be done via relative paths so that the links work in this GitHub repository, forks of this repository, the main XIPs site, mirrors of the main XIP site, etc. For example, you would link to this XIP with `[XIP-0](./XIPs/xip-0-purpose-process.md))`.
 
 ## Auxiliary Files
 
