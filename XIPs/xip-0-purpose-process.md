@@ -20,7 +20,7 @@ For XMTP implementers, XIPs are a convenient way to track the progress of their 
 
 ## XIP Types
 
-There are three major category of XIPs, as well as more specific subcategories:
+There are three major categories of XIPs, as well as more specific subcategories:
 
 - A **Standards Track XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
   - **Core**: includes backwards-incompatible changes that require a consensus fork
@@ -130,7 +130,7 @@ The preferred discussion URL is a topic on [XMTP Community forums](https://commu
 
 ### `type` header
 
-The `type` header specifies the type of XIP: Standards Track, Process, or Informational. If the track is Standards please include the subcategory (network, interface, or ERC).
+The `type` header specifies the type of XIP: Standards Track, Process, or Informational. If the track is Standards please include the subcategory (network, interface, or XRC).
 
 ### `category` header
 
