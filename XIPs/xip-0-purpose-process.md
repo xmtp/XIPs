@@ -26,7 +26,7 @@ There are three major categories of XIPs, as well as more specific subcategories
   - **Core**: includes backwards-incompatible changes that require a consensus fork
   - **Network**: includes specifications and proposals around networking behavior
   - **Interface**: includes improvements around client API/RPC specifications and standards
-  - **XRC**: includes application-level standards and conventions, including message format standards, otherwise known as an *XMTP Request for Comment*
+  - **XRC**: short for *XMTP Request for Comment* and includes application-level standards and conventions, such as message format standards
 - A **Process XIP** describes a process surrounding XMTP, or proposes changes to an existing process. They may propose an implementation, but not to XMTP's codebase; they often require community consensus; unlike Informational XIPs, they are more than recommendations, and users are typically not free to ignore them.
 - An **Informational XIP** provides general guidelines or information to the XMTP community, but does not propose a new feature. Informational XIPs do not necessarily represent a XMTP community consensus or recommendation, so users and implementors are free to ignore Informational XMTP or follow their advice.
 
