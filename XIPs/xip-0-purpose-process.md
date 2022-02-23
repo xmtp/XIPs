@@ -23,6 +23,7 @@ For XMTP implementers, XIPs are a convenient way to track the progress of their 
 There are three major category of XIPs, as well as more specific subcategories:
 
 - A **Standards Track XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
+  - **Core**: includes proposals for rules and behavior around message relay by nodes, node incentive strategies, and backwards-incompatible changes that require a consensus fork
   - **Network**: includes networking specifications and proposals around how nodes communicate and interoperate
   - **Interface**: includes client API/RPC specifications and improvements to how clients interact with the network
   - **Storage**: includes specifications and proposals for private persistent storage of messages by or on behalf of clients
@@ -94,7 +95,7 @@ Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style
 
 `type`: *One of `Standards Track`, `Process`, or `Informational`*
 
-`category`: *One of `Network`, `Interface`, or `XRC`* (Optional field, only needed for `Standards Track` XIPs)
+`category`: *One of `Core`, `Network`, `Interface`, `Storage`, or `XRC`* (Optional field, only needed for `Standards Track` XIPs)
 
 `created`: *Date the XIP was created on*
 
@@ -130,7 +131,7 @@ The preferred discussion URL is a topic on [XMTP Community forums](https://commu
 
 ### `type` header
 
-The `type` header specifies the type of XIP: Standards Track, Process, or Informational. If the track is Standards please include the subcategory (network, interface, storage, or ERC).
+The `type` header specifies the type of XIP: Standards Track, Process, or Informational. If the track is Standards please include the subcategory (core, network, interface, storage, or ERC).
 
 ### `category` header
 
