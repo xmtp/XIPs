@@ -7,7 +7,7 @@
 - **discussions-to**: <https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475>
 - **status:** Draft
 - **type:** Process
-- **author:** Matt Galligan `<mg@xmtp.com>`, et al
+- **author:** Matt Galligan `(@mg0716)`, et al
 - **created:** 2022-02-22
 
 ## What is an XIP?
@@ -110,19 +110,15 @@ Headers requiring dates will always do so in the format of ISO 8601 (yyyy-mm-dd)
 
 ### `author` header
 
-The `author` header lists the names, email addresses or usernames of the authors/owners of the XIP. Those who prefer anonymity may use a username only, or a first name and a username. The format of the `author` header value must be:
+The `author` header lists the names, email addresses or GitHub usernames of the authors/owners of the XIP. Those who prefer anonymity may use a GitHub username only, or a first name and a GitHub username. The format of the `author` header value must be:
 
-> Random J. User &lt;address@dom.ain&gt;
+> Random J. User `<address@dom.ain>`
 
 or
 
-> Random J. User (@username)
+> Random J. User `(@username)`
 
-if the email address or GitHub username is included, and
-
-> Random J. User
-
-if the email address is not given.
+if the email address or GitHub username is included.
 
 It is not possible to use both an email and a GitHub username at the same time. If important to include both, one could include their name twice, once with the GitHub username, and once with the email.
 
@@ -196,7 +192,7 @@ The editors don't pass judgment on XIPs. We merely do the administrative & edito
 
 ### XIP numbers
 
-When referring to an XIP by number, it should be written in the hyphenated form `XIP-X` where `X` is the XIP's assigned number.
+When referring to an XIP by number, it should be written in the hyphenated form `XIP-N` where `N` is the XIP's assigned number.
 
 ### RFC 2119
 
@@ -206,7 +202,7 @@ XIPs are encouraged to follow [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) f
 
 ## History
 
-This document was derived heavily from [Ethereum's XIP-1](https://github.com/ethereum/XIPs/blob/master/XIPs/XIP-1.md), which was derived from [Bitcoin's BIP-0001](https://github.com/bitcoin/bips) written by Amir Taaki, which in turn was derived from [Python's PEP-0001](https://www.python.org/dev/peps/). In many places text was simply copied and modified. Although the PEP-0001 text was written by Barry Warsaw, Jeremy Hylton, and David Goodger, they are not responsible for its use in the XMTP Improvement Process, and should not be bothered with technical questions specific to XMTP or the XIP. Please direct all comments to the XIP editors.
+This document was derived heavily from [Ethereum's EIP-1](https://eips.ethereum.org/EIPS/eip-1), which was derived from [Bitcoin's BIP-0001](https://github.com/bitcoin/bips) written by Amir Taaki, which in turn was derived from [Python's PEP-0001](https://www.python.org/dev/peps/). In many places text was simply copied and modified. Although the PEP-0001 text was written by Barry Warsaw, Jeremy Hylton, and David Goodger, they are not responsible for its use in the XMTP Improvement Process, and should not be bothered with technical questions specific to XMTP or the XIP. Please direct all comments to the XIP editors.
 
 ## Copyright
 
