@@ -4,8 +4,9 @@
 
 - **xip:** 0
 - **title:** XIP Purpose, Process, & Guidelines
+- **discussions-to**: <https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475>
 - **status:** Draft
-- **type:** Meta
+- **type:** Process
 - **author:** Matt Galligan `<mg@xmtp.com>`, et al
 - **created:** 2022-02-22
 
@@ -24,9 +25,10 @@ For XMTP implementers, XIPs are a convenient way to track the progress of their 
 There are three major category of XIPs, as well as more specific subcategories:
 
 - A **Standards Track XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
+  - **Core**: includes backwards-incompatible changes that require a consensus fork
   - **Network**: includes specifications and proposals around networking behavior
   - **Interface**: includes improvements around client API/RPC specifications and standards
-  - **XRC**: includes application-level standards and conventions, including message format standards
+  - **XRC**: includes application-level standards and conventions, including message format standards, otherwise known as an *XMTP Request for Comment*
 - A **Process XIP** describes a process surrounding XMTP, or proposes changes to an existing process. They may propose an implementation, but not to XMTP's codebase; they often require community consensus; unlike Informational XIPs, they are more than recommendations, and users are typically not free to ignore them.
 - An **Informational XIP** provides general guidelines or information to the XMTP community, but does not propose a new feature. Informational XIPs do not necessarily represent a XMTP community consensus or recommendation, so users and implementors are free to ignore Informational XMTP or follow their advice.
 
@@ -38,9 +40,9 @@ An XIP must meet certain minimum criteria. It must be a clear and complete descr
 
 ### Shepherding an XIP
 
-Parties involved in the process are you, the champion or *XIP author*, the [*XIP editors*](#XIP-editors), and the *XMTP Core Developers*.
+Parties involved in the process are you, the champion or *XIP author*, the [*XIP editors*](#XIP-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
 
-Before you begin writing a formal XIP, you should vet your idea. Ask the XMTP community first if an idea is original to avoid wasting time on something that will be rejected based on prior research. It is thus recommended to open a discussion thread on [the XMTP Community forum](https://community.xmtp.org/) to do this.
+Before you begin writing a formal XIP, you should vet your idea. Ask the XMTP community first if an idea is original to avoid wasting time on something that will be rejected based on prior research. It is thus recommended to open a discussion thread on [the XMTP Community forum](https://community.xmtp.org/c/xips/51) to do this.
 
 Once the idea has been vetted, your next responsibility will be to present (by means of an XIP) the idea to the reviewers and all interested parties, invite editors, developers, and the community to give feedback on the aforementioned channels. You should try and gauge whether the interest in your XIP is commensurate with both the work involved in implementing it and how many parties will have to conform to it. Negative community feedback will be taken into consideration and may prevent your XIP from moving past the Draft stage.
 
@@ -92,7 +94,7 @@ Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style
 
 `last-call-deadline`: *The date last call period ends on* (Optional field, only needed when status is `Last Call`)
 
-`type`: *One of `Standards Track`, `Meta`, or `Informational`*
+`type`: *One of `Standards Track`, `Process`, or `Informational`*
 
 `category`: *One of `Network`, `Interface`, or `XRC`* (Optional field, only needed for `Standards Track` XIPs)
 
@@ -130,11 +132,11 @@ At least one author must use a GitHub username, in order to get notified on chan
 
 While an XIP is a draft, a `discussions-to` header will indicate the URL where the XIP is being discussed.
 
-The preferred discussion URL is a topic on [XMTP Community forums](https://community.xmtp.org/). The URL cannot point to Github pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
+The preferred discussion URL is a topic on [XMTP Community forums](https://community.xmtp.org/c/xips/51). The URL cannot point to Github pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
 
 ### `type` header
 
-The `type` header specifies the type of XIP: Standards Track, Meta, or Informational. If the track is Standards please include the subcategory (network, interface, or ERC).
+The `type` header specifies the type of XIP: Standards Track, Process, or Informational. If the track is Standards please include the subcategory (network, interface, or ERC).
 
 ### `category` header
 
@@ -154,7 +156,7 @@ References to other XIPs should follow the format `XIP-N` where `N` is the XIP n
 
 ## Auxiliary Files
 
-Images, diagrams and auxiliary files should be included in a subdirectory of the assets folder for that XIP as follows: assets/xip-N (where N is to be replaced with the XIP number). When linking to an image in the XIP, use relative links such as ../assets/xip-1/image.png.
+Images, diagrams and auxiliary files should be included in a subdirectory of the assets folder for that XIP as follows: `assets/xip-N` (where `N` is to be replaced with the XIP number). When linking to an image in the XIP, use relative links such as `../assets/xip-0/image.png`.
 
 ## Transferring XIP Ownership
 
