@@ -1,12 +1,12 @@
-# XIP-0 XIP Purpose, Process, & Guidelines
-
-- **xip:** 0
-- **title:** XIP Purpose, Process, & Guidelines
-- **discussions-to**: <https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475>
-- **status:** Draft
-- **type:** Process
-- **author:** Matt Galligan `(@mg0716)`, et al
-- **created:** 2022-02-22
+---
+xip: 0
+title: XIP Purpose, Process, & Guidelines
+discussions-to: <https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475>
+status: Draft
+type: Process
+author: Matt Galligan `(@mg0716)`, et al
+created: 2022-02-22
+---
 
 ## What is an XIP?
 
@@ -14,7 +14,7 @@ XIP stands for XMTP Improvement Proposal. An XIP is a design document providing 
 
 ## XIP Rationale
 
-We intend XIPs to be the primary mechanisms for proposing new features, for collecting community technical input on an issue, and for documenting the design decisions that have gone into XMTP. Because the XIPs are maintained as text files in a versioned repository, their revision history is the historical record of the feature proposal.
+We intend XIPs to be the primary mechanisms for proposing new features, for collecting community technical input on an issue, and for documenting the design decisions that have gone into XMTP. Because the XIPs are maintained as text files in a versioned repository, their revision history i  s the historical record of the feature proposal.
 
 For XMTP implementers, XIPs are a convenient way to track the progress of their implementation. Ideally each implementation maintainer would list the XIPs that they have implemented. This will give end users a convenient way to know the current status of a given implementation or library.
 
@@ -78,7 +78,7 @@ XIPs should be written in [markdown](https://github.com/adam-p/markdown-here/wik
 
 ## XIP Header Preamble
 
-Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style header preamble, formatted as a bulleted list. The headers must appear in the following order.
+Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style header preamble, formatted as a bulleted list. This header is also termed ["front matter" by Jekyll](https://jekyllrb.com/docs/front-matter/). The headers must appear in the following order.
 
 `XIP`: *XIP number* (this is determined by the XIP editor)
 
