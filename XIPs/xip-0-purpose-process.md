@@ -1,7 +1,7 @@
 ---
 xip: 0
 title: XIP Purpose, Process, & Guidelines
-discussions-to: <https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475>
+discussions-to: https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475
 status: Draft
 type: Process
 author: Matt Galligan (@mg0716), et al
