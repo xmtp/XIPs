@@ -10,7 +10,7 @@ created: 2022-02-22
 
 ## What is an XIP?
 
-XIP stands for XMTP Improvement Proposal. An XIP is a design document providing information to the XMTP community, or describing a new feature for XTMP or its processes or environment. The XIP should provide a concise technical specification of the feature and a rationale for the feature. The XIP author is responsible for building consensus within the community and documenting dissenting opinions.
+XIP stands for XMTP Improvement Proposal. An XIP is a design document providing information to the XMTP community, or describing a new feature for XMTP or its processes or environment. The XIP should provide a concise technical specification of the feature and a rationale for the feature. The XIP author is responsible for building consensus within the community and documenting dissenting opinions.
 
 ## XIP Rationale
 
@@ -63,7 +63,7 @@ Each XIP should have the following parts:
 
 - Preamble - RFC 822 style headers containing metadata about the XIP, including the XIP number, a short descriptive title (limited to a maximum of 44 characters), a description (limited to a maximum of 140 characters), and the author details. Irrespective of the category, the title and description should not include XIP number. See [below](xip-0-purpose-process.md#xip-header-preamble) for details.
 - Abstract - Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
-- Motivation (*optional) - A motivation section is critical for XIPs that want to change the XTMP protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem that the XIP solves. XIP submissions without sufficient motivation may be rejected outright.
+- Motivation (*optional) - A motivation section is critical for XIPs that want to change the XMTP protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem that the XIP solves. XIP submissions without sufficient motivation may be rejected outright.
 - Specification - The technical specification should describe the syntax and semantics of any new feature. The specification should be detailed enough to allow competing, interoperable implementations for any of the current XMTP platforms.
 - Rationale - The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion.
 - Backwards Compatibility - All XIPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The XIP must explain how the author proposes to deal with these incompatibilities. XIP submissions without a sufficient backwards compatibility treatise may be rejected outright.
