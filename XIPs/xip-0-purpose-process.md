@@ -14,7 +14,7 @@ XIP stands for XMTP Improvement Proposal. An XIP is a design document providing 
 
 ## XIP Rationale
 
-We intend XIPs to be the primary mechanisms for proposing new features, for collecting community technical input on an issue, and for documenting the design decisions that have gone into XMTP. Because the XIPs are maintained as text files in a versioned repository, their revision history i  s the historical record of the feature proposal.
+We intend XIPs to be the primary mechanisms for proposing new features, for collecting community technical input on an issue, and for documenting the design decisions that have gone into XMTP. Because the XIPs are maintained as text files in a versioned repository, their revision history is the historical record of the feature proposal.
 
 For XMTP implementers, XIPs are a convenient way to track the progress of their implementation. Ideally each implementation maintainer would list the XIPs that they have implemented. This will give end users a convenient way to know the current status of a given implementation or library.
 
