@@ -181,6 +181,7 @@ If the XIP isn't ready, the editor will send it back to the author for revision,
 Once the XIP is ready for the repository, the XIP editor will:
 
 - Assign an XIP number (generally the PR number, but the decision is with the editors)
+- Add the XIP number to the filename
 - Merge the corresponding [pull request](https://github.com/xmtp/XIPs/pulls)
 - Send a message back to the XIP author with the next step.
 
@@ -189,6 +190,15 @@ Many XIPs are written and maintained by developers with write access to the XMTP
 The editors don't pass judgment on XIPs. We merely do the administrative & editorial part.
 
 ## Style Guide
+
+### XIP filenames
+
+XIP filenames must adhere to the following pattern:
+
+- Before an XIP number is assigned: `xip-title.md`
+  - Where `title` is a dash-separated shortened version of the XIP title
+- After an XIP number is assigned: `xip-n-short-title.md`
+  - Where `n` is the XIP number
 
 ### XIP Pull Request Titles
 
