@@ -1,16 +1,16 @@
-# XIP-0 XIP Purpose, Process, & Guidelines
-
-- **xip:** 0
-- **title:** XIP Purpose, Process, & Guidelines
-- **discussions-to**: <https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475>
-- **status:** Draft
-- **type:** Process
-- **author:** Matt Galligan `(@mg0716)`, et al
-- **created:** 2022-02-22
+---
+xip: 0
+title: XIP Purpose, Process, & Guidelines
+discussions-to: https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475
+status: Draft
+type: Process
+author: Matt Galligan (@mg0716), et al
+created: 2022-02-22
+---
 
 ## What is an XIP?
 
-XIP stands for XMTP Improvement Proposal. An XIP is a design document providing information to the XMTP community, or describing a new feature for XTMP or its processes or environment. The XIP should provide a concise technical specification of the feature and a rationale for the feature. The XIP author is responsible for building consensus within the community and documenting dissenting opinions.
+XIP stands for XMTP Improvement Proposal. An XIP is a design document providing information to the XMTP community, or describing a new feature for XMTP or its processes or environment. The XIP should provide a concise technical specification of the feature and a rationale for the feature. The XIP author is responsible for building consensus within the community and documenting dissenting opinions.
 
 ## XIP Rationale
 
@@ -20,7 +20,7 @@ For XMTP implementers, XIPs are a convenient way to track the progress of their 
 
 ## XIP Types
 
-There are three major category of XIPs, as well as more specific subcategories:
+There are three major categories of XIPs, as well as more specific subcategories:
 
 - A **Standards Track XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
   - **Core**: includes proposals for rules and behavior around message relay by nodes, node incentive strategies, and backwards-incompatible changes that require a consensus fork
@@ -62,7 +62,7 @@ Each XIP should have the following parts:
 
 - Preamble - RFC 822 style headers containing metadata about the XIP, including the XIP number, a short descriptive title (limited to a maximum of 44 characters), a description (limited to a maximum of 140 characters), and the author details. Irrespective of the category, the title and description should not include XIP number. See [below](xip-0-purpose-process.md#xip-header-preamble) for details.
 - Abstract - Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
-- Motivation (*optional) - A motivation section is critical for XIPs that want to change the XTMP protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem that the XIP solves. XIP submissions without sufficient motivation may be rejected outright.
+- Motivation (*optional) - A motivation section is critical for XIPs that want to change the XMTP protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem that the XIP solves. XIP submissions without sufficient motivation may be rejected outright.
 - Specification - The technical specification should describe the syntax and semantics of any new feature. The specification should be detailed enough to allow competing, interoperable implementations for any of the current XMTP platforms.
 - Rationale - The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion.
 - Backwards Compatibility - All XIPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The XIP must explain how the author proposes to deal with these incompatibilities. XIP submissions without a sufficient backwards compatibility treatise may be rejected outright.
@@ -77,7 +77,7 @@ XIPs should be written in [markdown](https://github.com/adam-p/markdown-here/wik
 
 ## XIP Header Preamble
 
-Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style header preamble, formatted as a bulleted list. The headers must appear in the following order.
+Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style header preamble, formatted as a bulleted list. This header is also termed ["front matter" by Jekyll](https://jekyllrb.com/docs/front-matter/). The headers must appear in the following order.
 
 `XIP`: *XIP number* (this is determined by the XIP editor)
 
@@ -147,7 +147,7 @@ XIPs may have a `requires` header, indicating the XIP numbers that this XIP depe
 
 ## Linking to other XIPs
 
-References to other XIPs should follow the format `XIP-N` where `N` is the XIP number you are referring to. Each XIP that is referenced in an XIP **MUST** be accompanied by a relative markdown link the first time it is referenced, and MAY be accompanied by a link on subsequent references. The link MUST always be done via relative paths so that the links work in this GitHub repository, forks of this repository, the main XIPs site, mirrors of the main XIP site, etc. For example, you would link to this XIP with `[XIP-0](/XIPs/xip-0-purpose-process.md))`.
+References to other XIPs should follow the format `XIP-N` where `N` is the XIP number you are referring to. Each XIP that is referenced in an XIP **MUST** be accompanied by a relative markdown link the first time it is referenced, and MAY be accompanied by a link on subsequent references. The link MUST always be done via relative paths so that the links work in this GitHub repository, forks of this repository, the main XIPs site, mirrors of the main XIP site, etc. For example, you would link to this XIP with `[XIP-0](./XIPs/xip-0-purpose-process.md))`.
 
 ## Auxiliary Files
 
@@ -180,6 +180,7 @@ If the XIP isn't ready, the editor will send it back to the author for revision,
 Once the XIP is ready for the repository, the XIP editor will:
 
 - Assign an XIP number (generally the PR number, but the decision is with the editors)
+- Add the XIP number to the filename
 - Merge the corresponding [pull request](https://github.com/xmtp/XIPs/pulls)
 - Send a message back to the XIP author with the next step.
 
@@ -188,6 +189,15 @@ Many XIPs are written and maintained by developers with write access to the XMTP
 The editors don't pass judgment on XIPs. We merely do the administrative & editorial part.
 
 ## Style Guide
+
+### XIP filenames
+
+XIP filenames must adhere to the following pattern:
+
+- Before an XIP number is assigned: `xip-title.md`
+  - Where `title` is a dash-separated shortened version of the XIP title
+- After an XIP number is assigned: `xip-n-short-title.md`
+  - Where `n` is the XIP number
 
 ### XIP Pull Request Titles
 
