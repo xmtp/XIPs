@@ -181,25 +181,25 @@ export default class Message implements proto.Message {
   content?: MessageContent
   error?:   
   ...
-  get getContent(): any {
+  get contentType(): ContentTypeId | undefined {
     if (!this.content) {
       return undefined
     }
     if (typeof this.content === 'string') {
-      return this.content
+      return ContentTypeText
     }
-    return this.content.content
+    return this.content.contentType
   }
 
 ```
 
-Note that the `Message.text` getter that previously just returned the `decrypted` string, will have to be replaced with `Message.content`. The clients of the API will need to interrogate the result and do the right thing based on the content type. `Message.getContent` getter shows how that might look.
+Note that the `Message.text` getter that previously just returned the `decrypted` string, will have to be replaced with `Message.content`. The clients of the API will need to interrogate the result and do the right thing based on `Message.contentType`.
 
-If an unrecognized content type is received the `Message.error` will be set accordingly, but if the `contentDescription` is present the `Message.content` will be set to the description. In order to be able to distinguish the actual content from the description, we will introduce a special `contentType`.
+If an unrecognized content type is received the `Message.error` will be set accordingly, but if the `contentFallback` is present the `Message.content` will be set to that. In order to be able to reliably distinguish the actual content from the fallback, we will introduce a special `ContentTypeId`.
 
 ```ts
 // This content type is used to provide the recipient
-// the alternative content description (if present)
+// the alternative content fallback (if present)
 // in case the content type is not supported.
 export const ContentTypeAlternativeDescription = {
   authorityId: 'xmtp.org',
@@ -251,6 +251,10 @@ https://github.com/xmtp/xmtp-js/pull/68
 ## Security Considerations
 
 All XIPs must contain a section that discusses the security implications/considerations relevant to the proposed change. Include information that might be important for security discussions, surfaces risks and can be used throughout the life cycle of the proposal. E.g. include security-relevant design decisions, concerns, important discussions, implementation-specific guidance and pitfalls, an outline of threats and risks and how they are being addressed. XIP submissions missing the "Security Considerations" section will be rejected. An XIP cannot proceed to status "Final" without a Security Considerations discussion deemed sufficient by the reviewers.
+
+---
+
+This API change allows transmitting arbitrary and therefore potentially dangerous types of content. Complex decoding or presentation logic can trigger undesirable or dangerous behavior in the receiving client. The authority of any given content type SHOULD provide suitable guidance on how to handle the content type safely.
 
 ## Copyright
 
