@@ -8,6 +8,17 @@ Note that an XIP number will be assigned by an editor. When opening a pull reque
 
 The title should be 44 characters or less. It should not repeat the XIP number in title, irrespective of the category.
 
+## Preamble
+
+title: The XIP title is a few words, not a complete sentence
+description: Description is one full (short) sentence
+author: The list of the author's or authors' name(s) and/or username(s), or name(s) and email(s). Details are below.
+discussions-to: The url pointing to the official discussion thread
+status: Draft, Review, Last Call, Final, Stagnant, Withdrawn, Living
+type: One of Standards Track, Process, or Informational
+category: One of Core, Network, Interface, Storage, or XRC (Optional field, only needed for Standards Track XIPs)
+created: Date the XIP was created on
+
 ## Abstract
 
 Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
