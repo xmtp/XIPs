@@ -2,6 +2,15 @@
 
 ![Lint](https://github.com/xmtp/XIPs/actions/workflows/lint.yml/badge.svg)
 
+title: Message Content Types
+description: Interoperable framework for supporting different types of content.
+author: Martin Kobetic, Nick Molnar
+discussions-to: ?
+status: Draft
+type: Standards Track
+category: Interface
+created: 2022/02/28
+
 ## Abstract
 
 Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
