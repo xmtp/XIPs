@@ -12,9 +12,9 @@ The title should be 44 characters or less. It should not repeat the XIP number i
 
 title: The XIP title is a few words, not a complete sentence
 description: Description is one full (short) sentence
-author: The list of the author's or authors' name(s) and/or username(s), or name(s) and email(s). Details are below.
+author: The list of the author's or authors' name(s) and/or username(s), or name(s) and email(s).
 discussions-to: The url pointing to the official discussion thread
-status: Draft, Review, Last Call, Final, Stagnant, Withdrawn, Living
+status: Draft
 type: One of Standards Track, Process, or Informational
 category: One of Core, Network, Interface, Storage, or XRC (Optional field, only needed for Standards Track XIPs)
 created: Date the XIP was created on
