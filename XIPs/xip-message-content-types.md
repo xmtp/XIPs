@@ -91,7 +91,16 @@ The `ContentTypeId` identifies the type and format of the information contained 
 * content type ID
 * content type version
 
-Identifier format is tied to the protocol version. Changes to the format will require corresponding protocol version adjustment. Such changes may add new information to the identifier but it should only be information that is required to match the identifier with the corresponding decoding machinery or information that is required for all content types (like the content type version). Any information that is specific to a content type should be carried in the content type parameters field.
+Identifier format is tied to the protocol version. Changes to the format will require corresponding protocol version adjustment. Such changes may add new information to the identifier but it should only be information that is required to match the identifier with the corresponding decoding machinery or information that is required for all content types (like the content type version). Any information that is specific to a content type should be carried in the content type parameters field. Here is the definition of the identifier type:
+
+```protobuf
+message ContentTypeId {
+  string authorityId = 1;  // authority governing this content type
+  string typeId = 2;  // type identifier
+  uint32 versionMajor = 3; // major version of the type
+  uint32 versionMinor = 4; // minor version of the type
+}
+```
 
 Authority ID identifies the entity that governs a suite of content types, their definitions and implementations. `xmtp.org` is one such organization. Authority ID should be unique and be widely recognized as belonging to the entity. DNS domains or ENS names can serve this purpose (e.g. `uniswap.eth`). The authority is responsible for providing a definition of the content type and its encoding parameters as well as the associated implementation.
 
