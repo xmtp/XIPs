@@ -34,7 +34,7 @@ The motivation section should describe the "why" of this XIP. What problem does 
 
 The API currently accepts only `string` as the message content, which suggests to the user that only plain text is supported. Given the ambition of builing a community around the protocol that would be motivated to build a wide array of very different clients and applications around it, we need to enable at least future possibility of using different types of content beyond just plain text (rich text, images, video, sound, file attachments, etc).
 
-However given that this is a large and complex topic we don't want to have to solve it all right now. We want a flexible framework that will allow building a rich library of various types of supported content over time. This library should be open to collaboration with other organizations. The framework should be simple, but powerful enough to not hinder future development. The framework should also provide a reasonably friendly API that isn't too onerous to use.
+However given that this is a large and complex topic we don't want to have to solve it all right now. We want a flexible framework that will allow building a rich library of various types of supported content over time. This library should be open to collaboration with other organizations. The framework should be simple, but powerful enough to not hinder future development. The framework should also provide a reasonably friendly API that isn't too onerous to use. This XIP forms an explicit foundation for future XRCs proposing new types of content to be carried by the protocol.
 
 ## Specification
 
