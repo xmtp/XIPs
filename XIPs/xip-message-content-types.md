@@ -115,6 +115,13 @@ Due forethought should be given when choosing identifiers as there are no provis
 To accommodate the new content type framework, the low level `Message` encode/decode API has to work in terms of bytes instead of strings. The protocol level `EncodedContent` message introduced above will be represented by `EncodedContent` interface that allows bundling the content bytes with the content type metadata.
 
 ```ts
+export type ContentTypeId = {
+  authorityId: string
+  typeId: string
+  versionMajor: number
+  versionMinor: number
+}
+
 export interface EncodedContent {
   contentType: ContentTypeId
   contentTypeParams: Record<string, string>
