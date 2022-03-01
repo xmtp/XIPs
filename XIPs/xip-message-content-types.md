@@ -1,15 +1,12 @@
-# Message Content Types
-
-![Lint](https://github.com/xmtp/XIPs/actions/workflows/lint.yml/badge.svg)
-
+---
 title: Message Content Types
-description: Interoperable framework for supporting different types of content.
-author: Martin Kobetic, Nick Molnar
-discussions-to: ?
+description: Interoperable framework for supporting different types of content
+author: Martin Kobetic (@mkobetic), Nick Molnar (@neekolas)
 status: Draft
 type: Standards Track
 category: Interface
-created: 2022/02/28
+created: 2022-02-08
+---
 
 ## Abstract
 
@@ -247,7 +244,7 @@ All XIPs that introduce backwards incompatibilities must include a section descr
 
 Since the new EncodedType message is embedded in the Ciphertext.payload bytes, this change doesn't break the protocol, strictly speaking, however any newer client would struggle interpretting the payload as EncodedContent unless it conforms. So this is a breaking change in that sense. Any older messages will be broken once the new protocol is deployed.
 
-At the API level the changes are even more pronounced, since the input and output of the API is now any type that matches `MessageContent` instead of just `string`. Exracting the content from the Message now requires interrogating the resulting value to determine which type of content it is and handling it accordingly. Clients SHOULD also take an appropriate action when encountering content type they do not recognize, and use the `contentFallback` when available. Clients SHOULD register encoders only for those types that they are prepared to handle.
+At the API level the changes are even more pronounced, since the input and output of the API is now any type that matches `MessageContent` instead of just `string`. Extracting the content from the Message now requires interrogating the resulting value to determine which type of content it is and handling it accordingly. Clients SHOULD also take an appropriate action when encountering content type they do not recognize, and use the `contentFallback` when available. Clients SHOULD register encoders only for those types that they are prepared to handle.
 
 ## Reference Implementation
 
