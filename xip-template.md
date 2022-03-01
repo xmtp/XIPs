@@ -1,10 +1,17 @@
-# XIP Title
-
-![Lint](https://github.com/xmtp/XIPs/actions/workflows/lint.yml/badge.svg)
+---
+title: The XIP title is a few words, not a complete sentence
+description: Description is one full (short) sentence
+author: The list of the author's name(s) and username(s), or name(s) and email(s).
+discussions-to: The url pointing to the official discussion thread
+status: Draft
+type: One of Standards Track, Process, or Informational
+category: One of Core, Network, Interface, Storage, or XRC (Optional field, only needed for Standards Track XIPs)
+created: 0000-00-00 Date the XIP was created on (ISO 8601 format)
+---
 
 This is the suggested template for new XIP.
 
-Note that an XIP number will be assigned by an editor. When opening a pull request to submit your XIP, please use an abbreviated title in the filename, `xip-draft_title_abbrev.md`.
+Note that an XIP number will be assigned by an editor. When opening a pull request to submit your XIP, please use an abbreviated title in the filename, `xip-draft-title-abbrev.md`.
 
 The title should be 44 characters or less. It should not repeat the XIP number in title, irrespective of the category.
 
