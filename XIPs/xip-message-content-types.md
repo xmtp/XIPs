@@ -189,9 +189,9 @@ Note that the `Message.text` getter that previously just returned the `decrypted
 If an unrecognized content type is received the `Message.error` will be set accordingly. If `contentFallback` is present `Message.content` will be set to that. In order to be able to reliably distinguish the actual content from the fallback, we will introduce a special `ContentTypeId`.
 
 ```ts
-export const ContentTypeAlternativeDescription = {
+export const ContentTypeFallback = {
   authorityId: 'xmtp.org',
-  typeId: 'alternative-description',
+  typeId: 'fallback',
   versionMajor: 1,
   versionMinor: 0,
 }
