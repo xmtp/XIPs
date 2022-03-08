@@ -10,10 +10,6 @@ created: 2022-02-08
 
 ## Abstract
 
-Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
-
----
-
 This XIP introduces a framework for interoperable support of different types of content in XMTP messages. At the heart of it are provisions for attaching meta-information to the content that will identify its type and structure, and allow for its correct decoding from the encoded form used for transport inside XMTP messages.
 
 The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to definte their own. The proposed framework provides an interface for registering content type encoders with the client for transparent encoding and decoding of content.
@@ -21,10 +17,6 @@ The XIP envisions community based, iterative development of a library of content
 This XIP is not intended to define content types themselves, those should be proposed through separate XRCs. The only content type defined here is a simple plain text type identified as `xmtp.org/text`. 
 
 ## Motivation
-
-The motivation section should describe the "why" of this XIP. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the XTMP ecosystem? What use cases does this XIP address?
-
----
 
 The API currently accepts only `string` as the message content, which suggests to the user that only plain text is supported. Given the ambition of builing a community around the protocol that would be motivated to build a wide array of very different clients and applications around it, we need to enable at least future possibility of using different types of content beyond just plain text (rich text, images, video, sound, file attachments, etc).
 
@@ -37,12 +29,6 @@ It is expected that many clients will want the ability to carry multiple differe
 Since the set of known content types will be changing over time, clients will need to be ready to handle situations where they cannot correctly decode or present content that arrives in a message. There should be a way to provide an optional `fallback` in the basic framework that can be used to provide description of the content that couldn't be presented.
 
 ## Specification
-
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
-
-The technical specification should describe the syntax and semantics of any new feature. The specification should be detailed enough to allow competing, interoperable implementations for any of the current XMTP platforms.
-
----
 
 ### Protocol
 
@@ -244,19 +230,11 @@ export class AlternativeContentDescription {
 
 ## Rationale
 
-The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages.
-
----
-
 There are decades of prior art in this area. Probably the most familiar example of content type identification scheme are filename extensions. The relevant lesson here is that simple string is likely insufficient for carrying the necessary parameters required to correctly decode the contents (what encoding is the `.txt` file using?). While structured file formats can easily embed those parameters in the file itself, if we do want to support unstructured payload, e.g. plain text, we probably should have a way to attach parameters to the content type identifier itself.
 
 MIME framework (the underlying standard of email, http and other widely used protocols) has a fairly involved sytem using several headers Content-Type, Content-Transfer-Encoding, Content-Disposition etc. Notably the Content-Type header allows embedding arbitrary set of parameters in the header value along with the primary type identifier (media type). Most relevant is [RFC 2046](https://datatracker.ietf.org/doc/html/rfc2046) which discusses the basic media types. At the highest level it recognizes 5 fundamental media types: text, image, audio, video and composite media types. The composite media type is of particular interest as it allows combining different media types in single payload. As soon as you support composite media type, there are additional aspects that likely need to be addressed, e.g. are the different parts just different renderings of the same information (multipart/alternative), or are they different parts of longer narrative (multipart/mixed). Is any individual part meant to be rendered inline with the rest of the content, or is it meant to be an attachment that can be open/saved separately (Content-Disposition)? MIME also prescribes the central authority (IANA) that manages the registry of all recognized media types and their required or optional parameters.
 
 ## Backwards Compatibility
-
-All XIPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The XIP must explain how the author proposes to deal with these incompatibilities. XIP submissions without a sufficient backwards compatibility treatise may be rejected outright.
-
----
 
 Since the new EncodedType message is embedded in the Ciphertext.payload bytes, this change doesn't break the protocol, strictly speaking, however any newer client would struggle interpretting the payload as EncodedContent unless it conforms. So this is a breaking change in that sense. Any older messages will be broken once the new protocol is deployed.
 
@@ -264,17 +242,9 @@ At the API level the changes are even more pronounced, since the input and outpu
 
 ## Reference Implementation
 
-An optional section that contains a reference/example implementation that people can use to assist in understanding or implementing this specification.  If the implementation is too large to reasonably be included inline, then consider adding it as one or more files in `../assets/xip-####/`.
-
----
-
 https://github.com/xmtp/xmtp-js/pull/68
 
 ## Security Considerations
-
-All XIPs must contain a section that discusses the security implications/considerations relevant to the proposed change. Include information that might be important for security discussions, surfaces risks and can be used throughout the life cycle of the proposal. E.g. include security-relevant design decisions, concerns, important discussions, implementation-specific guidance and pitfalls, an outline of threats and risks and how they are being addressed. XIP submissions missing the "Security Considerations" section will be rejected. An XIP cannot proceed to status "Final" without a Security Considerations discussion deemed sufficient by the reviewers.
-
----
 
 This API change allows transmitting arbitrary and therefore potentially dangerous types of content. Complex decoding or presentation logic can trigger undesirable or dangerous behavior in the receiving client. The authority of any given content type SHOULD provide suitable guidance on how to handle the content type safely.
 
