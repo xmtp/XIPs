@@ -14,17 +14,11 @@ Abstract is a multi-sentence (short paragraph) technical summary. This should be
 
 ---
 
-This XIP introduces a framework for interoperable support of different types of content in XMTP messages. At the heart of it are provisions for attaching meta-information to the content, that will identify its type and structure, and allow for its correct decoding from the encoded form used for transport inside XMTP messages. Main features of the framework are as follows.
+This XIP introduces a framework for interoperable support of different types of content in XMTP messages. At the heart of it are provisions for attaching meta-information to the content that will identify its type and structure, and allow for its correct decoding from the encoded form used for transport inside XMTP messages.
 
-* namespacing the content type identifiers to allow different entitities (including xmtp.org) to define and manage their respective suite of content types
-* versioning the identifier format to allow future changes to it
-* versioning the content types themselves to allow their future evolution
-* optionally attaching parameters to the content type identifier (key/value style) to carry metadata necessary for correct decoding of the content  
-* leaving support for multi-part payload to a potential future structured payload type to keep the basic framework simple
-* including optional `fallback` string in the basic framework that can be used to provide descriptive explanation to users when their client cannot correctly decode or present the content type
-* defining the first few content types:
-  * xmtp.org/text (optional encoding parameter, default utf-8 (not friendly to non-latin alphabets))
-  * ...
+The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to definte their own. The proposed framework provides an interface for registering content type encoders with the client for transparent encoding and decoding of content.
+
+This XIP is not intended to define content types themselves, those should be proposed through separate XRCs. The only content type defined here is a simple plain text type identified as `xmtp.org/text`. 
 
 ## Motivation
 
@@ -35,6 +29,12 @@ The motivation section should describe the "why" of this XIP. What problem does 
 The API currently accepts only `string` as the message content, which suggests to the user that only plain text is supported. Given the ambition of builing a community around the protocol that would be motivated to build a wide array of very different clients and applications around it, we need to enable at least future possibility of using different types of content beyond just plain text (rich text, images, video, sound, file attachments, etc).
 
 However given that this is a large and complex topic we don't want to have to solve it all right now. We want a flexible framework that will allow building a rich library of various types of supported content over time. This library should be open to collaboration with other organizations. The framework should be simple, but powerful enough to not hinder future development. The framework should also provide a reasonably friendly API that isn't too onerous to use. This XIP forms an explicit foundation for future XRCs proposing new types of content to be carried by the protocol.
+
+To support future evolution, both the type identifier itself and the types need a way to version their definitions. Specific types may require additional parameters that apply to those types only, these parameters should carry metadata necessary for correct decoding and presentation of the content.
+
+It is expected that many clients will want the ability to carry multiple different types of content in the same message. To keep the basic framework simple, the expectation is to handle such payload in dedicated structured content types that will be defined in the future.
+
+Since the set of known content types will be changing over time, clients will need to be ready to handle situations where they cannot correctly decode or present content that arrives in a message. There should be a way to provide an optional `fallback` in the basic framework that can be used to provide description of the content that couldn't be presented.
 
 ## Specification
 
@@ -61,7 +61,7 @@ message Ciphertext {
 }
 ```
 
-Since there is no reason to expose the content type meta information unencrypted it makes sense to define a new type that will be embedded in the Ciphertext.payload bytes. That means there will be two layers of protobuf encoding here since we need bytes as input into the encryption layer. Let's refer to the outer encoding layer that turns the entire message into bytes as `Message Encoding` and the inner layer that turns the payload into bytes as `Content Encoding`.
+There is no reason to expose the content type meta information unencrypted, so it makes sense to define a new type that will be embedded in the Ciphertext.payload bytes. That means there will be two layers of protobuf encoding. Let's refer to the outer encoding layer that turns the entire message into bytes as `Message Encoding` and the inner layer that turns the payload into bytes as `Content Encoding`. The content itself needs to be encoded into bytes as well in a manner that is dictated by the content type. For text content that would usually involve employing a standard character encoding, like UTF-8.
 
 ```protobuf
 message EncodedContent {
@@ -72,12 +72,12 @@ message EncodedContent {
 }
 ```
 
-The encoding process will then go through the following steps:
+The full encoding process will go through the following steps:
 
 1. Encode the content into its binary form
 2. Wrap it into the EncodedContent structure and encode it using protobuf (content encoding)
-3. Encrypt the EncodedContent into bytes and wrap those in the Ciphertext structure
-4. Wrap the Ciphertext in a Message structure and encode it using protobuf (message encoding)
+3. Encrypt the EncodedContent bytes and wrap those in the Ciphertext structure
+4. Wrap the Ciphertext in the Message structure and encode it using protobuf (message encoding)
 
 The decoding process is the reverse of that.
 
@@ -85,13 +85,13 @@ We will not introduce a separate version for the embedded type, it can be tied t
 
 #### Content Type Identifier and Parameters
 
-The `ContentTypeId` identifies the type and format of the information contained in the content. It needs to carry enough information to be able to route the decoding process to the correct decoding machinery. As such the identifier should carry following bits of information:
+`ContentTypeId` identifies the type and format of the information contained in the content. It needs to carry enough information to be able to route the decoding process to the correct decoding machinery. As such the identifier should carry following bits of information:
 
 * authority ID
 * content type ID
 * content type version
 
-Identifier format is tied to the protocol version. Changes to the format will require corresponding protocol version adjustment. Such changes may add new information to the identifier but it should only be information that is required to match the identifier with the corresponding decoding machinery or information that is required for all content types (like the content type version). Any information that is specific to a content type should be carried in the content type parameters field. Here is the definition of the identifier type:
+Identifier format is tied to the protocol version. Changes to the format will require corresponding protocol version adjustment. Such changes MAY add new information to the identifier but it SHOULD only be information that is required to match the identifier with the corresponding decoding machinery or information that is required for all content types (like the content type version). Any information that is specific to a content type SHOULD be carried in the content type parameters field. Here is the definition of the identifier type:
 
 ```protobuf
 message ContentTypeId {
@@ -102,11 +102,11 @@ message ContentTypeId {
 }
 ```
 
-Authority ID identifies the entity that governs a suite of content types, their definitions and implementations. `xmtp.org` is one such organization. Authority ID should be unique and be widely recognized as belonging to the entity. DNS domains or ENS names can serve this purpose (e.g. `uniswap.eth`). The authority is responsible for providing a definition of the content type and its encoding parameters as well as the associated implementation.
+Authority ID identifies the entity that governs a suite of content types, their definitions and implementations. `xmtp.org` is one such organization. Authority ID SHOULD be unique and be widely recognized as belonging to the entity. DNS domains or ENS names can serve this purpose (e.g. `uniswap.eth`). The authority is responsible for providing a definition of the content type and its encoding parameters as well as the associated implementation.
 
-Content type ID identifies particular type of content that can be handled by a specific implementation of its encoding/decoding rules. Content type version allows future evolution of the content type definition.
+Type ID identifies particular type of content that can be handled by a specific implementation of its encoding/decoding rules. Content type version allows future evolution of the content type definition.
 
-Content type version is captured in the common major.minor structure intended to convey the associated semantics that versions differing in the minor version only should be backward compatible, i.e. a client supporting an earlier version should be able to adequately present content with later version. Content type authority SHOULD manage the evolution of content type in a manner that respects this constraint.
+Type version is captured in the common major.minor form intended to convey the associated semantics that versions differing in the minor version only SHOULD be backward compatible, i.e. a client supporting an earlier version SHOULD be able to adequately present content with later version. Content type authority SHOULD manage the evolution of content type in a manner that respects this constraint.
 
 Due forethought should be given when choosing identifiers as there are no provisions to change them once they have been in use. A new identifier introduces a new (assumed unrelated) authority or content type as far as the protocol is concerned.
 
@@ -130,9 +130,9 @@ export interface EncodedContent {
 }
 ```
 
-This is a fairly simple change but makes for a very anemic and hard to use API. Given that content types should be highly reusable it makes sense to provide a framework that will facilitate this reuse and provide some common content types out of the box. The framework should provide automatic content encoding/decoding based on the type of the provided content.
+This is a fairly simple change but makes for a very crude and hard to use API. Given that content types should be highly reusable it makes sense to provide a framework that will facilitate this reuse and provide some common content types out of the box. The framework should provide automatic content encoding/decoding based on the type of the provided content.
 
-Supported content types are represented by TS type `MessageContent` that bundles the `content` with the `contentType` identifier.  Each content type will have an associated `ContentEncoder<T>`.
+Supported content types are represented by `MessageContent` that bundles the `content` with the `contentType` identifier.  Each content type will have an associated `ContentEncoder<T>`.
 
 ```ts
 export type MessageContent =
