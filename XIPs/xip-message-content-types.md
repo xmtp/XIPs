@@ -98,7 +98,7 @@ Due forethought should be given when choosing identifiers as there are no provis
 
 ### API
 
-To accommodate the new content type framework, the low level `Message` encode/decode API has to work in terms of bytes instead of strings. The protocol level `EncodedContent` message introduced above will be represented by `EncodedContent` interface that allows bundling the content bytes with the content type metadata.
+To accommodate the new content type framework, the low level `Message` encode/decode API has to work in terms of bytes instead of strings. The protocol level `EncodedContent` message introduced above will be represented by an interface that allows bundling the content bytes with the content type metadata.
 
 ```ts
 export type ContentTypeId = {
@@ -118,16 +118,9 @@ export interface EncodedContent {
 
 This is a fairly simple change but makes for a very crude and hard to use API. Given that content types should be highly reusable it makes sense to provide a framework that will facilitate this reuse and provide some common content types out of the box. The framework should provide automatic content encoding/decoding based on the type of the provided content.
 
-Supported content types are represented by `MessageContent` that bundles the `content` with the `contentType` identifier.  Each content type will have an associated `ContentEncoder<T>`.
+Supported content types must be submitted to the message sending API with a content type identifier.  Each content type will have an associated `ContentEncoder<T>`.
 
 ```ts
-export type MessageContent =
-  | string
-  | {
-      readonly contentType: ContentTypeId
-      readonly content: any
-    }
-
 export interface ContentEncoder<T> {
   contentType: ContentTypeId
   encode(message: T): EncodedContent
@@ -135,7 +128,7 @@ export interface ContentEncoder<T> {
 }
 ```
 
-The `contentType` field of the encoder is used to match the encoder with the corresponding `contentType` of the content.
+The `contentType` field of the encoder is used to match the encoder with the corresponding type of content.
 
 We can support plain `string` as valid content in a backward compatible manner (with some hardcoded typeof checks in a few places) as follows.
 
@@ -177,54 +170,30 @@ export default class Client {
   ...
 ```
 
-The client API will accept any `MessageContent` to send, and the `Message` type will be augmented to hold the decoded content instead of just the `decrypted: string`.
+The `Message` type will be augmented to hold the decoded `content` and `contentType` instead of just the `decrypted: string`.
 
 ```ts
 export default class Message implements proto.Message {
   header: proto.Message_Header // eslint-disable-line camelcase
   ciphertext: Ciphertext
   decrypted?: Uint8Array
-  // content allows attaching decoded content to the Message
-  // the message receiving APIs need to return a Message to provide access to the header fields like sender/recipient
-  content?: MessageContent
-  error?:   
+  contentType?: ContentTypeId
+  content?: any
+  error?: Error
   ...
-  get contentType(): ContentTypeId | undefined {
-    if (!this.content) {
-      return undefined
-    }
-    if (typeof this.content === 'string') {
-      return ContentTypeText
-    }
-    return this.content.contentType
-  }
 
 ```
 
-Note that the `Message.text` getter that previously just returned the `decrypted` string, will have to be replaced with `Message.content`. The clients of the API will need to interrogate the result and do the right thing based on `Message.contentType`.
+Note that the `Message.text` getter that previously just returned the `decrypted` string, will have to be replaced with `Message.content`. The clients of the API will need to interrogate `Message.contentType` and do the right thing.
 
-If an unrecognized content type is received the `Message.error` will be set accordingly, but if the `contentFallback` is present the `Message.content` will be set to that. In order to be able to reliably distinguish the actual content from the fallback, we will introduce a special `ContentTypeId`.
+If an unrecognized content type is received the `Message.error` will be set accordingly. If `contentFallback` is present `Message.content` will be set to that. In order to be able to reliably distinguish the actual content from the fallback, we will introduce a special `ContentTypeId`.
 
 ```ts
-// This content type is used to provide the recipient
-// the alternative content fallback (if present)
-// in case the content type is not supported.
 export const ContentTypeAlternativeDescription = {
   authorityId: 'xmtp.org',
   typeId: 'alternative-description',
   versionMajor: 1,
   versionMinor: 0,
-}
-
-export class AlternativeContentDescription {
-  content: string
-  constructor(description: string) {
-    this.content = description
-  }
-
-  get contentType(): string {
-    return ContentTypeAlternativeDescription
-  }
 }
 ```
 
@@ -238,7 +207,7 @@ MIME framework (the underlying standard of email, http and other widely used pro
 
 Since the new EncodedType message is embedded in the Ciphertext.payload bytes, this change doesn't break the protocol, strictly speaking, however any newer client would struggle interpretting the payload as EncodedContent unless it conforms. So this is a breaking change in that sense. Any older messages will be broken once the new protocol is deployed.
 
-At the API level the changes are even more pronounced, since the input and output of the API is now any type that matches `MessageContent` instead of just `string`. Extracting the content from the Message now requires interrogating the resulting value to determine which type of content it is and handling it accordingly. Clients SHOULD also take an appropriate action when encountering content type they do not recognize, and use the `contentFallback` when available. Clients SHOULD register encoders only for those types that they are prepared to handle.
+At the API level the changes are even more pronounced, since the input and output of the API is now potentially any type instead of just `string`. Extracting the content from the `Message` now requires interrogating the resulting value to determine which type of content it is and handling it accordingly. Clients SHOULD also take an appropriate action when encountering content type they do not recognize, and use the `contentFallback` when available. Clients SHOULD register encoders only for those types that they are prepared to handle.
 
 ## Reference Implementation
 
