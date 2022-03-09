@@ -14,7 +14,7 @@ This XIP introduces a framework for interoperable support of different types of 
 
 The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to definte their own. The proposed framework provides an interface for registering content type encoders with the client for transparent encoding and decoding of content.
 
-This XIP is not intended to define content types themselves, those should be proposed through separate XRCs. The only content type defined here is a simple plain text type identified as `xmtp.org/text`. 
+This XIP is not intended to define content types themselves, those should be proposed through separate XRCs. The only content type defined here is a simple plain text type identified as `xmtp.org/text`.
 
 ## Motivation
 
@@ -211,7 +211,7 @@ At the API level the changes are even more pronounced, since the input and outpu
 
 ## Reference Implementation
 
-https://github.com/xmtp/xmtp-js/pull/68
+[https://github.com/xmtp/xmtp-js/pull/68](https://github.com/xmtp/xmtp-js/pull/68)
 
 ## Security Considerations
 
