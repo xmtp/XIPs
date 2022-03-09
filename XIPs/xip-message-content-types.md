@@ -140,7 +140,7 @@ export const ContentTypeText = {
   versionMinor: 0,
 }
 
-export class TextContentCodec implements ContentCodec<string> {
+export class TextCodec implements ContentCodec<string> {
   get contentType(): string {
     return ContentTypeText
   }
