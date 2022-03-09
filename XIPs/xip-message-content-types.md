@@ -130,7 +130,7 @@ export interface ContentCodec<T> {
 
 The `contentType` field of the codec is used to match the codec with the corresponding type of content.
 
-We can support plain `string` as valid content in a backward compatible manner (with some hardcoded typeof checks in a few places) as follows.
+We can support plain `string` as the default content type in a backward compatible manner as follows.
 
 ```ts
 export const ContentTypeText = {
