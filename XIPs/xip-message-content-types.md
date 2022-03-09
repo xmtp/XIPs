@@ -12,7 +12,7 @@ created: 2022-02-08
 
 This XIP introduces a framework for interoperable support of different types of content in XMTP messages. At the heart of it are provisions for attaching meta-information to the content that will identify its type and structure, and allow for its correct decoding from the encoded form used for transport inside XMTP messages.
 
-The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to definte their own. The proposed framework provides an interface for registering content type encoders with the client for transparent encoding and decoding of content.
+The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to definte their own. The proposed framework provides an interface for registering content type codecs with the client for transparent encoding and decoding of content.
 
 This XIP is not intended to define content types themselves, those should be proposed through separate XRCs. The only content type defined here is a simple plain text type identified as `xmtp.org/text`.
 
@@ -118,17 +118,17 @@ export interface EncodedContent {
 
 This is a fairly simple change but makes for a very crude and hard to use API. Given that content types should be highly reusable it makes sense to provide a framework that will facilitate this reuse and provide some common content types out of the box. The framework should provide automatic content encoding/decoding based on the type of the provided content.
 
-Supported content types must be submitted to the message sending API with a content type identifier.  Each content type will have an associated `ContentEncoder<T>`.
+Supported content types must be submitted to the message sending API with a content type identifier.  Each content type will have an associated `ContentCodec<T>`.
 
 ```ts
-export interface ContentEncoder<T> {
+export interface ContentCodec<T> {
   contentType: ContentTypeId
   encode(message: T): EncodedContent
   decode(content: EncodedContent): T
 }
 ```
 
-The `contentType` field of the encoder is used to match the encoder with the corresponding type of content.
+The `contentType` field of the codec is used to match the codec with the corresponding type of content.
 
 We can support plain `string` as valid content in a backward compatible manner (with some hardcoded typeof checks in a few places) as follows.
 
@@ -140,7 +140,7 @@ export const ContentTypeText = {
   versionMinor: 0,
 }
 
-export class TextContentEncoder implements ContentEncoder<string> {
+export class TextContentCodec implements ContentCodec<string> {
   get contentType(): string {
     return ContentTypeText
   }
@@ -149,7 +149,7 @@ export class TextContentEncoder implements ContentEncoder<string> {
     return {
       contentType: ContentTypeText,
       contentTypeParams: {},
-      content: new TextEncoder().encode(content),
+      content: new TextCodec().encode(content),
     }
   }
 
@@ -159,14 +159,14 @@ export class TextContentEncoder implements ContentEncoder<string> {
 }
 ```
 
-The mapping between content types and their encoders will be managed at the Client level. The Client maintains a registry of supported types and encoders initialized to a default set of encoders that can be overriden/extended through `CreateOptions`.
+The mapping between content types and their codecs will be managed at the Client level. The Client maintains a registry of supported types and codecs initialized to a default set of codecs that can be overriden/extended through `CreateOptions`.
 
 ```ts
 export default class Client {
   ...
-  registerEncoder(encoder: ContentEncoder<any>): void
+  registerCodec(codec: ContentCodec<any>): void
   ...
-  encoderFor(contentType: ContentTypeId): ContentEncoder<any> | undefined 
+  codecFor(contentType: ContentTypeId): ContentCodec<any> | undefined 
   ...
 ```
 
@@ -207,7 +207,7 @@ MIME framework (the underlying standard of email, http and other widely used pro
 
 Since the new EncodedType message is embedded in the Ciphertext.payload bytes, this change doesn't break the protocol, strictly speaking, however any newer client would struggle interpretting the payload as EncodedContent unless it conforms. So this is a breaking change in that sense. Any older messages will be broken once the new protocol is deployed.
 
-At the API level the changes are even more pronounced, since the input and output of the API is now potentially any type instead of just `string`. Extracting the content from the `Message` now requires interrogating the resulting value to determine which type of content it is and handling it accordingly. Clients SHOULD also take an appropriate action when encountering content type they do not recognize, and use the `contentFallback` when available. Clients SHOULD register encoders only for those types that they are prepared to handle.
+At the API level the changes are even more pronounced, since the input and output of the API is now potentially any type instead of just `string`. Extracting the content from the `Message` now requires interrogating the resulting value to determine which type of content it is and handling it accordingly. Clients SHOULD also take an appropriate action when encountering content type they do not recognize, and use the `contentFallback` when available. Clients SHOULD register codecs only for those types that they are prepared to handle.
 
 ## Reference Implementation
 
