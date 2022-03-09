@@ -65,7 +65,7 @@ The full encoding process will go through the following steps:
 3. Encrypt the EncodedContent bytes and wrap those in the Ciphertext structure
 4. Wrap the Ciphertext in the Message structure and encode it using protobuf (message encoding)
 
-The decoding process is the reverse of that.
+The encoded Message is then further wrapped in transport protocol envelopes. The decoding process is the reverse of the above steps.
 
 We will not introduce a separate version for the embedded type, it can be tied to the version of the overall protocol.
 
@@ -92,7 +92,7 @@ Authority ID identifies the entity that governs a suite of content types, their 
 
 Type ID identifies particular type of content that can be handled by a specific implementation of its encoding/decoding rules. Content type version allows future evolution of the content type definition.
 
-Type version is captured in the common major.minor form intended to convey the associated semantics that versions differing in the minor version only SHOULD be backward compatible, i.e. a client supporting an earlier version SHOULD be able to adequately present content with later version. Content type authority SHOULD manage the evolution of content type in a manner that respects this constraint.
+Type version is captured in the common major.minor form intended to convey the associated semantics that versions differing in the minor version only MUST be backward compatible, i.e. a client supporting an earlier version MUST be able to adequately present content with later version. Content type authority MUST manage the evolution of content type in a manner that respects this constraint.
 
 Due forethought should be given when choosing identifiers as there are no provisions to change them once they have been in use. A new identifier introduces a new (assumed unrelated) authority or content type as far as the protocol is concerned.
 
