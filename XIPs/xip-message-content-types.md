@@ -88,7 +88,7 @@ message ContentTypeId {
 }
 ```
 
-Authority ID identifies the entity that governs a suite of content types, their definitions and implementations. `xmtp.org` is one such organization. Authority ID SHOULD be unique and be widely recognized as belonging to the entity. DNS domains or ENS names can serve this purpose (e.g. `uniswap.eth`). The authority is responsible for providing a definition of the content type and its encoding parameters as well as the associated implementation.
+Authority ID identifies the entity that governs a suite of content types, their definitions and implementations. `xmtp.org` is one such organization. Authority ID SHOULD be unique and be widely recognized as belonging to the entity. DNS domains or ENS names can serve this purpose (e.g. `uniswap.eth`). The authority is responsible for providing a definition of the content type and its encoding parameters as well as the associated implementation. Any content type MUST have well defined parameters (or clearly state that no parameters are required/allowed), and any implementation MUST support all valid parameters for the content type.
 
 Type ID identifies particular type of content that can be handled by a specific implementation of its encoding/decoding rules. Content type version allows future evolution of the content type definition.
 
@@ -159,7 +159,7 @@ export class TextContentEncoder implements ContentEncoder<string> {
 }
 ```
 
-The mapping between content types and their encoders will be managed at the Client level. The Client maintains a registry of supported types and encoders initialized to a default set of encoders that can be overriden/extended through the `CreateOptions`.
+The mapping between content types and their encoders will be managed at the Client level. The Client maintains a registry of supported types and encoders initialized to a default set of encoders that can be overriden/extended through `CreateOptions`.
 
 ```ts
 export default class Client {
