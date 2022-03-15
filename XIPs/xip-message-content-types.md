@@ -51,9 +51,9 @@ There is no reason to expose the content type meta information unencrypted, so i
 
 ```protobuf
 message EncodedContent {
-  ContentTypeId contentType = 1;
-  map<string, string> contentTypeParams = 2;
-  optional string contentFallback = 3;
+  ContentTypeId type = 1;
+  map<string, string> parameters = 2;
+  optional string fallback = 3;
   bytes content = 4;
 }
 ```
@@ -109,9 +109,9 @@ export type ContentTypeId = {
 }
 
 export interface EncodedContent {
-  contentType: ContentTypeId
-  contentTypeParams: Record<string, string>
-  contentFallback?: string
+  type: ContentTypeId
+  parameters: Record<string, string>
+  fallback?: string
   content: Uint8Array
 }
 ```
