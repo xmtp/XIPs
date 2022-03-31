@@ -14,15 +14,15 @@ This XIP introduces a framework for interoperable support of different types of 
 
 The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to definte their own. The proposed framework provides an interface for registering content type codecs with the client for transparent encoding and decoding of content.
 
-This XIP is not intended to define content types themselves, those should be proposed through separate XRCs. The only content type defined here is a simple plain text type identified as `xmtp.org/text`.
+This XIP is not intended to define content types themselves, those should be proposed through separate XRCs. The only content type defined here is a simple plain text type (`xmtp.org/text`).
 
 ## Motivation
 
-The API currently accepts only `string` as the message content, which suggests to the user that only plain text is supported. Given the ambition of builing a community around the protocol that would be motivated to build a wide array of very different clients and applications around it, we need to enable at least future possibility of using different types of content beyond just plain text (rich text, images, video, sound, file attachments, etc).
+The SDK API currently accepts only `string` as the message content, which suggests to the user that only plain text is supported. We want to foster a community around the protocol that would be motivated to build a wide array of very different clients and applications around it. We need to enable at least future possibility of using different types of content beyond just plain text (rich text, images, video, sound, file attachments, etc).
 
-However given that this is a large and complex topic we don't want to have to solve it all right now. We want a flexible framework that will allow building a rich library of various types of supported content over time. This library should be open to collaboration with other organizations. The framework should be simple, but powerful enough to not hinder future development. The framework should also provide a reasonably friendly API that isn't too onerous to use. This XIP forms an explicit foundation for future XRCs proposing new types of content to be carried by the protocol.
+Given that this is a large and complex topic we don't want to have to solve it all right now. We want a flexible framework that will allow building a rich library of various types of supported content over time. This library should be open to collaboration with other organizations. The framework should be simple, but powerful enough to not hinder future development. The framework should also provide a reasonably friendly API that isn't too onerous to use. This XIP forms an explicit foundation for future XRCs proposing new types of content to be carried by the protocol.
 
-To support future evolution, both the type identifier itself and the types need a way to version their definitions. Specific types may require additional parameters that apply to those types only, these parameters should carry metadata necessary for correct decoding and presentation of the content.
+To support future evolution, both the type identifier itself and the types need a way to version their definitions. Specific types may require additional parameters that apply to those types only, these parameters should carry metadata necessary for correct decoding of the content.
 
 It is expected that many clients will want the ability to carry multiple different types of content in the same message. To keep the basic framework simple, the expectation is to handle such payload in dedicated structured content types that will be defined in the future.
 
@@ -126,7 +126,7 @@ export interface EncodedContent {
 
 This is a fairly simple change but makes for a very crude and hard to use API. Given that content types should be highly reusable it makes sense to provide a framework that will facilitate this reuse and provide some common content types out of the box. The framework should provide automatic content encoding/decoding based on the type of the provided content.
 
-Supported content types must be submitted to the message sending API with a content type identifier.  Each content type will have an associated `ContentCodec<T>`. The Client will maintain a registry of supported codecs, that will be used to look up codecs based on the `ContentTypeId` associated with the content.
+Supported content types must be submitted to the message sending API with a content type identifier. Each content type will have an associated `ContentCodec<T>`. The Client will maintain a registry of supported codecs, that will be used to look up codecs based on the `ContentTypeId` associated with the content.
 
 ```ts
 export interface CodecRegistry {
