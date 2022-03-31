@@ -10,7 +10,7 @@ created: 2022-02-08
 
 ## Abstract
 
-This XIP introduces a framework for interoperable support of different types of content in XMTP messages. At the heart of it are provisions for attaching meta-information to the content that will identify its type and structure, and allow for its correct decoding from the encoded form used for transport inside XMTP messages.
+This XIP introduces a framework for interoperable support of different types of content in XMTP messages. At the heart of it are provisions for attaching meta-information to the content that will identify its type and structure, and allow for its correct decoding from the encoded form used for transport inside XMTP messages. Additionally it defines provisions for optional content compression.
 
 The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to definte their own. The proposed framework provides an interface for registering content type codecs with the client for transparent encoding and decoding of content.
 
@@ -50,10 +50,16 @@ message Ciphertext {
 There is no reason to expose the content type meta information unencrypted, so it makes sense to define a new type that will be embedded in the Ciphertext.payload bytes. That means there will be two layers of protobuf encoding. Let's refer to the outer encoding layer that turns the entire message into bytes as `Message Encoding` and the inner layer that turns the payload into bytes as `Content Encoding`. The content itself needs to be encoded into bytes as well in a manner that is dictated by the content type. For text content that would usually involve employing a standard character encoding, like UTF-8.
 
 ```protobuf
+enum Compression {
+  deflate = 0;
+  gzip = 1;
+}
+
 message EncodedContent {
   ContentTypeId type = 1;
   map<string, string> parameters = 2;
   optional string fallback = 3;
+  optional Compression compression = 5;
   bytes content = 4;
 }
 ```
@@ -61,9 +67,10 @@ message EncodedContent {
 The full encoding process will go through the following steps:
 
 1. Encode the content into its binary form
-2. Wrap it into the EncodedContent structure and encode it using protobuf (content encoding)
-3. Encrypt the EncodedContent bytes and wrap those in the Ciphertext structure
-4. Wrap the Ciphertext in the Message structure and encode it using protobuf (message encoding)
+2. Optionally compress the binary content
+3. Wrap it into the EncodedContent structure and encode it using protobuf (content encoding)
+4. Encrypt the EncodedContent bytes and wrap those in the Ciphertext structure
+5. Wrap the Ciphertext in the Message structure and encode it using protobuf (message encoding)
 
 The encoded Message is then further wrapped in transport protocol envelopes. The decoding process is the reverse of the above steps.
 
@@ -112,19 +119,24 @@ export interface EncodedContent {
   type: ContentTypeId
   parameters: Record<string, string>
   fallback?: string
+  compression?: Compression
   content: Uint8Array
 }
 ```
 
 This is a fairly simple change but makes for a very crude and hard to use API. Given that content types should be highly reusable it makes sense to provide a framework that will facilitate this reuse and provide some common content types out of the box. The framework should provide automatic content encoding/decoding based on the type of the provided content.
 
-Supported content types must be submitted to the message sending API with a content type identifier.  Each content type will have an associated `ContentCodec<T>`.
+Supported content types must be submitted to the message sending API with a content type identifier.  Each content type will have an associated `ContentCodec<T>`. The Client will maintain a registry of supported codecs, that will be used to look up codecs based on the `ContentTypeId` associated with the content.
 
 ```ts
+export interface CodecRegistry {
+  codecFor(contentType: ContentTypeId): ContentCodec<any> | undefined
+}
+
 export interface ContentCodec<T> {
   contentType: ContentTypeId
-  encode(message: T): EncodedContent
-  decode(content: EncodedContent): T
+  encode(content: T, registry: CodecRegistry): EncodedContent
+  decode(content: EncodedContent, registry: CodecRegistry): T
 }
 ```
 
