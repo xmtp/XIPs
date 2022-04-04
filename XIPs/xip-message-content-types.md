@@ -140,9 +140,19 @@ export interface ContentCodec<T> {
 }
 ```
 
-The `contentType` field of the codec is used to match the codec with the corresponding type of content.
+The `contentType` field of the codec is used to match the codec with the corresponding type of content. The major version declared by the codec's `contentType` is the maximum version supported by the codec. The codec SHOULD support all the previous versions up to its declared maximum version as long as those versions are in use.
 
-We can support plain `string` as the default content type in a backward compatible manner as follows.
+New content types and content type versions SHOULD be proposed through XRCs. The XRC should
+
+* define the content type identifier and version
+* define any parameters and their semantics
+* include a reference implementation of the codec
+
+The codecs SHOULD comply with all the provisions of this XIP. Any deviations MUST be specified in their corresponding XRC.
+
+### xmtp.org/text
+
+This XIP defines a content type for plain text content. The content type id is `ContentTypeText`, the codec is `TextCodec`. The content value for this content type must be a simple `string`. This is the default content type, which is assumed when a `send` call does not have the `contentType` option.
 
 ```ts
 export const ContentTypeText = {
@@ -157,19 +167,15 @@ export class TextCodec implements ContentCodec<string> {
     return ContentTypeText
   }
 
-  encode(content: string): EncodedContent {
-    return {
-      contentType: ContentTypeText,
-      contentTypeParams: {},
-      content: new TextCodec().encode(content),
-    }
-  }
-
-  decode(content: EncodedContent): string {
-    return new TextDecoder().decode(content.content)
-  }
+  ...
 }
 ```
+
+This content type has an optional `encoding` parameter indicating the character encoding used to encode the string into bytes. The default encoding is `UTF-8`. Only `UTF-8` is currently supported, additional encodings can be added through an XRC.
+
+The codec implementation is part of the XMTP SDK.
+
+### Implementation
 
 The mapping between content types and their codecs will be managed at the Client level. The Client maintains a registry of supported types and codecs initialized to a default set of codecs that can be overriden/extended through `CreateOptions`.
 
