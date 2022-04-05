@@ -105,8 +105,6 @@ For human communication only we are also proposing an alternative representation
 
 Due forethought should be given when choosing identifiers as there are no provisions to change them once they have been in use. A new identifier introduces a new (assumed unrelated) authority or content type as far as the protocol is concerned.
 
-
-
 ### API
 
 To accommodate the new content type framework, the low level `Message` encode/decode API has to work in terms of bytes instead of strings. The protocol level `EncodedContent` message introduced above will be represented by an interface that allows bundling the content bytes with the content type metadata.
