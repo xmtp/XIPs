@@ -2,10 +2,11 @@
 xip: 0
 title: XIP Purpose, Process, & Guidelines
 discussions-to: https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475
-status: Draft
+status: Living
 type: Process
 author: Matt Galligan (@mg0716), et al
 created: 2022-02-22
+updated: 2022-04-06
 ---
 
 ## What is an XIP?
@@ -79,9 +80,7 @@ XIPs should be written in [markdown](https://github.com/adam-p/markdown-here/wik
 
 Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style header preamble, formatted as a bulleted list. This header is also termed ["front matter" by Jekyll](https://jekyllrb.com/docs/front-matter/). The headers must appear in the following order.
 
-`XIP`: *XIP number* (this is determined by the XIP editor)
-
-`title`: *The XIP title is a few words, not a complete sentence*
+`title`: *The XIP title is a few words, not a complete sentence. An ID [XIP-n] will be added by an editor when the XIP is considered Final.*
 
 `description`: *Description is one full (short) sentence*
 
@@ -105,7 +104,7 @@ Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style
 
 Headers that permit lists must separate elements with commas.
 
-Headers requiring dates will always do so in the format of ISO 8601 (yyyy-mm-dd).
+Headers requiring dates will always do so in the format of ISO 8601 (YYYY-MM-DD).
 
 ### `author` header
 
@@ -139,7 +138,7 @@ The `category` header specifies the XIP's category. This is required for standar
 
 ### `created` header
 
-The `created` header records the date that the XIP was assigned a number. Both headers should be in yyyy-mm-dd format, e.g. 2001-08-14.
+The `created` header records the date that the XIP was assigned a number. Both headers should be in YYYY-MM-DD format, e.g. 2009-01-12.
 
 ### `requires` header
 
