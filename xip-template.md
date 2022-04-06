@@ -6,7 +6,7 @@ discussions-to: The url pointing to the official discussion thread
 status: Draft
 type: One of Standards Track, Process, or Informational
 category: One of Core, Network, Interface, Storage, or XRC (Optional field, only needed for Standards Track XIPs)
-created: 0000-00-00 Date the XIP was created on (ISO 8601 format)
+created: YYYY-MM-DD Date the XIP was created on (ISO 8601 format)
 ---
 
 This is the suggested template for new XIP.
