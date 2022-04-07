@@ -12,7 +12,7 @@ created: 2022-02-08
 
 This XIP introduces a framework for interoperable support of different types of content in XMTP messages. At the heart of it are provisions for attaching meta-information to the content that will identify its type and structure, and allow for its correct decoding from the encoded form used for transport inside XMTP messages. Additionally it defines provisions for optional content compression.
 
-The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to definte their own. The proposed framework provides an interface for registering content type codecs with the client for transparent encoding and decoding of content.
+The XIP envisions community based, iterative development of a library of content types over time. Content type identifiers are scoped to allow different entities to define their own. The proposed framework provides an interface for registering content type codecs with the client for transparent encoding and decoding of content.
 
 This XIP is not intended to define content types themselves, those should be proposed through separate XRCs. The only content type defined here is a simple plain text type (`xmtp.org/text`).
 
