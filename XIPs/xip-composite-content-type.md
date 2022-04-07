@@ -14,7 +14,7 @@ Based on XIP-5 this XRC proposes a new content type `xtmp.org/composite:1.0` for
 
 ## Motivation
 
-Combining different kinds of content in a single messages seems obviously useful. Providing a generic facility to do that (similar to the MIME multipart content types) could satisfy some usecases, although more specific types designed to support particular use-cases may prove more popular in the long run. Especially since more specialized solutions will be easier to use (e.g. may infer content type rather then requiring content type IDs explicitly), and provide additional facitlities (e.g. provide hints about proper presentation of the content). Even if this generic type does not end up being widely used, it will also serve as an educational tool for future content type authors.
+Combining different kinds of content in a single messages seems obviously useful. Providing a generic facility to do that (similar to the MIME multipart content types) could satisfy some use-cases, although more specific types designed to support particular use-cases may prove more popular in the long run. Especially since more specialized solutions will be easier to use (e.g. may infer content type rather then requiring content type IDs explicitly), and provide additional facilities (e.g. provide hints about proper presentation of the content). Even if this generic type does not end up being widely used, it will also serve as an educational tool for future content type authors.
 
 ## Specification
 
@@ -40,7 +40,7 @@ const content = { parts: [
         { type: ContentTypeText, content: 'four' }]}]}
 ```
 
-This type of content SHALL be identied with following `ContentTypeId`
+This type of content SHALL be identified with following `ContentTypeId`
 
 ```ts
 export const ContentTypeComposite = new ContentTypeId({
