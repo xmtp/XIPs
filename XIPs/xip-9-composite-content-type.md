@@ -1,5 +1,5 @@
 ---
-title: Composite content type
+title: XRC-9 Composite content type
 description: Generic content type for multi-part content
 author: Martin Kobetic (@mkobetic)
 status: Draft
