@@ -80,7 +80,9 @@ XIPs should be written in [markdown](https://github.com/adam-p/markdown-here/wik
 
 Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style header preamble, formatted as a bulleted list. This header is also termed ["front matter" by Jekyll](https://jekyllrb.com/docs/front-matter/). The headers must appear in the following order.
 
-`title`: *The XIP title is a few words, not a complete sentence. An ID [XIP-n] will be added by an editor when the XIP is considered Final.*
+`xip`: *An ID will be added by an editor when the XIP is considered Final.* (The ID will correspond with its pull request number.)
+
+`title`: *The XIP title is a few words, not a complete sentence.*
 
 `description`: *Description is one full (short) sentence*
 
