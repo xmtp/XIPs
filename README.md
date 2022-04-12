@@ -24,13 +24,8 @@ The goal of the XIP project is to document standardized protocols for XMTP clien
 
 ### Standards track
 
-| ID | Title | Status |
-| -- | -- | -- |
-| 0 | [XIP Purpose, Process, & Guidelines](./XIPs/xip-0-purpose-process.md) | Living |
-| 5 | [Message content types](./XIPs/xip-5-message-content-types.md) | Final |
-
-### XRCs
-
-| ID | Title | Status |
-| -- | -- | -- |
-| 9 | [Composite content type](./XIPs/xip-composite-content-type.md) | Final |
+| ID | Title | Type | Status |
+| -- | -- | -- | -- |
+| 0 | [XIP Purpose, Process, & Guidelines](./XIPs/xip-0-purpose-process.md) | Process | Living |
+| 5 | [Message content types](./XIPs/xip-5-message-content-types.md) | Interface | Final |
+| 9 | [Composite content type](./XIPs/xip-9-composite-content-type.md) | XRC | Final |

@@ -1,8 +1,8 @@
 ---
-title: XRC-9 Composite content type
+title: XRC-9: Composite content type
 description: Generic content type for multi-part content
 author: Martin Kobetic (@mkobetic)
-status: Draft
+status: Final
 type: Standards Track
 category: XRC
 created: 2022-04-07
@@ -10,7 +10,7 @@ created: 2022-04-07
 
 ## Abstract
 
-Based on XIP-5 this XRC proposes a new content type `xtmp.org/composite:1.0` for multi-part messages where the parts can be of any content type and the composite parts can be arbitrarily nested.
+Based on [XIP-5](xip-5-message-content-types.md) this XRC proposes a new content type `xtmp.org/composite:1.0` for multi-part messages where the parts can be of any content type and the composite parts can be arbitrarily nested.
 
 ## Motivation
 
