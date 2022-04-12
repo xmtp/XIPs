@@ -1,5 +1,6 @@
 ---
-title: XIP-5: Message content types
+xip: 5
+title: Message content types
 description: Interoperable framework for supporting different types of content
 author: Martin Kobetic (@mkobetic), Nick Molnar (@neekolas)
 status: Final
