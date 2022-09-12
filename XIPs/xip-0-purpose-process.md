@@ -1,6 +1,6 @@
 ---
 xip: 0
-title: XIP Purpose, Process, & Guidelines
+title: XIP purpose, process, and guidelines
 discussions-to: https://github.com/orgs/xmtp/discussions/categories/xips
 status: Living
 type: Process
