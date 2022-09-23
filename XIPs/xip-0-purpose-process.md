@@ -1,12 +1,12 @@
 ---
 xip: 0
-title: XIP Purpose, Process, & Guidelines
+title: XIP purpose, process, and guidelines
 discussions-to: https://community.xmtp.org/t/xip-0-xip-purpose-process-guidelines/475
 status: Living
 type: Process
 author: Matt Galligan (@mg0716), et al
 created: 2022-02-22
-updated: 2022-04-06
+updated: 2022-09-21
 ---
 
 ## What is an XIP?
@@ -23,14 +23,14 @@ For XMTP implementers, XIPs are a convenient way to track the progress of their 
 
 There are three major categories of XIPs, as well as more specific subcategories:
 
-- A **Standards Track XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
+- A **Standards XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
   - **Core**: includes proposals for rules and behavior around message relay by nodes, node incentive strategies, and backwards-incompatible changes that require a consensus fork
   - **Network**: includes networking specifications and proposals around how nodes communicate and interoperate
   - **Interface**: includes client API/RPC specifications and improvements to how clients interact with the network
   - **Storage**: includes specifications and proposals for persistent storage of messages by or on behalf of clients
   - **XRC** (*XMTP Request for Comment*): includes application-level standards and conventions, including message payload formats and applications
 - A **Process XIP** describes a process surrounding XMTP, or proposes changes to an existing process. They may propose an implementation, but not to XMTP's codebase; they often require community consensus; unlike Informational XIPs, they are more than recommendations, and users are typically not free to ignore them.
-- An **Informational XIP** provides general guidelines or information to the XMTP community, but does not propose a new feature. Informational XIPs do not necessarily represent a XMTP community consensus or recommendation, so users and implementors are free to ignore Informational XMTP or follow their advice.
+- An **Informational XIP** provides general guidelines or information to the XMTP community, but does not propose a new feature. Informational XIPs do not necessarily represent an XMTP community consensus or recommendation, so users and implementors are free to ignore Informational XMTP or follow their advice.
 
 It is highly recommended that a single XIP contain a single key proposal or new idea. The more focused the XIP, the more successful it tends to be. If in doubt, split your XIP into several well-focused ones. A change to one client doesn’t require an XIP; a change that affects multiple clients, or defines a standard for multiple apps to use, does.
 
@@ -42,7 +42,7 @@ An XIP must meet certain minimum criteria. It must be a clear and complete descr
 
 Parties involved in the process are you, the champion or *XIP author*, the [*XIP editors*](#XIP-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
 
-Before you begin writing a formal XIP, you should vet your idea. Ask the XMTP community first if an idea is original to avoid wasting time on something that will be rejected based on prior research. It is thus recommended to open a discussion thread on [the XMTP Community forum](https://community.xmtp.org/c/xips/51) to do this.
+Before you begin writing a formal XIP, you should vet your idea. Ask the XMTP community first if an idea is original to avoid wasting time on something that will be rejected based on prior research. It is thus recommended to create a new topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips) to do this.
 
 Once the idea has been vetted, your next responsibility will be to present (by means of an XIP) the idea to the reviewers and all interested parties, invite editors, developers, and the community to give feedback on the aforementioned channels. You should try and gauge whether the interest in your XIP is commensurate with both the work involved in implementing it and how many parties will have to conform to it. Negative community feedback will be taken into consideration and may prevent your XIP from moving past the Draft stage.
 
@@ -53,15 +53,15 @@ Once the idea has been vetted, your next responsibility will be to present (by m
 - **Review** - An XIP Author marks an XIP as ready for and requesting Peer Review.
 - **Last Call** - This is the final review window for an XIP before moving to `Final`. An XIP editor will assign `Last Call` status and set a review end date (`last-call-deadline`), typically 14 days later. If this period results in necessary normative changes it will revert the XIP to `Review`.
 - **Final** - This XIP represents the final standard. A Final XIP exists in a state of finality and should only be updated to correct errata and add non-normative clarifications.
-- **Stagnant** - Any XIP in `Draft` or `Review` or `Last Call` if inactive for a period of 6 months or greater is moved to `Stagnant`. An XIP may be resurrected from this state by Authors or XIP Editors through moving it back to `Draft` or it’s earlier status. If not resurrected, a proposal may stay forever in this status.
-- **Withdrawn** - The XIP Author(s) have withdrawn the proposed XIP. This state has finality and can no longer be resurrected using this XIP number. If the idea is pursued at later date it is considered a new proposal.
+- **Stagnant** - Any XIP in `Draft` or `Review` or `Last Call` if inactive for a period of 6 months or greater is moved to `Stagnant`. An XIP may be resurrected from this state by Authors or XIP Editors through moving it back to `Draft` or its earlier status. If not resurrected, a proposal may stay forever in this status.
+- **Withdrawn** - The XIP Author(s) have withdrawn the proposed XIP. This state has finality and can no longer be resurrected using this XIP number. If the idea is pursued at a later date it is considered a new proposal.
 - **Living** - A special status for XIPs that are designed to be continually updated and not reach a state of finality. This includes most notably XIP-0.
 
 ## What belongs in a successful XIP?
 
 Each XIP should have the following parts:
 
-- Preamble - RFC 822 style headers containing metadata about the XIP, including the XIP number, a short descriptive title (limited to a maximum of 44 characters), a description (limited to a maximum of 140 characters), and the author details. Irrespective of the category, the title and description should not include XIP number. See [below](xip-0-purpose-process.md#xip-header-preamble) for details.
+- Preamble - RFC 822 style headers containing metadata about the XIP, including the XIP number, a short descriptive title (limited to a maximum of 44 characters), a description (limited to a maximum of 140 characters), and the author details. Irrespective of the category, the title and description should not include XIP number. See [below](#xip-header-preamble) for details.
 - Abstract - Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
 - Motivation (*optional) - A motivation section is critical for XIPs that want to change the XMTP protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem that the XIP solves. XIP submissions without sufficient motivation may be rejected outright.
 - Specification - The technical specification should describe the syntax and semantics of any new feature. The specification should be detailed enough to allow competing, interoperable implementations for any of the current XMTP platforms.
@@ -94,9 +94,9 @@ Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style
 
 `last-call-deadline`: *The date last call period ends on* (Optional field, only needed when status is `Last Call`)
 
-`type`: *One of `Standards Track`, `Process`, or `Informational`*
+`type`: *One of `Standards`, `Process`, or `Informational`*
 
-`category`: *One of `Core`, `Network`, `Interface`, `Storage`, or `XRC`* (Optional field, only needed for `Standards Track` XIPs)
+`category`: *One of `Core`, `Network`, `Interface`, `Storage`, or `XRC`* (Optional field, only needed for `Standards` XIPs)
 
 `created`: *Date the XIP was created on*
 
@@ -128,15 +128,15 @@ At least one author must use a GitHub username, in order to get notified on chan
 
 While an XIP is a draft, a `discussions-to` header will indicate the URL where the XIP is being discussed.
 
-The preferred discussion URL is a topic on [XMTP Community forums](https://community.xmtp.org/c/xips/51). The URL cannot point to Github pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
+The preferred discussion URL is a topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips). The URL must not point to GitHub pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
 
 ### `type` header
 
-The `type` header specifies the type of XIP: Standards Track, Process, or Informational. If the track is Standards please include the subcategory (core, network, interface, storage, or ERC).
+The `type` header specifies the type of XIP: Standards, Process, or Informational. If the type is Standards please include the subcategory (core, network, interface, storage, or ERC).
 
 ### `category` header
 
-The `category` header specifies the XIP's category. This is required for standards-track XIPs only.
+The `category` header specifies the XIP's category. This is required for Standards XIPs only.
 
 ### `created` header
 
