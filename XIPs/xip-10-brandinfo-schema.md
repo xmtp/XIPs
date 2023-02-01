@@ -25,14 +25,8 @@ Proposed `brandInfo` schema in conversation `metadata`
 
 ```json
 {
-    conversationId: 'mydomain.xyz/abc/qrs',
-    metadata: {
-        brandInfo: {
-            displayName: 'My Company',
-            profileImage: 'mydomain.xyz/assets/myimage.png,
-            primaryColor: '#ffffff',
-        }
-    }
+    conversationId: "mydomain.xyz/abc/qrs",
+    metadata: { "brandInfo.displayName": "My company", "brandInfo.profileImage": "mydomain.xyz/assets/myimage.png", "brandInfo.primaryColor": "#ffffff" }
 }
 ```
 
@@ -40,14 +34,8 @@ Example `brandInfo` implementation for a chat app named Galaxy
 
 ```json
 {
-    conversationId: 'galaxy.chat/dm/uniqueIdentifier',
-    metadata: {
-        brandInfo: {
-            displayName: 'Galaxy',
-            profileImage: 'galaxychat.com/assets/logo.png,
-            primaryColor: '#6865B8',
-        }
-    }
+    conversationId: "galaxy.chat/dm/uniqueIdentifier",
+    metadata: { "brandInfo.displayName": "Galaxy", "brandInfo.profileImage": "galaxychat.xyz/brandassets/logo.png", "brandInfo.primaryColor": "#6865B8" }
 }
 ```
 
@@ -58,7 +46,7 @@ The `profileImage` must meet the following criteria:
 - Maximum resolution: 800x800
 - Format: .PNG, .WEBP
 
-The `primaryColor` is a hex color code.
+The `primaryColor` must be a hex color code.
 
 ## Backwards Compatibility
 
@@ -70,7 +58,7 @@ Old Lens schema:
 
 ```json
 {
-        conversationId: lens.dev/dm/${memberA}-${memberB}
+        conversationId: "lens.dev/dm/${memberA}-${memberB}"
         metadata: {}
 }
 ```
@@ -79,14 +67,8 @@ New Lens schema
 
 ```json
 {
-    conversationId: 'lens.dev/dm/${memberA}-${memberB}',
-    metadata: {
-        brandInfo: {
-            displayName: 'Lens',
-            profileImage: 'lens.xyz/assets/myimage.png,
-            primaryColor: '#ffffff',
-        }
-    }
+    conversationId: "lens.dev/dm/${memberA}-${memberB}"
+    metadata: { "brandInfo.displayName": "Lens", "brandInfo.profileImage": "lens.xyz/assets/myimage.png", "brandInfo.primaryColor": "#ffffff" }
 }
 ```
 
