@@ -1,5 +1,5 @@
 ---
-xip: 10
+xip: 14
 title: Brand info schema in conversation metadata
 description: Schema to enable standardized sharing of brand information as it relates to conversationId
 author: Yash Lunagaria (@yash-luna)
@@ -51,7 +51,7 @@ Example `brandInfo` implementation for a chat app named Galaxy
 }
 ```
 
-The `profileImage` file is encouraged to meet the following criteria:
+The `profileImage` must meet the following criteria:
 
 - Aspect ratio: 1:1
 - Minimum resolution: 100x100
