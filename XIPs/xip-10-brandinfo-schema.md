@@ -15,7 +15,7 @@ This XIP proposes a schema for sharing brand information as it relates to `conve
 
 ## Motivation
 
-The SDK API currently accepts a unique `conversationId` per address pair and allows `metadata` to be set as well. Today, different apps use these parameters in different ways and therefore other apps may not know how to render the `conversationId` appropriately within the UI to reflect the corresponding brand. We propose a schema to standardize the use of conversation `metadata` for the purpose of client-side brand expression stemming from the `conversationId`. The `metadata` field may include other non-standard (or future standard) properties.
+The SDK API currently accepts a unique `conversationId` per address pair and allows `metadata` to be set as well. Today, different apps use these parameters in different ways. Therefore an app may not know how to correctly render in its UI `conversationId` and `metadata` for conversations originating from other apps. We propose a schema to standardize the use of conversation `metadata` for the purpose of app brand expression stemming from the `conversationId`. The `metadata` field may include other non-standard (or future standard) properties.
 
 Note that the schema is only applicable when setting a non-null `conversationId`. If `conversationId` is null, the SDK does not allow setting `metadata`.
 
@@ -26,7 +26,10 @@ Proposed `brandInfo` schema in conversation `metadata`
 ```json
 {
     conversationId: "mydomain.xyz/abc/qrs",
-    metadata: { "brandInfo.displayName": "My company", "brandInfo.profileImage": "mydomain.xyz/assets/myimage.png", "brandInfo.primaryColor": "#ffffff" }
+    metadata: { 
+        "displayInfo.prettyName": "My company", 
+        "displayInfo.profileImage": "mydomain.xyz/assets/myimage.png", 
+        "displayInfo.primaryColor": "#ffffff" }
 }
 ```
 
@@ -35,7 +38,10 @@ Example `brandInfo` implementation for a chat app named Galaxy
 ```json
 {
     conversationId: "galaxy.chat/dm/uniqueIdentifier",
-    metadata: { "brandInfo.displayName": "Galaxy", "brandInfo.profileImage": "galaxychat.xyz/brandassets/logo.png", "brandInfo.primaryColor": "#6865B8" }
+    metadata: { 
+        "displayInfo.prettyName": "Galaxy", 
+        "displayInfo.profileImage": "galaxychat.xyz/brandassets/logo.png", 
+        "displayInfo.primaryColor": "#6865B8" }
 }
 ```
 
@@ -68,7 +74,10 @@ New Lens schema
 ```json
 {
     conversationId: "lens.dev/dm/${memberA}-${memberB}"
-    metadata: { "brandInfo.displayName": "Lens", "brandInfo.profileImage": "lens.xyz/assets/myimage.png", "brandInfo.primaryColor": "#ffffff" }
+    metadata: { 
+        "displayInfo.prettyName": "Lens", 
+        "displayInfo.profileImage": "lens.xyz/assets/myimage.png", 
+        "displayInfo.primaryColor": "#ffffff" }
 }
 ```
 
