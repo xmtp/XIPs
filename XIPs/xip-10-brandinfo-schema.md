@@ -48,7 +48,7 @@ The `profileImage` must meet the following criteria:
 
 The `primaryColor` must be a hex color code.
 
-## Backwards Compatibility
+## Backward compatibility
 
 Existing conversations will not be affected by the adoption of the new schema; only conversations created after the new schema is finalized will follow the updated schema.
 
