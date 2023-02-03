@@ -72,7 +72,7 @@ New Lens schema
 }
 ```
 
-## Security Considerations
+## Security considerations
 
 The metadata field can be spoofed by malicious apps to display Names and Images that degrade the user experience and are harmful to the brand’s perception. A mechanism for apps to sign messages and related metadata can enable front-ends to verify if the signature is from a credible source in order to prevent such spoofing. An affordance for client verifiability is under consideration.
 
