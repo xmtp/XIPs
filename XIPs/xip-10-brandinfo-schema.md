@@ -1,7 +1,7 @@
 ---
 xip: 14
-title: Brand info schema in conversation metadata
-description: Schema to enable standardized sharing of brand information as it relates to conversationId
+title: Conversation context metadta schema
+description: Schema to enable standardized sharing of conversation context
 author: Yash Lunagaria (@yash-luna)
 status: Review
 type: Standards Track
@@ -11,7 +11,7 @@ created: 2023-01-31
 
 ## Abstract
 
-This XIP proposes a schema for sharing brand information as it relates to `conversationId`. A standard way to represent this information in conversation `metadata` will enable different front-ends to surface the context captured by `conversationId` in a consistent, user-friendly manner while still affording clients design and UI flexibility.
+This XIP proposes a schema for sharing additional context about a conversation beyond a `conversationId`. Having a standard way to provide not only a conversationId, but also conversation metadata will enable different frontends to display useful contextual information in a consistent, user-friendly manner, while still affording apps design and UI flexibility.
 
 ## Motivation
 
@@ -21,7 +21,7 @@ Note that the schema is only applicable when setting a non-null `conversationId`
 
 ## Specification
 
-Proposed `brandInfo` schema in conversation `metadata`
+Proposed `displayInfo` schema in conversation `metadata`
 
 ```json
 {
@@ -33,7 +33,7 @@ Proposed `brandInfo` schema in conversation `metadata`
 }
 ```
 
-Example `brandInfo` implementation for a chat app named Galaxy
+Example `displayInfo` implementation for a chat app named Galaxy
 
 ```json
 {
@@ -83,7 +83,7 @@ New Lens schema
 
 ## Security considerations
 
-The metadata fields can be spoofed by malicious apps to display names and profile images that degrade the user experience and can be harmful to a brand’s perception. A mechanism for apps to sign messages and related metadata can enable frontends to verify if the signature is from a credible source to prevent such spoofing. An affordance for client verifiability is under consideration.
+The `metadata` fields can be spoofed by malicious apps to display names and profile images that degrade the user experience and harm brand perception. A mechanism for apps to sign payloads such as conversation metadata and messages can enable frontends to verify the sending client's identity and prevent such spoofing. An affordance for client verifiability is under consideration.
 
 ## Copyright
 
