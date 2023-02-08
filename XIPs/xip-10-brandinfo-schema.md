@@ -1,6 +1,6 @@
 ---
 xip: 14
-title: Conversation context metadta schema
+title: Conversation context metadata schema
 description: Schema to enable standardized sharing of conversation context
 author: Yash Lunagaria (@yash-luna)
 status: Review
