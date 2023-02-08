@@ -17,7 +17,7 @@ This XIP proposes a schema for sharing additional context about a conversation b
 
 The SDK API currently accepts a unique `conversationId` per address pair and allows `metadata` to be set as well. Today, different apps use these parameters in different ways. Therefore an app may not know how to correctly render in its UI `conversationId` and `metadata` for conversations originating from other apps. We propose a schema to standardize the use of conversation `metadata` for the purpose of app brand expression stemming from the `conversationId`. The `metadata` field may include other non-standard (or future standard) properties.
 
-Note that the schema is only applicable when setting a non-null `conversationId`. If `conversationId` is null, the SDK does not allow setting `metadata`.
+Note that the schema is only applicable when a valid`conversationId` is set. If `conversationId` is null, the SDK does not allow setting `metadata`.
 
 ## Specification
 
