@@ -56,7 +56,7 @@ The `primaryColor` must be a hex color code.
 
 ## Backward compatibility
 
-Existing conversations will not be affected by the adoption of the new schema; only conversations created after the new schema is finalized will follow the updated schema.
+Existing conversations will not be affected by the adoption of the new schema. Only conversations created after the new schema is finalized will follow the updated schema.
 
 To maintain backward compatibility, clients may consider rendering popular but older schemas (such as Lens), present in conversations created before the finalization of this XRC, in a manner consistent with their updated schema that follows this XRC.
 
