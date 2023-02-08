@@ -11,7 +11,7 @@ created: 2023-01-31
 
 ## Abstract
 
-This XIP proposes a schema for sharing additional context about a conversation beyond a `conversationId`. Having a standard way to provide not only a conversationId, but also conversation metadata will enable different frontends to display useful contextual information in a consistent, user-friendly manner, while still affording apps design and UI flexibility.
+This XIP proposes a schema for sharing additional context about a conversation beyond `conversationId`. It introduces associated conversation metadata alongside a `conversationId` to enable front-ends to display useful contextual information consistently and in a user-friendly manner while maintaining flexibility in UI and UX.
 
 ## Motivation
 
