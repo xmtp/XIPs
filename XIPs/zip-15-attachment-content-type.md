@@ -35,12 +35,11 @@ The message MUST include the following parameters:
 ```ts
 {
   mimeType: string,
-  filename: string
+  filename: string,
 }
 ```
 
-
-The content of the encoded message is arbitrary data. It's up to clients to use the mime type and filename to determine how to render the message.
+The content of the encoded message is arbitrary data. It's up to clients to use the mime type and filename to determine how to render the message. The content MUST not be more than 1MB.
 
 ## Backward compatibility
 
@@ -48,8 +47,8 @@ Clients encountering messages of this type must already be able to deal with mes
 
 ## Reference implementation
 
-Implementation reference: https://github.com/xmtp/xmtp-ios/pull/62
-Client Usage reference: https://github.com/xmtp-labs/xmtp-inbox-ios/pull/65
+- [Implementation reference](https://github.com/xmtp/xmtp-ios/pull/62)
+- [Client Usage reference](https://github.com/xmtp-labs/xmtp-inbox-ios/pull/65)
 
 ## Security considerations
 
