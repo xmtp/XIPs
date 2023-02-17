@@ -79,7 +79,7 @@ We will not introduce a separate version for the embedded type, it can be tied t
 
 #### Content Type Identifier and Parameters
 
-`ContentTypeId` identifies the type and format of the information contained in the content. It needs to carry enough information to be able to route the decoding process to the correct decoding machinery. As such the identifier should carry following bits of information:
+`ContentTypeId` identifies the type and format of the information contained in the content. It needs to carry enough information to be able to route the decoding process to the correct decoding machinery. As such the identifier should carry the following bits of information:
 
 * authority ID
 * content type ID
@@ -96,7 +96,11 @@ message ContentTypeId {
 }
 ```
 
-Authority ID identifies the entity that governs a suite of content types, their definitions and implementations. `xmtp.org` is one such organization. Authority ID SHOULD be unique and be widely recognized as belonging to the entity. DNS domains or ENS names can serve this purpose (e.g. `uniswap.eth`). The authority is responsible for providing a definition of the content type and its encoding parameters as well as the associated implementation. Any content type MUST have well defined parameters (or clearly state that no parameters are required/allowed), and any implementation MUST support all valid parameters for the content type.
+Any content type MUST have well defined parameters (or clearly state that no parameters are required/allowed), and any implementation MUST support all valid parameters for the content type.
+
+Authority ID identifies the entity that governs a suite of content types, their definitions and implementations. Authority ID SHOULD be unique and be widely recognized as belonging to the entity. DNS domains or ENS names can serve this purpose (e.g. `uniswap.eth`). The authority is responsible for providing a definition of the content type and its encoding parameters as well as the associated implementation.
+
+`xmtp.org` is one such entity and the `xmtp.org` authority ID value is reserved for standard content types only. Standard content types are those that have been adopted through the XIP process.
 
 Type ID identifies particular type of content that can be handled by a specific implementation of its encoding/decoding rules. Content type version allows future evolution of the content type definition.
 
