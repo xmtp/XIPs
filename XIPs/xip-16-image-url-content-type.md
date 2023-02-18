@@ -22,11 +22,40 @@ As per users requirements, and for my platform I decided to create a new content
 Proposed content type:
 
 ```js
+new ContentTypeId({
+    authorityId: "xmtp.org",
+    typeId: "media-image-url",
+    versionMajor: 1,
+    versionMinor: 0,
+})
+
+class ImageCodec {
+    get contentType() {
+        return ContentTypeImageKey
+    }
+
+    encode(content: string): EncodedContent {
+        return {
+            type: ContentTypeImageKey,
+            parameters: {},
+            content: new TextEncoder().encode(content),
+        }
+    }
+
+    decode(content: EncodedContent): string {
+        // console.log(content.content.toString())
+        const uint8Array = content.content
+        const key = new TextDecoder().decode(uint8Array)
+        return key
+    }
+}
+```
+
+The message MUST include the following parameters:
+
+```js
 {
-  authorityId: "xmtp.org"
-  typeId: "media-image-url"
-  versionMajor: 0
-  versionMinor: 1
+  altTag: string
 }
 ```
 
