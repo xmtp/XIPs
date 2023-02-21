@@ -67,7 +67,7 @@ Clients encountering messages of this type must already be able to deal with mes
 
 Making requests to servers outside the network could reveal information similar to tracking pixels. This could be somewhat mitigated by not loading this content by default, or at least providing users with a setting.
 
-Having arbitrary data anywhere can be risky, but this is already the case for our messages, since there's no server side validation of message contents (besides size). The same protections we have now would be in place while the same pitfalls we have would still be there as well.
+Having arbitrary data anywhere can be risky, but this is already the case for our messages, since there's no server side validation of message contents (besides size).
 
 ## Copyright
 
