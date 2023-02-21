@@ -24,7 +24,7 @@ Proposed content type:
 ```js
 {
   authorityId: "xmtp.org"
-  typeId: "remoteAttachment"
+  typeId: "remoteStaticContent"
   versionMajor: 0
   versionMinor: 1
 }
@@ -35,7 +35,7 @@ The encoded content MUST have the following parameters:
 ```js
 {
 	// The SHA256 hash of the remote content
-	checksum: string,
+	contentDigest: string,
 	
 	// A 32 byte hex string for decrypting the remote content payload
 	secret: string,
