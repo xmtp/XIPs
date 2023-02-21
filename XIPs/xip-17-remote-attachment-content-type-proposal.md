@@ -41,7 +41,7 @@ Clients encountering messages of this type must already be able to deal with mes
 ## Reference implementation
 
 - [Implementation reference](https://github.com/xmtp/xmtp-ios/pull/68)
-- Client Usage reference (TODO if this is a direction we're interested in pursuing)
+- [Client Usage reference](https://github.com/xmtp-labs/xmtp-inbox-ios/pull/83)
 
 ## Security considerations
 
