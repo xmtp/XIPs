@@ -34,24 +34,24 @@ The encoded content MUST have the following parameters:
 
 ```js
 {
-	// The SHA256 hash of the remote content
-	contentDigest: string,
-	
-	// A 32 byte hex string for decrypting the remote content payload
-	secret: string,
-	
-	// A hex string for the salt used to encrypt the remote content payload
-	salt: string,
-	
-	// A hex string for the nonce used to encrypt the remote content payload
-	nonce: string,
-	
-	// The scheme of the URL. Must be "https://"
-	scheme: "https://"
+  // The SHA256 hash of the remote content
+  contentDigest: string,
+  
+  // A 32 byte hex string for decrypting the remote content payload
+  secret: string,
+  
+  // A hex string for the salt used to encrypt the remote content payload
+  salt: string,
+  
+  // A hex string for the nonce used to encrypt the remote content payload
+  nonce: string,
+  
+  // The scheme of the URL. Must be "https://"
+  scheme: "https://"
 }
 ```
 
-The content of the encoded message is a URL that points to an encrypted `EncodedContent` object. The content MUST be accessed by an HTTP `GET` request to the URL. The `EncodedContent`'s content type MUST not be another `RemoteAttachment`.
+The content of the encoded message is a URL that points to an encrypted `EncodedContent` object. The content must be accessible by an HTTP `GET` request to the URL. The `EncodedContent`'s content type MUST not be another `RemoteAttachment`.
 
 By using `EncodedMessage`, we can make it easier for clients to support any message content already used on the network (with the exception of `RemoteAttachment` as mentioned above).
 
