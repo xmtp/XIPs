@@ -11,7 +11,7 @@ created: 2023-02-15
 
 ## Abstract
 
-This XRC proposes a new content type for messages that do not consist of text and/or are too large to be sent on the XMTP network. It builds on [XIP 15](https://github.com/xmtp/XIPs/pull/15)'s basic attachment type, but instead of messages being sent on the network, the message contains a URL. The contents of the URL is an `Envelope` that can be decoded by clients.
+This XRC proposes a new content type for messages that do not consist of text and/or are too large to be sent on the XMTP network. It builds on [XIP 15](https://github.com/xmtp/XIPs/pull/15)'s basic attachment type, but instead of messages being sent on the network, the message contains a URL. The contents of the URL is an encrypted protobuf encoded `EncodedContent` that can be decrypted and decoded by clients.
 
 ## Motivation
 
@@ -30,9 +30,29 @@ Proposed content type:
 }
 ```
 
-The content of the encoded message is a URL that points to encoded Envelope data that would not be limited by the 1MB limit, since it's not being sent on the network. By using the existing `Envelope` format, we can still ensure E2E encryption for this data.
+The encoded content MUST have the following parameters:
 
-The envelope itself can contain any type of message already allowed on the network. The reference implementation uses the `Attachment` type from XIP 15, but if we introduce richer types for things like images or video, those would work here as well, since clients should be able to understand those types once they're settled.
+```js
+{
+	// The SHA256 hash of the remote content
+	checksum: string,
+	
+	// A 32 byte hex string for decrypting the remote content payload
+	secret: string,
+	
+	// A hex string for the salt used to encrypt the remote content payload
+	salt: string,
+	
+	// A hex string for the nonce used to encrypt the remote content payload
+	nonce: string
+}
+```
+
+The content of the encoded message is a URL that points to an encrypted `EncodedContent` object. The `EncodedContent`'s content type MUST not be another `RemoteAttachment`.
+
+By using `EncodedMessage`, we can make it easier for clients to support any message content already used on the network (with the exception of `RemoteAttachment` as mentioned above).
+
+The reference implementation uses the `Attachment` type from XIP 15, but if we introduce richer types for things like images or video, those would work here as well, since clients should be able to understand those types once they're settled.
 
 ## Backward compatibility
 
@@ -40,10 +60,12 @@ Clients encountering messages of this type must already be able to deal with mes
 
 ## Reference implementation
 
-- [Implementation reference](https://github.com/xmtp/xmtp-ios/pull/68)
-- [Client Usage reference](https://github.com/xmtp-labs/xmtp-inbox-ios/pull/83)
+- [Implementation reference](https://github.com/xmtp/xmtp-ios/pull/68) (needs update)
+- [Client Usage reference](https://github.com/xmtp-labs/xmtp-inbox-ios/pull/83) (needs update)
 
 ## Security considerations
+
+Making requests to servers outside the network could reveal information similar to tracking pixels. This could be somewhat mitigated by not loading this content by default, or at least providing users with a setting.
 
 Having arbitrary data anywhere can be risky, but this is already the case for our messages, since there's no server side validation of message contents (besides size). The same protections we have now would be in place while the same pitfalls we have would still be there as well.
 
