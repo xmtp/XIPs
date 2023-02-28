@@ -45,7 +45,6 @@ The parameters for `remoteStaticAttachment` MUST include the following:
 }
 ```
 
-
 ## Backwards Compatibility
 
 The current `remoteStaticAttachment` content type has not been widely adopted yet (it only exists in the iOS SDK at the moment). Still, messages sent before would be considered invalid.
