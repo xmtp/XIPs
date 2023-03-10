@@ -29,3 +29,6 @@ The goal of the XIP project is to document standardized protocols for XMTP clien
 | 0 | [XIP Purpose, Process, & Guidelines](./XIPs/xip-0-purpose-process.md) | Process | Living |
 | 5 | [Message content types](./XIPs/xip-5-message-content-types.md) | Interface | Final |
 | 9 | [Composite content type](./XIPs/xip-9-composite-content-type.md) | XRC | Final |
+| 15 | [Attachment content type](./XIPs/xip-15-attachment-content-type.md) | XRC | Review |
+| 17 | [Remote attachment content type](./XIPs/xip-17-remote-attachment-content-type-proposal.md) | XRC | Review |
+| 18 | [Add contentLength and filename to remote attachment content type](./XIPs/xip-18-adding-contentlength-filename-to-remote-attachments.md) | XRC | Draft |
