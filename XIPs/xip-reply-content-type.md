@@ -32,25 +32,24 @@ Proposed content type:
 
 The reply message MUST include the following parameters:
 
-Adding info about the message we’re replying to (it’s content type id, content, sender address and the message id). 
-
 ```ts
 {
-  replyContentTypeId: string
-  messageContentTypeId: string
-  replyContent: string
-  replyMessageId: string
-  replySenderAddress: string
-  messageContent: string
+  // The ID of the message that is being replied to
+  inReplyToID: string
 }
 ```
 
-The content of the encoded message is arbitrary data. It's up to clients to use the replyContentTypeId , messageContentTypeId ,replyContent , replyMessageId , replySenderAddress , messageContent to determine how to render the message.
+The content of the encoded message is an EncodedContent object, serialized in the protobuf format (since we're guaranteed to always have the ability to deserialize that.)
+
+The content type of the reply's `EncodedContent` MUST be allowed. By default, the only allowed content type is `ContentTypeText`, but additional types can be optionally allowed as well.
 
 ## Backward compatibility
 
 Clients encountering messages of this type must already be able to deal with messages of an unknown content type, so whatever considerations they're making there should work here too.
 
+## Reference implementation
+
+- [PR implementation for the JS SDK](https://github.com/xmtp/xmtp-js-content-types/blob/baed02476cd94c6ceef24c107a86a162efaec678/reply/src/Reply.ts)
 
 ## Security considerations
 
