@@ -32,24 +32,22 @@ Proposed content type:
 
 The reaction MUST include the following parameters:
 
-Adding info about the message we’re reacting to (it’s message id, sender address, message content, content type id and the reaction). 
-
 ```ts
 {
-    messageId: string
-    senderAddress: string
-    messageContent: string
-    contentTypeId: string
-    reaction: string
+    // The message ID that this reaction is being added to
+    reactingToID: string
 }
 ```
 
-The content of the encoded message is arbitrary data. It's up to clients to use the messageId , senderAddress , messageContent, contentTypeId and reaction to determine how to render the message.
+The content of the encoded message must be a string consisting of a single emoji character.
 
 ## Backward compatibility
 
 Clients encountering messages of this type must already be able to deal with messages of an unknown content type, so whatever considerations they're making there should work here too.
 
+## Reference implementation
+
+- [PR implementation for the JS SDK](https://github.com/xmtp/xmtp-js-content-types/blob/d859187c00d216069cffbb2f6a847cd276e5225a/reaction/src/Reaction.ts)
 
 ## Security considerations
 
