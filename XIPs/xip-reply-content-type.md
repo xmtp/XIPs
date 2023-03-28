@@ -11,7 +11,7 @@ created: 2023-03-24
 
 ## Abstract
 
-This XRC proposes a new content type for messages that enriches the messaging experience. It attempts to include only the bare minimum for clients to determine how to display such messages in order to provide flexibility for more rich types in the future.
+This XRC proposes a reply content type that can be used to give clients the functionality of replying to a message.
 
 ## Motivation
 
