@@ -1,5 +1,5 @@
 ---
-Title: Payment and Nfts as content types
+Title: Payment as content types
 Description: Xip for payments and Nfts as content types 
 Authors: Shubham Patel (@aeyshubh), Siddharth Shukla (@gunner26735), Krishn Panchal (@phovious14)
 Satus: Draft
@@ -12,8 +12,6 @@ Created: 2023-04-04
 ## Abstract
 
 - Payments : Every ERC20 token has a contract address and a token Transfer function ,when the \pay keyword is encountered then we fetch the token name(USDC,MATIC) from the command then it's contract address and call the transfer function with that contract address on behalf of the user,if the user accepts the transfer event in his metamask wallet then the tokens will be treansfered and the transaction link will be sent in the chat.  
-
-Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
 
 ## Motivation
 
