@@ -1,6 +1,6 @@
 ---
 Title: Payment as content types
-Description: Xip for payments and Nfts as content types 
+Description: Xip for payments as content types 
 Authors: Shubham Patel (@aeyshubh), Siddharth Shukla (@gunner26735), Krishn Panchal (@phovious14)
 Satus: Draft
 Suggested-XIP-Number : 3
