@@ -11,7 +11,7 @@ created: 2023-04-10
 
 ## Abstract
 
-This XRC proposes a new content type that allows the sender to understand the status of the outgoing messages and marks them as ‘delivered’ and ‘seen’.
+This XRC proposes a new content type that allows the sender to understand the status of the outgoing messages and marks them as `SENT`, `DELIVERED` and `SEEN`.
 
 ## Motivation
 
