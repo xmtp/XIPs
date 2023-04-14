@@ -142,6 +142,9 @@ Opt-In, Opt-Out
 
 Clients encountering messages of this type must already be able to deal with messages of an unknown content type, so whatever considerations they're making there should work here too.
 
+## Reference implementation
+- [Client implementation reference](https://read-receipts.vercel.app)
+
 ## Security considerations
 
 Relying on new messages to determine and mark the previous message’s delivery status is risky and the results may vary depending on the deliverability of the post coming read receipt messages. Any delays / complications in the XMTP network may affect the deliverability of these messages and hence break the entire system of read receipts. 
