@@ -44,7 +44,7 @@ It's important to gather feedback about your proposal or new idea within the com
 
 Engaging with the XMTP community first will help determine the originality of an idea, and will help to avoid wasting time on something that may be rejected based on prior research.
 
-**It's recommended to create a new topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips) to do this.**
+**It's recommended to create a new topic in the [XIP Ideas forum](https://github.com/orgs/xmtp/discussions/categories/xip-ideas) to do this.**
 
 ### Shepherding an XIP
 
@@ -138,7 +138,7 @@ At least one author must use a GitHub username, in order to get notified on chan
 
 While an XIP is a draft, a `discussions-to` header will indicate the URL where the XIP is being discussed.
 
-The preferred discussion URL is a topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips). The URL must not point to GitHub pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
+The preferred discussion URL is a topic in the [XIP Drafts forum](https://github.com/orgs/xmtp/discussions/categories/xip-drafts). The URL must not point to GitHub pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
 
 ### `type` header
 
