@@ -6,7 +6,7 @@ status: Living
 type: Process
 author: Matt Galligan (@mg0716), et al
 created: 2022-02-22
-updated: 2022-09-21
+updated: 2023-05-01
 ---
 
 ## What is an XIP?
@@ -38,13 +38,19 @@ An XIP must meet certain minimum criteria. It must be a clear and complete descr
 
 ## XIP Workflow
 
+## Getting started
+
+It's important to gather feedback about your proposal or new idea within the community before advancing it further in the process. This helps to vet your idea before going through the formality of the Improvement Proposal process.
+
+Engaging with the XMTP community first will help determine the originality of an idea, and will help to avoid wasting time on something that may be rejected based on prior research.
+
+**It's recommended to create a new topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips) to do this.**
+
 ### Shepherding an XIP
 
-Parties involved in the process are you, the champion or *XIP author*, the [*XIP editors*](#XIP-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
+Parties involved in the process are you, the champion or *XIP author*, the [*XIP editors*](#xip-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
 
-Before you begin writing a formal XIP, you should vet your idea. Ask the XMTP community first if an idea is original to avoid wasting time on something that will be rejected based on prior research. It is thus recommended to create a new topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips) to do this.
-
-Once the idea has been vetted, your next responsibility will be to present (by means of an XIP) the idea to the reviewers and all interested parties, invite editors, developers, and the community to give feedback on the aforementioned channels. You should try and gauge whether the interest in your XIP is commensurate with both the work involved in implementing it and how many parties will have to conform to it. Negative community feedback will be taken into consideration and may prevent your XIP from moving past the Draft stage.
+Once the idea has been vetted (as described in [*Getting Started*](#getting-started)), your next responsibility will be to present (by means of an XIP Draft) the idea to the reviewers and all interested parties, invite editors, developers, and the community to give feedback on the aforementioned channels. You should try and gauge whether the interest in your XIP is commensurate with both the work involved in implementing it and how many parties will have to conform to it. Negative community feedback will be taken into consideration and may prevent your XIP from moving past the Draft stage.
 
 ### XIP Process
 
@@ -110,7 +116,7 @@ Headers requiring dates will always do so in the format of ISO 8601 (YYYY-MM-DD)
 
 ### `author` header
 
-The `author` header lists the names, email addresses or GitHub usernames of the authors/owners of the XIP. Those who prefer anonymity may use a GitHub username only, or a first name and a GitHub username. The format of the `author` header value must be:
+The `author` header lists the names, email addresses, GitHub usernames, or ENS domain of the authors/owners of the XIP. Those who prefer anonymity may use a GitHub username only, or a first name and a GitHub username. The format of the `author` header value must be:
 
 > Random J. User `<address@dom.ain>`
 
@@ -118,7 +124,11 @@ or
 
 > Random J. User `(@username)`
 
-if the email address or GitHub username is included.
+or
+
+> Random J. User `(randomjuser.eth)`
+
+if the email address, GitHub username, or ENS domain is included.
 
 It is not possible to use both an email and a GitHub username at the same time. If important to include both, one could include their name twice, once with the GitHub username, and once with the email.
 
@@ -162,9 +172,9 @@ If you are interested in assuming ownership of an XIP, send a message asking to 
 
 ## XIP Editors
 
-The current XIP editors are
+The current XIP editors are:
 
-- Matt Galligan (@mg0716)
+- Matt Galligan (@galligan)
 - Saul Carlin (@saulmc)
 - Steven Normore (@snormore)
 
