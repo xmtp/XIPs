@@ -40,11 +40,11 @@ An XIP must meet certain minimum criteria. It must be a clear and complete descr
 
 ## Getting started
 
-It's important to gather feedback about your proposal or new idea within the community before advancing it further in the process. This helps to vet your idea before going through the formality of the Improvement Proposal process.
+Before advancing your idea through the XIP process into the Draft stage, it’s crucial to gather feedback from the community. This will help you vet your idea and assess its originality, potentially saving you time and effort. Engaging with the XMTP community will also help you gauge overall interest in your idea.
 
-Engaging with the XMTP community first will help determine the originality of an idea, and will help to avoid wasting time on something that may be rejected based on prior research.
+Prototyping your proposal may also help to de-risk it and provide a reference implementation to anchor discussions around.
 
-**It's recommended to create a new topic in the [XIP Ideas forum](https://github.com/orgs/xmtp/discussions/categories/xip-ideas) to do this.**
+To get started, you can **submit your idea as a new topic in the [XIP Ideas category in XMTP's GitHub Discussions](https://github.com/orgs/xmtp/discussions/categories/xip-ideas)**.
 
 ### Shepherding an XIP
 
