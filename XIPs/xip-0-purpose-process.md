@@ -48,7 +48,7 @@ To get started, you can **submit your idea as a new topic in the [XIP Ideas cate
 
 ### Shepherding an XIP
 
-Parties involved in the process are you, the champion or *XIP author*, the [*XIP editors*](#xip-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
+Parties involved in the process are you, the champion or *XIP author*, the *XMTP community*, the [*XIP editors*](#xip-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
 
 Once the idea has been vetted (as described in [*Getting Started*](#getting-started)), your next responsibility will be to present (by means of an XIP Draft) the idea to the reviewers and all interested parties, invite editors, developers, and the community to give feedback on the aforementioned channels. You should try and gauge whether the interest in your XIP is commensurate with both the work involved in implementing it and how many parties will have to conform to it. Negative community feedback will be taken into consideration and may prevent your XIP from moving past the Draft stage.
 
