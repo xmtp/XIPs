@@ -6,7 +6,7 @@ status: Living
 type: Process
 author: Matt Galligan (@mg0716), et al
 created: 2022-02-22
-updated: 2022-09-21
+updated: 2023-05-01
 ---
 
 ## What is an XIP?
@@ -38,13 +38,23 @@ An XIP must meet certain minimum criteria. It must be a clear and complete descr
 
 ## XIP Workflow
 
+## Getting started
+
+Before advancing your idea through the XIP process into the Draft stage, it’s crucial to gather feedback from the community. This will help you vet your idea and assess its originality, potentially saving you time and effort. Engaging with the XMTP community will also help you gauge overall interest in your idea.
+
+Prototyping your proposal may also help to de-risk it and provide a reference implementation to anchor discussions around.
+
+To get started, you can **submit your idea as a new topic in the [XIP Ideas category in XMTP's GitHub Discussions](https://github.com/orgs/xmtp/discussions/categories/xip-ideas)**.
+
 ### Shepherding an XIP
 
-Parties involved in the process are you, the champion or *XIP author*, the [*XIP editors*](#XIP-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
+Parties involved in the process are you, the champion or *XIP author*, the *XMTP community*, the [*XIP editors*](#xip-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
 
-Before you begin writing a formal XIP, you should vet your idea. Ask the XMTP community first if an idea is original to avoid wasting time on something that will be rejected based on prior research. It is thus recommended to create a new topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips) to do this.
+Vetting your idea within a discussion is a critical part of the XIP process. We encourage sharing the discussion with reviewers, interested parties, editors, developers, and the community to gather feedback.
 
-Once the idea has been vetted, your next responsibility will be to present (by means of an XIP) the idea to the reviewers and all interested parties, invite editors, developers, and the community to give feedback on the aforementioned channels. You should try and gauge whether the interest in your XIP is commensurate with both the work involved in implementing it and how many parties will have to conform to it. Negative community feedback will be taken into consideration and may prevent your XIP from moving past the Draft stage.
+Additional vetting criteria may include reviewing reference implementations or assessing whether the idea is too specific for broad adoption within the XMTP ecosystem. It’s important to gauge whether the interest in your XIP is commensurate with the effort required to implement it and how many parties will need to conform to it. While the volume of interest by way of discussion is not an explicitly disqualifying characteristic, it may play a role in advancing beyond the idea stage.
+
+After vetting the idea as described above, your next responsibility is to present the idea as a formal XIP Draft by opening a [Pull Request](https://github.com/xmtp/XIPs/pulls).  Following this step, the [XIP Editors](#xip-editors) will review the Draft and make recommendations on its advancement.
 
 ### XIP Process
 
@@ -110,7 +120,7 @@ Headers requiring dates will always do so in the format of ISO 8601 (YYYY-MM-DD)
 
 ### `author` header
 
-The `author` header lists the names, email addresses or GitHub usernames of the authors/owners of the XIP. Those who prefer anonymity may use a GitHub username only, or a first name and a GitHub username. The format of the `author` header value must be:
+The `author` header lists the names, email addresses, GitHub usernames, or ENS domain of the authors/owners of the XIP. Those who prefer anonymity may use a GitHub username only, or a first name and a GitHub username. The format of the `author` header value must be:
 
 > Random J. User `<address@dom.ain>`
 
@@ -118,7 +128,11 @@ or
 
 > Random J. User `(@username)`
 
-if the email address or GitHub username is included.
+or
+
+> Random J. User `(randomjuser.eth)`
+
+if the email address, GitHub username, or ENS domain is included.
 
 It is not possible to use both an email and a GitHub username at the same time. If important to include both, one could include their name twice, once with the GitHub username, and once with the email.
 
@@ -128,7 +142,7 @@ At least one author must use a GitHub username, in order to get notified on chan
 
 While an XIP is a draft, a `discussions-to` header will indicate the URL where the XIP is being discussed.
 
-The preferred discussion URL is a topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips). The URL must not point to GitHub pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
+The preferred discussion URL is a topic in the [XIP Drafts forum](https://github.com/orgs/xmtp/discussions/categories/xip-drafts). The URL must not point to GitHub pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
 
 ### `type` header
 
@@ -162,9 +176,9 @@ If you are interested in assuming ownership of an XIP, send a message asking to 
 
 ## XIP Editors
 
-The current XIP editors are
+The current XIP editors are:
 
-- Matt Galligan (@mg0716)
+- Matt Galligan (@galligan)
 - Saul Carlin (@saulmc)
 - Steven Normore (@snormore)
 
