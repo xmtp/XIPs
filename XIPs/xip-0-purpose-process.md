@@ -58,14 +58,14 @@ After vetting the idea as described above, your next responsibility is to presen
 
 ### XIP Process
 
-- **Idea** - An idea that is pre-draft. This is not tracked within the XIP Repository.
-- **Draft** - The first formally tracked stage of an XIP in development. An XIP is merged by an XIP Editor into the XIP repository when properly formatted.
-- **Review** - An XIP Author marks an XIP as ready for and requesting Peer Review.
-- **Last Call** - This is the final review window for an XIP before moving to `Final`. An XIP editor will assign `Last Call` status and set a review end date (`last-call-deadline`), typically 14 days later. If this period results in necessary normative changes it will revert the XIP to `Review`.
-- **Final** - This XIP represents the final standard. A Final XIP exists in a state of finality and should only be updated to correct errata and add non-normative clarifications.
-- **Stagnant** - Any XIP in `Draft` or `Review` or `Last Call` if inactive for a period of 6 months or greater is moved to `Stagnant`. An XIP may be resurrected from this state by Authors or XIP Editors through moving it back to `Draft` or its earlier status. If not resurrected, a proposal may stay forever in this status.
-- **Withdrawn** - The XIP Author(s) have withdrawn the proposed XIP. This state has finality and can no longer be resurrected using this XIP number. If the idea is pursued at a later date it is considered a new proposal.
-- **Living** - A special status for XIPs that are designed to be continually updated and not reach a state of finality. This includes most notably XIP-0.
+- **Idea** - Submit an idea for an improvement as a topic in the [XIP Ideas category in XMTP's GitHub Discussions](https://github.com/orgs/xmtp/discussions/categories/xip-ideas).
+- **Draft** - The first formally tracked stage of an XIP in development. An XIP is merged by an XIP Editor into the XIP repository when properly formatted. 
+- **Review** - An XIP Author marks an XIP as ready for and requesting Peer Review. 
+- **Last Call** - This is the final review window for an XIP before moving to `Final`. An XIP editor will assign `Last Call` status and set a review end date (`last-call-deadline`), typically 14 days later. If this period results in necessary normative changes it will revert the XIP to `Review`. 
+- **Final** - This XIP represents the final standard. A Final XIP exists in a state of finality and should only be updated to correct errata and add non-normative clarifications. 
+- **Stagnant** - Any XIP in `Draft` or `Review` or `Last Call` if inactive for a period of 6 months or greater is moved to `Stagnant`. An XIP may be resurrected from this state by Authors or XIP Editors through moving it back to `Draft` or its earlier status. If not resurrected, a proposal may stay forever in this status. 
+- **Withdrawn** - The XIP Author(s) have withdrawn the proposed XIP. This state has finality and can no longer be resurrected using this XIP number. If the idea is pursued at a later date it is considered a new proposal. 
+- **Living** - A special status for XIPs that are designed to be continually updated and not reach a state of finality. This includes most notably XIP-0. 
 
 ## What belongs in a successful XIP?
 
