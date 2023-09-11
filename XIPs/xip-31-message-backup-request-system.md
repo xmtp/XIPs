@@ -15,7 +15,7 @@ A proposed system for transferring backups of message history between installati
 
 ## Motivation
 
-The current [XMTP V3 Protocol Specification](https://github.com/xmtp/libxmtp) creates a new XMTP identity for each installation associated with a blockchain account, instead of sharing a single set of keys across all installations like V1/V2. New installations will receive all messages sent to a blockchain account after they are created, but V3 does _not_ specify how to receive messages sent before installation creation. Having conversation history sync between devices is a popular feature of V1 and V2 of the XMTP protocol and there is clear demand from developers for this to be possible as part of V3.
+The [XMTP V3 Protocol Specification](https://github.com/xmtp/libxmtp) creates a new XMTP identity for each installation associated with a blockchain account, instead of sharing a single set of keys across all installations like V1/V2. New installations will receive all messages sent to a blockchain account after they are created, but V3 does _not_ specify how to receive messages sent before installation creation. Having conversation history sync between devices is a popular feature of V1 and V2 of the XMTP protocol and there is clear demand from developers for this to be possible as part of V3.
 
 There are a number of cases where message history synchronization is desirable:
 
@@ -37,7 +37,7 @@ It's also worth noting that there are many use-cases for XMTP where message hist
 1. Message history synchronization should be opt-in for developers.
 1. It should be simple for developers to implement message history synchronization correctly. Implementation work should be focused on application-specific UX choices, with the SDK responsible for core transport and security decisions.
 1. Compatibility between applications is expected. Applications should be able to share history irrespective of operating system, SDK version, or device type (web vs mobile vs server).
-1. Even if developers of some popular applications choose to not support message history synchronization, it should be simple for users to opt themselves in.
+1. Even if developers of some popular applications choose to not support message history synchronization, it should be simple for users to opt enable themselves.
 
 ## Specification
 
