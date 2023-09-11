@@ -200,8 +200,6 @@ I am also proposing that XMTP Labs runs a Backup Storage Provider as a free publ
 #### [Mesage Protos](https://github.com/xmtp/proto/blob/xmtpv3/proto/v3/message_contents/message.proto)
 
 ```proto
-syntax = "proto3";
-
 // The decrypted message contents of any message on the installation's messaging topic
 message PadlockMessagePayload {
     EdDsaSignature header_signature = 1;
@@ -237,7 +235,7 @@ message DirectMessage {
 #### [Contact protos](https://github.com/xmtp/proto/blob/xmtpv3/proto/v3/message_contents/public_key.proto)
 
 ```proto
-syntax = "proto3";
+
 enum ContactRole {
     UNKNOWN_CONTACT_ROLE = 0;
     FULL = 1;
@@ -268,7 +266,7 @@ impl Client<A> {
     /**
     Methods for Backup Requesters
     **/
-    pub fn requesRemotetMessageHistoryBackup(&self) -> Result<Vec<MessageHistoryBackupRequest>, ClientError> {
+    pub fn requestRemoteMessageHistoryBackup(&self) -> Result<Vec<MessageHistoryBackupRequest>, ClientError> {
         // Create and send a MessageHistoryBackupRequest to all other installations associated with the current blockchain account
         ...
     }
@@ -284,13 +282,13 @@ impl Client<A> {
         // 2. If either are not found, return `ResponseNotFound`
         // 3. Download the backup from the URI specified in the MessageHistoryBackupResponse
         // 4. Decrypt the backup using the keys specified in the MessageHistoryBackupResponse
-        // 5. Run applyMessageHistoryBackupFromFile with the decrypted file
+        // 5. Run loadMessageBackupFile with the decrypted file
         // 6. Delete the MessageHistoryBackupResponse from the local database, removing all sensitive key material
         // 7. Set the MessageHistoryBackupRequest status to Applied
         ...
     }
 
-    pub fn applyMessageHistoryBackupFromFile(&self, file: std::fs::File) -> Result<(), BackupApplyError> {
+    pub fn loadMessageBackupFile(&self, file: std::fs::File) -> Result<(), BackupApplyError> {
         // Read from the file line by line and add each message to the database. If message already exists, skip it and move on to the next line
     }
 
