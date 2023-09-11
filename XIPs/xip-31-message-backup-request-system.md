@@ -1,5 +1,5 @@
 ---
-xip: 29
+xip: 31
 title: Message backup request system
 description: A system for requesting and receiving message backups between V3 installations
 author: Nick Molnar
