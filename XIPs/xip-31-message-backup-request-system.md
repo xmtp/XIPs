@@ -73,7 +73,9 @@ class S["Backup Storage Provider"]{
 
 ### Remote Message Backups
 
-Remote message backups work by Backup Requesters sending a special message type (`MessageHistoryBackupRequest`) across the XMTP network to all other installations signed by the same blockchain account as the sender (Message Backup Providers). Upon receipt of these messages, Message Backup Providers should display a prompt to the user asking whether they consent to share their message history with the requesting installation. Upon approval, the application will convert their local database into a standard Message History Backup File and upload it to the Backup Storage Provider specified in the `MessageHistoryBackupRequest`.
+Remote message backups work by Backup Requesters sending a special message type (`MessageHistoryBackupRequest`) across the XMTP network to all other installations signed by the same blockchain account as the sender (Message Backup Providers). Upon receipt of these messages, Message Backup Providers should display a prompt to the user asking whether they consent to share their message history with the requesting installation. The prompt should display the Verification PIN from the request - which will also be displayed in the Backup Requester's app - to ensure that the user is approving the correct request.
+
+Upon approval, the application will convert their local database into a standard Message History Backup File, encrypt it, and upload it to the Backup Storage Provider specified in the `MessageHistoryBackupRequest`.
 
 For mobile applications already handling push notifications, `MessageHistoryBackupRequest`s would become a special case of push notification handling.
 
