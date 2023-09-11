@@ -403,7 +403,7 @@ Messages would be encrypted using either an [N](https://noiseexplorer.com/patter
 ##### QR Code Advantages
 
 - Does not require any additional installations to be added to the user's account
-- Could be combined with the Backup Account File approach if desired, to handle cases where the Message Backup Provider is inaccessible
+- Ensures the Backup Requester and Message Backup Provider are in the same room (QR Code) or on the same device (deep link)
 
 ##### QR Code Disadvantages
 
