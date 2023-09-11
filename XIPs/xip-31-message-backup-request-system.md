@@ -199,7 +199,9 @@ I am also proposing that XMTP Labs runs a Backup Storage Provider as a free publ
 
 #### [Mesage Protos](https://github.com/xmtp/proto/blob/xmtpv3/proto/v3/message_contents/message.proto)
 
-```protobuf
+```proto
+syntax = "proto3";
+
 // The decrypted message contents of any message on the installation's messaging topic
 message PadlockMessagePayload {
     EdDsaSignature header_signature = 1;
@@ -234,7 +236,8 @@ message DirectMessage {
 
 #### [Contact protos](https://github.com/xmtp/proto/blob/xmtpv3/proto/v3/message_contents/public_key.proto)
 
-```protobuf
+```proto
+syntax = "proto3";
 enum ContactRole {
     UNKNOWN_CONTACT_ROLE = 0;
     FULL = 1;
