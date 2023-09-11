@@ -180,6 +180,8 @@ Example response:
 ```
 
 `POST /backups/$UPLOAD_ID`:
+Request body would contain the file as multipart/form-data.
+
 Example response:
 
 ```json
