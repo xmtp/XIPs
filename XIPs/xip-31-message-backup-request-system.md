@@ -43,7 +43,33 @@ It's also worth noting that there are many use-cases for XMTP where message hist
 
 This specification offers the user two modes of message backup, which accomodate different use-cases: Remote Message Backups and Backup Account Files. Remote Message Backups are the lowest friction solution, provided the blockchain account has access to another existing installation. Backup Account Files are an emergency solution for cases where the user has lost access to all of their XMTP applications (for example, if they lost the only device they have used to connect to XMTP).
 
+### Actors
+
 There are three types of actors in this specification: Backup Requesters, Message Backup Providers, and Backup Storage Providers. Backup requesters are XMTP Clients that are missing message history and would like to receive a backup. Message Backup Providers are XMTP Clients that have a message history and are capable of sending it to a requester. These first two types of actors are XMTP Clients, and the implementation required to fulfill the responsibilities of both roles would be built into `libxmtp`. The Backup Storage Provider is a remote service responsible for temporarily storing backup files, and is only needed for Remote Message Backups.
+
+```mermaid
+classDiagram
+class R["Backup Requester"]{
+    The new installation requesting missing messages
+    Responsible for selecting a Backup Storage Provider and obtaining authorization
+    Creates MessageHistoryBackupRequests
+    Reads MessageHistoryBackupResponses
+}
+
+class M["Message Backup Provider"]{
+    An existing installation that has access to message history
+    Reads MessageHistoryBackupRequests
+    Creates MessageHistoryBackupResponses
+    Uploads Message Backup Files to the pre-selected storage provider
+    Responsible for generating one-time encryption keys
+}
+
+class S["Backup Storage Provider"]{
+    A cloud service with durable storage
+    Stores encrypted backups for a few days
+    Responsible for authenticating requests to reduce abuse potential
+}
+```
 
 ### Remote Message Backups
 
@@ -168,6 +194,68 @@ It would be the responsibility of the Backup Storage Provider to authenticate re
 XMTP Labs would provide a reference implementation of a Backup Storage Provider.
 
 I am also proposing that XMTP Labs runs a Backup Storage Provider as a free public good for the next 2 years, at which point this functionality becomes a part of an ecosystem of third party gateway service providers.
+
+### Changes to the v3 protocol buffers
+
+#### [Mesage Protos](https://github.com/xmtp/proto/blob/xmtpv3/proto/v3/message_contents/message.proto)
+
+```proto3
+// The decrypted message contents of any message on the installation's messaging topic
+message PadlockMessagePayload {
+    EdDsaSignature header_signature = 1;
+    oneof contents {
+        DirectMessage direct_message = 2;
+        MessageHistoryBackupRequest message_history_backup_request = 3;
+        MessageHistoryBackupResponse message_history_backup_response = 4;
+    }
+}
+
+// The decrypted contents of a MessageHistoryBackupRequest
+message MessageHistoryBackupRequest {
+    string request_id = 1;
+    int32 verification_pin = 2;
+    string upload_url = 3;
+}
+
+message MessageHistoryBackupResponse {
+    string request_id = 1;
+    string backup_url = 2;
+    // TBD on exact parameter definitions. Want to have flexibilty to change key types later
+    EncryptionParameters encryption_parameters = 3;
+    bytes backup_file_hash = 4;
+    int64 expiration_time_ns = 5;
+}
+
+message DirectMessage {
+    string convo_id = 1;
+    bytes content_bytes = 2;
+}
+```
+
+#### [Contact protos](https://github.com/xmtp/proto/blob/xmtpv3/proto/v3/message_contents/public_key.proto)
+
+```proto3
+enum ContactRole {
+    UNKNOWN_CONTACT_ROLE = 0;
+    FULL = 1;
+    BACKUP = 2;
+}
+
+message VmacInstallationPublicKeyBundleV1 {
+    VmacAccountLinkedKey identity_key = 1;
+    VmacInstallationLinkedKey fallback_key = 2;
+    // NEW FIELD
+    ContactRole contact_role = 3;
+}
+
+// A wrapper for versions of the installation contact bundle to allow
+// upgradeability
+message InstallationContactBundle {
+    oneof version {
+        VmacInstallationPublicKeyBundleV1 v1 = 1;
+    }
+}
+```
 
 ### Changes to `libxmtp`
 
