@@ -163,7 +163,7 @@ Example response:
 `GET /backups/$DOWNLOAD_ID`:
 Returns the uploaded file matching the ID
 
-It would be the responsibility of the Backup Storage Provider to authenticate requests to `/backups` and mitigate abuse. Uploaded files would only need to be stored for maybe 72 hours before they could be safely purged, as backups are meant to be temporary storage. We could also just delete the file after it had been downloaded once.
+It would be the responsibility of the Backup Storage Provider to authenticate requests to `/backups` and mitigate abuse.Uploaded files would only need to be stored for maybe 72 hours before they could be safely purged, as backups are meant to be temporary storage. We could also just delete the file after it had been downloaded once.
 
 XMTP Labs would provide a reference implementation of a Backup Storage Provider.
 
@@ -243,8 +243,7 @@ pub struct MessageHistoryBackupRequest {
     pub verificationPin: i16, // A four digit PIN that can be displayed in both the Backup Requester app and the Backup Provider app to ensure the user is responding to the correct backup request
     pub backupStorageProviderUploadUrl: String,
     pub status: BackupRequestStatus
-
-    ... // a bunch of likely private fields with encryption information
+    ...
 }
 
 pub struct MessageHistoryBackupResponse {
@@ -354,6 +353,7 @@ TODO
 ### Risks and drawbacks to Remote Message Backups
 
 - Developers of the Message Backup Provider could implement the consent flow in a way that confuses users into accepting backup requests from malicious applications. PIN verification may not be implemnted across all providers
+- A malicious Message Backup Provider could choose to censor messages in the backup, or add spoofed messages, since the messages in the backup are unauthenticated.
 - Bugs in the validation of requests in Message Backup Providers would be very very bad. This would need to be very well tested code, since a compromise here would effectively be a 0-click exploit of someone's XMTP account.
 
 ### Risks and drawbacks to Backup Account Files
@@ -363,6 +363,10 @@ TODO
 - This approach relies on the XMTP network allowing messages to remain in pre-delivery storage indefinitely. While that works today, in future iterations of the network this may be cost prohibitive.
 - Applications creating Backup Account Files would need to handle interacting with the device filesystem or cloud storage providers. For mobile applications this may require extra permissions.
 - If Backup Account Files were accessed, and it's encryption keys were compromised, the attacker would have access to all historical messages
+
+### Risks and drawbacks to Backup Storage Providers
+
+- Offering free storage on the internet has potential for abuse. Requests to this service should be rate limited or otherwise protected against attack. If we were less concerned about abuse potential, we could remove the need for pre-generation of upload URLs, which would remove the need for the Backup Requester to contact the Backup Storage Provider before creating a `MessageHistoryBackupRequest`
 
 ## Copyright
 
