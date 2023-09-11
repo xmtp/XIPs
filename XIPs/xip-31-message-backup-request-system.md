@@ -15,7 +15,7 @@ A proposed system for transferring backups of message history between installati
 
 ## Motivation
 
-The current [XMTP V3 Protocol Specification](https://github.com/xmtp/libxmtp) allows new installations to be created and receive all messages sent to a blockchain account after it's creation. It does _not_ specify how messages sent before the installation was created can be loaded into the new installation. Having conversation history sync between devices is a popular feature of V1 and V2 of the XMTP protocol and there is clear demand from developers for this to be possible as part of V3.
+The current [XMTP V3 Protocol Specification](https://github.com/xmtp/libxmtp) creates a new XMTP identity for each installation associated with a blockchain account, instead of sharing a single set of keys across all installations like V1/V2. New installations will receive all messages sent to a blockchain account after they are created, but V3 does _not_ specify how to receive messages sent before installation creation. Having conversation history sync between devices is a popular feature of V1 and V2 of the XMTP protocol and there is clear demand from developers for this to be possible as part of V3.
 
 There are a number of cases where message history synchronization is desirable:
 
@@ -26,7 +26,7 @@ There are a number of cases where message history synchronization is desirable:
 
 It's also worth noting that there are many use-cases for XMTP where message history synchronization is not necessary or desirable.
 
-- A bot that replies to messages from users. Most bots don't care about messages sent before they were created.
+- A bot that replies to messages from users. Many bots don't care about messages sent before they were created.
 - A service that sends notifications to a list of subscribers via XMTP.
 - An application that allows users to talk to customer support only needs access to the newly created conversation with the support agent.
 - A marketplace application that wants to allow buyers and sellers to communicate about a particular item. These would only be new conversations and may not care about pre-existing messages.
@@ -37,7 +37,7 @@ It's also worth noting that there are many use-cases for XMTP where message hist
 1. Message history synchronization should be opt-in for developers.
 1. It should be simple for developers to implement message history synchronization correctly. Implementation work should be focused on application-specific UX choices, with the SDK responsible for core transport and security decisions.
 1. Compatibility between applications is expected. Applications should be able to share history irrespective of operating system, SDK version, or device type (web vs mobile vs server).
-1. Even if developers of some popular applications choose to not support message history synchronization, it should be simple for users to opt themselves in
+1. Even if developers of some popular applications choose to not support message history synchronization, it should be simple for users to opt themselves in.
 
 ## Specification
 
@@ -49,12 +49,14 @@ There are three types of actors in this specification: Backup Requesters, Messag
 
 Remote message backups work by Backup Requesters sending a special message type (`MessageHistoryBackupRequest`) across the XMTP network to all other installations signed by the same blockchain account as the sender (Message Backup Providers). Upon receipt of these messages, Message Backup Providers should display a prompt to the user asking whether they consent to share their message history with the requesting installation. Upon approval, the application will convert their local database into a standard Message History Backup File and upload it to the Backup Storage Provider specified in the `MessageHistoryBackupRequest`.
 
+For mobile applications already handling push notifications, `MessageHistoryBackupRequest`s would become a special case of push notification handling.
+
 #### Flow for Backup Requesters
 
 1. Get a list of all other installations associated with their blockchain account. Ignore any installations that have been revoked
 2. Obtain a one-time upload URL from the Backup Storage Provider for each installation
 3. Generate a `MessageHistoryBackupRequest` for each installation (see below for Protobuf spec) and store in the local database
-4. Send the `MessageHistoryBackupRequest` messages to the standard message topic for each installation
+4. Send the `MessageHistoryBackupRequest` messages to the normal inbound messaging topic for each installation
 5. Wait for a response from any of the Message Backup Providers
 6. For each `MessageHistoryBackupResponse`
    6a. Ensure there is a `MessageHistoryBackupRequest` with a matching `requestId` stored in the database. If not, ignore
@@ -130,9 +132,9 @@ This same web application could be used to create Backup Account Files for cases
 
 ### Backup Storage Provider
 
-A Backup Storage Provider is a simple HTTP service with two endpoints. Anyone can implement a Backup Storage Provider. It is up to the Backup Requester to choose the Backup Service Provider for their application.
+A Backup Storage Provider is a simple HTTP service with three endpoints. Anyone can implement a Backup Storage Provider. It is up to the Backup Requester application to choose the Backup Service Provider for their application.
 
-Backup Storage Providers only need to implement three APIs:
+These are the required APIs for a minimal Backup Storage Provider:
 
 `POST /backups`:
 Example response:
@@ -288,7 +290,6 @@ Instead of storing backups in a remotely hosted file and serving via HTTP, messa
 ##### XMTP Network Disadvantages
 
 - The XMTP network was not designed for storage of large files. The network currently has a 1mb per message limit, so backups would be divided across potentially hundreds of chunks.
-- We would want to handle expiration/deletion of these large backup files to reduce network storage needs
 - Costly as the network decentralizes and fees are added to the network. Given that alternative storage providers can be used in the current proposal, the benefits to decentralization are limited.
 
 I could get on board with this proposal if others felt strongly that we shouldn't create new infrastructure. While backups are a bit of an odd fit for the XMTP transport network, it would work in the short term and would be easier to bootstrap.
@@ -297,7 +298,7 @@ I could get on board with this proposal if others felt strongly that we shouldn'
 
 Following in the footsteps of Signal, message history synchronization could be achieved as a synchronous exchange of data between clients.
 
-A QR code displayed in the Message Backup Provider, could establish an encrypted channel with the Backup Requester. This model follows a flow similar to WalletConnect.
+A QR code displayed in the Message Backup Provider, could establish an encrypted channel with the Backup Requester. This model follows a flow similar to WalletConnect. Deep links would be used for app -> app transfers.
 
 Messages would be encrypted using either an [N](https://noiseexplorer.com/patterns/X/) or [X](https://noiseexplorer.com/patterns/X/) pattern Noise handshake, with the bootstrap information encoded in the QR for out-of-band transmission. This channel would be private and ephemeral, offering the best protection for backups.
 
@@ -308,8 +309,8 @@ Messages would be encrypted using either an [N](https://noiseexplorer.com/patter
 
 ##### QR Code Disadvantages
 
-- Forces the process to be synchronous.
-- All participating applications would have to be able to handle the QR code flow. This requires more complicated front-end designs that every application needs to implement, access to a camera, and would require a very different flow for server-side use-cases.
+- QR codes are most appropriate for cases where there isn't an authenticated and private communication channel between parties. That isn't the problem here. We already have a solution for authenticated and secure messaging between two installations as part of V3.
+- All participating applications would have to be able to handle the QR code flow. This requires more complicated front-end designs that every application needs to implement, as well as access to a camera in some cases. This could be enough to discourage developers from implementing their side of the flow.
 - Would require mobile application developers to handle XMTP deep links for app -> app transfer. This gets complicated when there are multiple potential applications as backup providers. The Backup Requester would need to be aware of all possible Backup Provider apps and the user would have to select the right one.
 - Would need to be rethought for webapp -> server transfer
 - Would need to be rethought for webapp -> webapp transfers where QR code scanning and deep-linking are not possible. Maybe something closer to oAuth.
@@ -320,7 +321,7 @@ This approach is similar to the Backup Account File, but the backup account woul
 
 ##### Trusted Service Advantages
 
-- Continuous real-time backup of all messages after the service is created. Backups would continue even if user's devices were lost or compromised.
+- Continuous real-time backup of all messages after the service is created. Backups would continue even if all of a user's devices were lost or compromised.
 - No need to involve any other applications in backup process. User would have complete control over where their backups were stored
 - Users could self-host trusted services
 
@@ -336,7 +337,7 @@ This approach is similar to the Backup Account File, but the backup account woul
 
 Given that V3 is brand new, there is no risk of backwards incompatible changes with the initial release of this feature.
 
-Caution should be taken in the design of the Message Backup File format to ensure that it is flexible and compatible with other potential changes. Any fields that may have changing data formats should be self-describing, and allow for versioning in the future.
+Caution should be taken in the design of the Message Backup File format to ensure that it is flexible and compatible with other potential changes. Any fields that may have changing data formats should be self-describing and versioned for backwards/forwards compatibility.
 
 ## Reference implementation
 
@@ -347,11 +348,11 @@ TODO
 ### Risks and drawbacks to Remote Message Backups
 
 - Developers of the Message Backup Provider could implement the consent flow in a way that confuses users into accepting backup requests from malicious applications. PIN verification may not be implemnted across all providers
-- Bac
+- Bugs in the validation of requests in Message Backup Providers would be very very bad. This would need to be very well tested code, since a compromise here would effectively be a 0-click exploit of someone's XMTP account.
 
 ### Risks and drawbacks to Backup Account Files
 
-- Because the account stored in a Backup Account File never sends messages, all messages sent to the account will be encrypted using a one time prekey with no ratcheting. A single ratchet step could happen each time a backup was created, although this would require the user to replace their Backup Acount File with a new one containing the current ratchet state
+- Because the account stored in a Backup Account File never sends messages, all messages sent to the account will be encrypted using a one time prekey with no ratcheting. A single ratchet step could happen each time a backup was created since the account is briefly online, although this would require the user to replace their Backup Acount File with a new one containing the current ratchet state.
 - Accounts in the Backup Account File will only be online during backup restoration. This means there are few opportunities to generate new one time prekeys. This may be mitigated by creating a very large number of one-time prekeys as part of creation.
 - This approach relies on the XMTP network allowing messages to remain in pre-delivery storage indefinitely. While that works today, in future iterations of the network this may be cost prohibitive.
 - Applications creating Backup Account Files would need to handle interacting with the device filesystem or cloud storage providers. For mobile applications this may require extra permissions.
