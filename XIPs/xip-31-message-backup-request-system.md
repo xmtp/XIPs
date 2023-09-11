@@ -443,7 +443,7 @@ TODO
 
 ### Risks and drawbacks to Remote Message Backups
 
-- Developers of the Message Backup Provider could implement the consent flow in a way that confuses users into accepting backup requests from malicious applications. PIN verification may not be implemnted across all providers
+- Developers of the Message Backup Provider could implement the consent flow in a way that confuses users into accepting backup requests from malicious applications. PIN verification may not be implemented across all providers
 - A malicious Message Backup Provider could choose to censor messages in the backup, or add spoofed messages, since the messages in the backup are unauthenticated.
 - Bugs in the validation of requests in Message Backup Providers would be very very bad. This would need to be very well tested code, since a compromise here would effectively be a 0-click exploit of someone's XMTP account.
 
