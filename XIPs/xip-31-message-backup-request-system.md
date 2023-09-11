@@ -59,11 +59,17 @@ For mobile applications already handling push notifications, `MessageHistoryBack
 4. Send the `MessageHistoryBackupRequest` messages to the normal inbound messaging topic for each installation
 5. Wait for a response from any of the Message Backup Providers
 6. For each `MessageHistoryBackupResponse`
+
    6a. Ensure there is a `MessageHistoryBackupRequest` with a matching `requestId` stored in the database. If not, ignore
+
    6b. Ensure the `backupUrl` is on the same host as the requested `backupStorageProviderUploadUrl`. If not, ignore
+
    6c. Download the file from the `backupUrl` and decrypt using the credentials provided in the `MessageHistoryBackupResponse`. If the hash of the downloaded file does not match the hash in the `MessageHistoryBackupResponse`, abort.
+
    6d. Load each message into the local database, ignoring any duplicate messages
+
    6e. Delete the `MessageHistoryBackupResponse` and all associated credentials
+
    6f. Set the status of the `MessageHistoryBackupRequest` to `Applied`
 
 #### Flow for Message Backup Providers
