@@ -15,7 +15,7 @@ A proposed system for transferring backups of message history between installati
 
 ## Motivation
 
-The [XMTP V3 Protocol Specification](https://github.com/xmtp/libxmtp) creates a new XMTP identity for each installation associated with a blockchain account, instead of sharing a single set of keys across all installations like V1/V2. New installations will receive all messages sent to a blockchain account after they are created, but V3 does _not_ specify how to receive messages sent before installation creation. Having conversation history sync between devices is a popular feature of V1 and V2 of the XMTP protocol and there is clear demand from developers for this to be possible as part of V3.
+The [XMTP V3 Protocol Specification](https://github.com/xmtp/libxmtp/blob/main/TECHNICAL_OVERVIEW.md) creates a new XMTP identity for each installation associated with a blockchain account, instead of sharing a single set of keys across all installations like V1/V2. New installations will receive all messages sent to a blockchain account after they are created, but V3 does _not_ specify how to receive messages sent before installation creation. Having conversation history sync between devices is a popular feature of V1 and V2 of the XMTP protocol and there is clear demand from developers for this to be possible as part of V3.
 
 There are a number of cases where message history synchronization is desirable:
 
