@@ -67,7 +67,7 @@ class M["Message Backup Provider"]{
 class S["Backup Storage Provider"]{
     A cloud service with durable storage
     Stores encrypted backups for a few days
-    Responsible for authenticating requests to reduce abuse potential
+    Responsible for authenticating requests to reduce abuse
 }
 ```
 
@@ -82,23 +82,22 @@ For mobile applications already handling push notifications, `MessageHistoryBack
 #### Flow for Backup Requesters
 
 1. Get a list of all other installations associated with their blockchain account. Ignore any installations that have been revoked
-2. Obtain a one-time upload URL from the Backup Storage Provider for each installation
-3. Generate a `MessageHistoryBackupRequest` for each installation (see below for Protobuf spec) and store in the local database
-4. Send the `MessageHistoryBackupRequest` messages to the normal inbound messaging topic for each installation
-5. Wait for a response from any of the Message Backup Providers
-6. For each `MessageHistoryBackupResponse`
+2. Generate a `MessageHistoryBackupRequest` for each installation (see below for Protobuf spec) and store in the local database
+3. Send the `MessageHistoryBackupRequest` messages to the normal inbound messaging topic for each installation
+4. Wait for a response from any of the Message Backup Providers
+5. For each `MessageHistoryBackupResponse`
 
-   6a. Ensure there is a `MessageHistoryBackupRequest` with a matching `requestId` stored in the database. If not, ignore
+   5a. Ensure there is a `MessageHistoryBackupRequest` with a matching `requestId` stored in the database. If not, ignore
 
-   6b. Ensure the `backupUrl` is on the same host as the requested `backupStorageProviderUploadUrl`. If not, ignore
+   5b. Ensure the `backupUrl` is on the same host as the requested `backupStorageProviderUploadUrl`. If not, ignore
 
-   6c. Download the file from the `backupUrl` and decrypt using the credentials provided in the `MessageHistoryBackupResponse`. If the hash of the downloaded file does not match the hash in the `MessageHistoryBackupResponse`, abort.
+   5c. Download the file from the `backupUrl` and decrypt using the credentials provided in the `MessageHistoryBackupResponse`. If the hash of the downloaded file does not match the hash in the `MessageHistoryBackupResponse`, abort.
 
-   6d. Load each message into the local database, ignoring any duplicate messages
+   5d. Load each message into the local database, ignoring any duplicate messages
 
-   6e. Delete the `MessageHistoryBackupResponse` and all associated credentials
+   5e. Delete the `MessageHistoryBackupResponse` and all associated credentials
 
-   6f. Set the status of the `MessageHistoryBackupRequest` to `Applied`
+   5f. Set the status of the `MessageHistoryBackupRequest` to `Applied`
 
 #### Flow for Message Backup Providers
 
@@ -119,8 +118,6 @@ sequenceDiagram
     Participant S as Backup Storage Provider
     Participant N as XMTP Network
     Participant M as Message Backup Provider
-    B->>S: Request a backup storage upload URL
-    S-->>B: Receive one time upload URL
     B->>N: Send a MessageHistoryBackupRequest to each potential Message Backup Provider
     M->>N: Check for MessageHistoryBackupRequest
     N-->>M: Receive MessageHistoryBackupRequest
@@ -166,20 +163,11 @@ This same web application could be used to create Backup Account Files for cases
 
 ### Backup Storage Provider
 
-A Backup Storage Provider is a simple HTTP service with three endpoints. Anyone can implement a Backup Storage Provider. It is up to the Backup Requester application to choose the Backup Service Provider for their application.
+A Backup Storage Provider is a simple HTTP service with two endpoints. Anyone can implement a Backup Storage Provider. It is up to the Backup Requester application to choose the Backup Service Provider for their application.
 
 These are the required APIs for a minimal Backup Storage Provider:
 
 `POST /backups`:
-Example response:
-
-```json
-{
-  "uploadUrl": "https://backupproviderdomain.com/backups/some-long-unguessable-upload-id"
-}
-```
-
-`POST /backups/$UPLOAD_ID`:
 Request body would contain the file as multipart/form-data.
 
 Example response:
@@ -459,7 +447,7 @@ TODO
 
 ### Risks and drawbacks to Backup Storage Providers
 
-- Offering free storage on the internet has potential for abuse. Requests to this service should be rate limited or otherwise protected against attack. If we were less concerned about abuse potential, we could remove the need for pre-generation of upload URLs, which would remove the need for the Backup Requester to contact the Backup Storage Provider before creating a `MessageHistoryBackupRequest`
+- Offering free storage on the internet has potential for abuse. Requests to this service should be rate limited or otherwise protected against attack.
 
 ## Copyright
 
