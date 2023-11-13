@@ -1,7 +1,7 @@
 ---
 xip: 
 title: Sender Identity Content Type
-description: Content type and processing guidlines for sender identity
+description: Content type and processing guidelines for sender identity
 author: Chris Boscolo
 status: Review
 type: Standards Track
@@ -17,7 +17,7 @@ This XRC proposes a new content type and a set of processing guidelines for send
 
 One concern for many users is that the current XMTP user experience is confusing due to inconsistent wallet display name rendering across different client apps. Since XMTP as a protocol cares about wallet address (as it should) and displaying the user name is performed by the client (as it should), it can lead to an inconsistent user experience as user interacts with different parts of the web3 ecosystem. Each app has its own method and priority for resolving the wallet address to a user name.
 
-This proposal seeks to solve this by creating a standard way for a user to communicate which web3 name and profile pic is prefered for a given conversation. It also describes how clients should verify the name and pfp specified by the peer is in fact owned by the peer wallet address.
+This proposal seeks to solve this by creating a standard way for a user to communicate which web3 name and profile pic is preferred for a given conversation. It also describes how clients should verify the name and pfp specified by the peer is in fact owned by the peer wallet address.
 
 ## Specification
 
@@ -51,7 +51,7 @@ The rationale behind using the Farcaster Canonical URI specification is to enabl
 
 ### Receiver - Client Processing Guidelines
 
-It is the responsibility of the client while parsing incoming messages to process the `sender-identiy` content type. The client is responsible for verifying that authenticity of the identity name and optional pfp sent by the peer. The clients SHOULD display the most recently received name and optional pfp. If no `sender-identity` content type has been sent by a peer, it SHOULD fallback to doing some form of reverse address lookup in order to determine the name of the peer.
+It is the responsibility of the client while parsing incoming messages to process the `sender-identity` content type. The client is responsible for verifying that authenticity of the identity name and optional pfp sent by the peer. The clients SHOULD display the most recently received name and optional pfp. If no `sender-identity` content type has been sent by a peer, it SHOULD fallback to doing some form of reverse address lookup in order to determine the name of the peer.
 
 #### Name
 
@@ -85,7 +85,7 @@ The pfpUri contains link to the user's profile pic. If it is an NFT using the `c
 
 ### Sender - Client Procesing guidlines
 
-- Clients SHOULD send the `sender-idenety` content in the first message sent to a peer.
+- Clients SHOULD send the `sender-identity` content in the first message sent to a peer.
 - Clients SHOULD send the `sender-identity` content any time the sending users updates their desired name or pfp.
 - Clients SHOULD NOT send the `sender-identity` content with every message.
 - Clients MAY send messages that only contain the `sender-identity`
@@ -93,13 +93,13 @@ The pfpUri contains link to the user's profile pic. If it is an NFT using the `c
 
 ### Which client sends identity info
 
-If a user uses multiple different clients, one question that needs to be addressed is which client should be responsible for updating the `sender-identity`. The most ideal way to handle this is for the `sender-identity` to be a user preference that is shared across all clients. There is currently no standard specified for shaered user preferences. Once a standard is established for sharing user preferences, clients should adopt this mechanism for agreeing on which `sender-identity` should be used. Until then, clients SHOULD only send `sender-identity` if the user explicitly changes the desired name/pfp except on the first message.
+If a user uses multiple different clients, one question that needs to be addressed is which client should be responsible for updating the `sender-identity`. The most ideal way to handle this is for the `sender-identity` to be a user preference that is shared across all clients. There is currently no standard specified for shared user preferences. Once a standard is established for sharing user preferences, clients should adopt this mechanism for agreeing on which `sender-identity` should be used. Until then, clients SHOULD only send `sender-identity` if the user explicitly changes the desired name/pfp except on the first message.
 
 ## Questions to resolve (these questions to be removed from the spec)
 
 - I chose to keep this spec as simple as possible and only included `name` and `pfpUri` in the identity content. Should it also include additional identity information, such as real names or other social media profiles?
 - For pfpUri, any objections to using the Farcaster Canonical URI spec?
-- For the name field, should we keep it a string and require clients to use a web3 name lookup mechanism based on the name, or would it be better to explicitly identify the web3 asset using the Farcaster Canonical URI spec or some other mechanims?
+- For the name field, should we keep it a string and require clients to use a web3 name lookup mechanism based on the name, or would it be better to explicitly identify the web3 asset using the Farcaster Canonical URI spec or some other mechanism?
 - Will this approach work in the context of Group Messaging?
 
 ## Backward compatibility
