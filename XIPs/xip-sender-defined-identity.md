@@ -32,7 +32,7 @@ Proposed content type:
 }
 ```
 
-The message MUST include the following parameters:
+The message MUST include the following parameters, although either paramater can be an empty string:
 
 ```ts
 {
@@ -42,7 +42,7 @@ The message MUST include the following parameters:
 ```
 
 ### Name
-A string that contains the user's Web3 name. 
+A string that contains the peer user's Web3 name. If present, it must be a valid Web3 name whose ownership can be verified onchain.
 
 ### pfpUri
 The pfpUri contains a URI that resolves to an image that should be used as the sender's pfp. This URI MUST conform to the [Farcaster Conanical URI specification](https://github.com/farcasterxyz/protocol/discussions/72).
@@ -51,7 +51,7 @@ The rationale behind using the Farcaster Canonical URI specification is to enabl
 
 ### Receiver - Client Processing Guidelines
 
-It is the responsibility of the client while parsing incoming messages to process the `sender-identiy` content type. The clients SHOULD display the most recently received name and/or pfp. If no `sender-identity` content type has been sent by a peer, it SHOULD fallback to doing some form of reverse address lookup in order to determine the name of the peer.
+It is the responsibility of the client while parsing incoming messages to process the `sender-identiy` content type. The client is responsible for verifying that authenticity of the identity name and optional pfp sent by the peer. The clients SHOULD display the most recently received name and optional pfp. If no `sender-identity` content type has been sent by a peer, it SHOULD fallback to doing some form of reverse address lookup in order to determine the name of the peer.
 
 #### Name
 
