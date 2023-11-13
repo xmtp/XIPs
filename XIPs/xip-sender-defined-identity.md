@@ -32,7 +32,7 @@ Proposed content type:
 }
 ```
 
-The message MUST include the following parameters, although either paramater can be an empty string:
+The message MUST include the following parameters, although either parameter can be an empty string:
 
 ```ts
 {
@@ -57,10 +57,10 @@ It is the responsibility of the client while parsing incoming messages to proces
 
 To determine the display name of a peer, clients SHOULD do the following.
 
-1. Parse the `name`` to determine what type of name it is. (ENS/UD/AVVY/other)
-1. Perform a forward lookup on this `name`` to determine the associated EVM Address. How this forward lookup is performed will depend on what type of name it is.
+1. Parse the `name` to determine what type of name it is. (ENS/UD/AVVY/other)
+1. Perform a forward lookup on this `name` to determine the associated EVM Address. How this forward lookup is performed will depend on what type of name it is.
 1. Verify that the EVM address returned by looking up the name matches the conversation `peerAddress`.
-   1. If the addresses match, the `name` is considered valid and the client SHOULD display the `name``
+   1. If the addresses match, the `name` is considered valid and the client SHOULD display the `name`
    1. If the addresses do not match, the client MUST not display the `name`, and MAY optionally inform the user to be suspicious of this conversation.
 
 Example ENS lookup using viem TS lib.
@@ -86,7 +86,7 @@ The pfpUri contains link to the user's profile pic. If it is an NFT using the `c
 ### Sender - Client Procesing guidlines
 
 - Clients SHOULD send the `sender-idenety` content in the first message sent to a peer.
-- Clients SHOULD sned the `sender-identity` content any time the sending users updates their desired name or pfp.
+- Clients SHOULD send the `sender-identity` content any time the sending users updates their desired name or pfp.
 - Clients SHOULD NOT send the `sender-identity` content with every message.
 - Clients MAY send messages that only contain the `sender-identity`
 - Clients with existing conversations when upgraded to support `sender-identity` MAY send a `sender-identity` on these existing conversations.
@@ -98,8 +98,8 @@ If a user uses multiple different clients, one question that needs to be address
 ## Questions to resolve (these questions to be removed from the spec)
 
 - I chose to keep this spec as simple as possible and only included `name` and `pfpUri` in the identity content. Should it also include additional identity information, such as real names or other social media profiles?
-- For pfpUri, any objections to using the Farcaster Coniical URI spec?
-- For the name field, should we keep it a string and require clients to use a web3 name lookup mechanism based on the name, or would it be better to explicitly identify the web3 asset using the Farcaster Conicial URI spec or some other mechanims?
+- For pfpUri, any objections to using the Farcaster Cononical URI spec?
+- For the name field, should we keep it a string and require clients to use a web3 name lookup mechanism based on the name, or would it be better to explicitly identify the web3 asset using the Farcaster Cononical URI spec or some other mechanims?
 - Will this approach work in the context of Group Messaging?
 
 ## Backward compatibility
@@ -113,7 +113,8 @@ Clients encountering messages of this type must already be able to deal with mes
 
 ## Security considerations
 
-TBD
+This approach relies on clients to correctly validate ownership of name and pfp when `chain:`and could lead to spoofing for clients that avoid these additional checks.
+
 
 ## Copyright
 
