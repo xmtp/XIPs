@@ -1,7 +1,7 @@
 ---
 xip: 
-title: Attachment Content Type
-description: Content type for basic attachments
+title: Sender Identity Content Type
+description: Content type and processing guidlines for sender identity
 author: Chris Boscolo
 status: Review
 type: Standards Track
