@@ -45,7 +45,7 @@ The message MUST include the following parameters, although either parameter can
 A string that contains the peer user's Web3 name. If present, it must be a valid Web3 name whose ownership can be verified onchain.
 
 ### pfpUri
-The pfpUri contains a URI that resolves to an image that should be used as the sender's pfp. This URI MUST conform to the [Farcaster Conanical URI specification](https://github.com/farcasterxyz/protocol/discussions/72).
+The pfpUri contains a URI that resolves to an image that should be used as the sender's pfp. This URI MUST conform to the [Farcaster Canonical URI specification](https://github.com/farcasterxyz/protocol/discussions/72).
 
 The rationale behind using the Farcaster Canonical URI specification is to enable clients to send NFTs from various chains as the pfp in addition to `https` URIs.
 
@@ -98,8 +98,8 @@ If a user uses multiple different clients, one question that needs to be address
 ## Questions to resolve (these questions to be removed from the spec)
 
 - I chose to keep this spec as simple as possible and only included `name` and `pfpUri` in the identity content. Should it also include additional identity information, such as real names or other social media profiles?
-- For pfpUri, any objections to using the Farcaster Cononical URI spec?
-- For the name field, should we keep it a string and require clients to use a web3 name lookup mechanism based on the name, or would it be better to explicitly identify the web3 asset using the Farcaster Cononical URI spec or some other mechanims?
+- For pfpUri, any objections to using the Farcaster Canonical URI spec?
+- For the name field, should we keep it a string and require clients to use a web3 name lookup mechanism based on the name, or would it be better to explicitly identify the web3 asset using the Farcaster Canonical URI spec or some other mechanims?
 - Will this approach work in the context of Group Messaging?
 
 ## Backward compatibility
