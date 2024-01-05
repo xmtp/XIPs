@@ -24,21 +24,23 @@ The reaction content type includes:
 - reference (string): The ID of the message being reacted to.
 - emoji (string): The emoji used in the reaction.
 - action (string): Indicates if the reaction is being 'added' or 'removed'.
-- schema (string): Categorizes the emoji as ‘unicode’, ‘custom’, ‘shortcode-cldr’, ‘shortcode-cldr-native’, ‘shortcode-discord’, ‘shortcode-emojibase’, ‘shortcode-emojibase-native’, ‘shortcode-emojibase-legacy’, ‘shortcode-github’, ‘shortcode-iamcal’, ‘shortcode-joypixels’, or ‘shortcode-slack’ (shortcode schemas have been pulled from this list: https://emojibase.dev/docs/shortcodes/)
+- schema (string): Categorizes the emoji as ‘unicode’, ‘custom’, ‘shortcode-cldr’, ‘shortcode-cldr-native’, ‘shortcode-discord’, ‘shortcode-emojibase’, ‘shortcode-emojibase-native’, ‘shortcode-emojibase-legacy’, ‘shortcode-github’, ‘shortcode-iamcal’, ‘shortcode-joypixels’, or ‘shortcode-slack’ (shortcode schemas have been pulled from [this list](https://emojibase.dev/docs/shortcodes/))
 
 Example code snippet:
 
+```
 // Reacting with a thumbs-up emoji
 const reaction: Reaction = {
-reference: originalMessage.id,
-emoji: "👍",
-action: "added",
-schema: "unicode"
+  reference: originalMessage.id,
+  emoji: "👍",
+  action: "added",
+  schema: "unicode"
 };
 
 await conversation.send(reaction, {
 contentType: ContentTypeReaction
 });
+```
 
 ## Rationale
 
@@ -54,7 +56,7 @@ Test cases will validate the interpretation of schema types, handling of action,
 
 ## Reference Implementation
 
-The reference implementation in the XMTP SDKs demonstrates the integration of the reaction content type. The full implementation can be accessed in the React playground here: https://github.com/xmtp/xmtp-react-playground/pull/1/, and we also have a reference implementation in xmtp.chat.
+The reference implementation in the XMTP SDKs demonstrates the integration of the reaction content type. The full implementation can be accessed in the React playground [here](https://github.com/xmtp/xmtp-react-playground/pull/1/), and we also have a reference implementation in xmtp.chat.
 
 ## Security Considerations
 
