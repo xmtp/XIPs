@@ -28,17 +28,17 @@ The reaction content type includes:
 
 Example code snippet:
 
-```
+```javascript
 // Reacting with a thumbs-up emoji
 const reaction: Reaction = {
   reference: originalMessage.id,
   emoji: "👍",
   action: "added",
-  schema: "unicode"
+  schema: "unicode",
 };
 
 await conversation.send(reaction, {
-contentType: ContentTypeReaction
+  contentType: ContentTypeReaction,
 });
 ```
 
