@@ -6,7 +6,7 @@ status: Living
 type: Process
 author: Matt Galligan (@mg0716), et al
 created: 2022-02-22
-updated: 2023-05-01
+updated: 2023-11-28
 ---
 
 ## What is an XIP?

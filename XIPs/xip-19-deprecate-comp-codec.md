@@ -35,7 +35,7 @@ Considering the confusion the content type introduces and the lack of adoption, 
 
 ## Backward Compatibility
 
-Once the Composite Codec has been deprecated, you can still use it by adding it to your project as a custom content type. 
+Once the Composite Codec has been deprecated, you can still use it by adding it to your project as a custom content type.
 
 However, we recommend that you check in with the [XMTP Community Forums](https://community.xmtp.org/c/development/ideas/54) first, as the developer community may have since developed a better custom content type or standard to handle your use case.
 
