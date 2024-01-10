@@ -1,9 +1,10 @@
 ---
+xip: 20
 title: Reactions content type
 description: This XIP draft describes a way to add reactions in clients that support XMTP.
-author: N/A
-discussions-to: https://community.xmtp.org/t/proposal-for-emoji-reactions-content-type/499
-status: Draft
+author: Matt Galligan (@galligan)
+discussions-to: https://community.xmtp.org/t/reactions-content-type/524
+status: Review
 type: Standards Track
 category: XRC
 created: 2024-01-05
