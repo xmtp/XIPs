@@ -3,8 +3,8 @@ xip: 19
 title: Deprecate the Composite Codec
 description: Proposal to deprecate the Composite Codec
 author: Naomi Plasterer (@nplasterer)
-discussions-to: Coming soon
-status: Draft
+discussions-to: https://community.xmtp.org/t/deprecate-the-composite-codec/525
+status: Review
 type: Standards Track
 category: XRC
 created: 2024-01-09
