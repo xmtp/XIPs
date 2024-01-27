@@ -4,7 +4,7 @@ title: Deprecate the Composite Codec
 description: Proposal to deprecate the Composite Codec
 author: Naomi Plasterer (@nplasterer)
 discussions-to: https://community.xmtp.org/t/deprecate-the-composite-codec/525
-status: Review
+status: Last Call
 type: Standards Track
 category: XRC
 created: 2024-01-09
