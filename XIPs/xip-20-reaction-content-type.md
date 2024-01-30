@@ -12,7 +12,7 @@ created: 2024-01-05
 
 ## Abstract
 
-This XIP introduces the reaction content type for XMTP clients, enabling users to react to messages with emojis. It defines an action field (values: 'added', 'removed') for reaction management, and a schema field (values: 'unicode', 'shortcode-\*', 'custom') for categorizing emoji types. This standardization aims to enhance communication efficiency and engagement across XMTP clients.
+This XIP introduces the reaction content type for XMTP clients, enabling users to react to messages with emojis. It defines an action field (values: 'added', 'removed') for reaction management, and a schema field (value: 'unicode') for categorizing emoji types. This standardization aims to enhance communication efficiency and engagement across XMTP clients.
 
 ## Motivation
 
@@ -25,7 +25,7 @@ The reaction content type includes:
 - reference (string): The ID of the message being reacted to.
 - emoji (string): The emoji used in the reaction.
 - action (string): Indicates if the reaction is being 'added' or 'removed'.
-- schema (string): Categorizes the emoji as ‘unicode’, ‘custom’, ‘shortcode-cldr’, ‘shortcode-cldr-native’, ‘shortcode-discord’, ‘shortcode-emojibase’, ‘shortcode-emojibase-native’, ‘shortcode-emojibase-legacy’, ‘shortcode-github’, ‘shortcode-iamcal’, ‘shortcode-joypixels’, or ‘shortcode-slack’ (shortcode schemas have been pulled from [this list](https://emojibase.dev/docs/shortcodes/))
+- schema (string): Categorizes the emoji as ‘unicode’.
 
 Example code snippet:
 
@@ -47,7 +47,7 @@ await conversation.send(reaction, {
 
 The action and schema fields provide necessary flexibility for reaction management. `action` addresses the dynamic nature of conversations, while `schema` ensures cross-client consistency. The choice of emoji as a reaction medium leverages its universal appeal and succinct expression capabilities.
 
-## Backwards Compatibility
+## Backward Compatibility
 
 To maintain backward compatibility, a contentFallback is stored in the codec as text — ensuring that the intent of reactions is conveyed even in non-supporting clients.
 
