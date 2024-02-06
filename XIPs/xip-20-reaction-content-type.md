@@ -1,10 +1,10 @@
 ---
 xip: 20
 title: Reactions content type
-description: This XIP draft describes a way to add reactions in clients that support XMTP.
+description: This XIP describes a way to add reactions in clients that support XMTP.
 author: Matt Galligan (@galligan)
 discussions-to: https://community.xmtp.org/t/reactions-content-type/524
-status: Review
+status: Last Call
 type: Standards Track
 category: XRC
 created: 2024-01-05
