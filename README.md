@@ -32,3 +32,5 @@ The goal of the XIP project is to document standardized protocols for XMTP clien
 | 15 | [Attachment content type](./XIPs/xip-15-attachment-content-type.md) | XRC | Review |
 | 17 | [Remote attachment content type](./XIPs/xip-17-remote-attachment-content-type-proposal.md) | XRC | Review |
 | 18 | [Add contentLength and filename to remote attachment content type](./XIPs/xip-18-adding-contentlength-filename-to-remote-attachments.md) | XRC | Draft |
+| 37 | [Universal 'block' and 'allow' preferences](./XIPs/xrc-37-universal-contact-permission-prefs.md)
+
