@@ -7,7 +7,7 @@
 | status             | Draft                                      |
 | type               | Standards Track                            |
 | category           | XRC                                        |
-| author             | Saul Carlin (@saulmc), Nick Molnar (@neekolas), Naomi Plasterer (@nplasterer), Ry Racherbaumer (@erygine) |
+| author             | Saul Carlin (@saulmc), Nick Molnar (@neekolas), Naomi Plasterer (@nplasterer), Ry Racherbaumer (@rygine) |
 | created            | 2024-02-14                                 |
 | updated            | 2024-02-14                                 |
 
