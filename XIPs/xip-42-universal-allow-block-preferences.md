@@ -1,9 +1,9 @@
-# XIP-37: Universal 'allow' and 'block' preferences
+# XIP-42: Universal 'allow' and 'block' preferences
 
-| xip                | 37                                         |
+| xip                | 42                                         |
 |--------------------|--------------------------------------------|
 | title              | Universal 'allow' and 'block' preferences  |
-| discussions-to     | <https://community.xmtp.org/t/xip-37-universal-allow-and-block-preferences/544> |
+| discussions-to     | <https://community.xmtp.org/t/xip-42-universal-allow-and-block-preferences/544> |
 | status             | Draft                                      |
 | type               | Standards Track                            |
 | category           | XRC                                        |
