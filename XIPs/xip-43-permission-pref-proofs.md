@@ -49,7 +49,7 @@ message PermissionPayload {
 
 The message that will be signed by the user's wallet will contain the sender's address and a timestamp. It must include a human-readable explanation, such as follows.
 
-```
+```text
 XMTP : Grant inbox permission to sender
 
 Current Time: <ISO 8601 date and time in UTC>
