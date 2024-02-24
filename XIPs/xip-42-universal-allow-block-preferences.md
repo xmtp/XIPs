@@ -1,15 +1,14 @@
-# XIP-42: Universal 'allow' and 'block' preferences
-
-| xip                | 42                                         |
-|--------------------|--------------------------------------------|
-| title              | Universal 'allow' and 'block' preferences  |
-| discussions-to     | <https://community.xmtp.org/t/xip-42-universal-allow-and-block-preferences/544> |
-| status             | Draft                                      |
-| type               | Standards Track                            |
-| category           | XRC                                        |
-| author             | Saul Carlin (@saulmc), Nick Molnar (@neekolas), Naomi Plasterer (@nplasterer), Ry Racherbaumer (@rygine) |
-| created            | 2024-02-14                                 |
-| updated            | 2024-02-14                                 |
+---
+xip: 42
+title: Universal 'allow' and 'block' preferences
+description:
+author: Saul Carlin (@saulmc), Nick Molnar (@neekolas), Naomi Plasterer (@nplasterer), Ry Racherbaumer (@rygine)
+discussions-to: <https://community.xmtp.org/t/xip-42-universal-allow-and-block-preferences/544>
+status: Draft
+type: Standards
+category: XRC
+created: 2024-02-14
+---
 
 ## Abstract
 
@@ -21,7 +20,7 @@ This XIP establishes 'allow' and 'block' permission preferences, enabling users 
 
 The ability to 'allow' or 'block' contacts is fundamental for safeguarding users' inboxes in messaging. 'Allow' promotes a conversation from a 'request' or 'invitations' UI component to a 'primary inbox' component, while 'Block' gives users the vital ability to remove spam and other unwanted content from their inbox.
 
-Because XMTP hasn't yet standardized a method for communicating these actions across the network, changing preferences in one app does not affect other inboxes. This results in inbox apps failing to remove unwanted conversations and properly display desired communications.
+Because XMTP hasn't yet standardized a method for communicating these actions across the network, changing preferences in one app does not affect other inboxes. This results in inbox apps failing to remove unwanted conversations and properly displaying desired communications.
 
 ## Specification
 
@@ -72,4 +71,4 @@ The `identifier` in the topic is derived from the private key using HKDF and SHA
 
 ## Copyright
 
-Copyright and related rights waived via CC0.
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
