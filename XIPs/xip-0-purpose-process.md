@@ -40,7 +40,7 @@ An XIP must meet certain minimum criteria. It must be a clear and complete descr
 
 ### Get started with an idea
 
-Before advancing your idea through the XIP process into the Draft stage, it’s crucial to gather feedback from the community. This will help you vet your idea and assess its originality, potentially saving you time and effort. Engaging with the XMTP community will also help you gauge overall interest in your idea.
+Before advancing your idea into the XIP process, it’s crucial to vet your idea first using an XMTP Discussion Forums topic.
 
 **To get started with your idea**:
 
@@ -50,29 +50,39 @@ Before advancing your idea through the XIP process into the Draft stage, it’s 
 
 1. Be sure to include the date by which you want people to provide feedback. A good standard is giving people ~2 weeks, including 2 weekends.
 
-1. Share your idea with the community to get feedback. For example, beyond posting to the XMTP Community Forums, you might want to share a link to your idea topic with your networks on other platforms.
+1. Share your idea topic with the community, including reviewers, interested parties, editors, and developers. You might also want to share your idea with your networks on other platforms.
+
+1. Request feedback that will enable you to gauge overall interest in your idea and assess its originality, potentially saving you time and effort.  
+
+   Additional vetting criteria may include reviewing reference implementations or assessing whether the idea is too specific for broad adoption within the XMTP ecosystem. It’s important to gauge whether the interest in your XIP is commensurate with the effort required to implement it and how many parties will need to conform to it. While the volume of interest by way of discussion is not an explicitly disqualifying characteristic, it may play a role in advancing beyond the idea stage.
 
 1. After you feel your idea has received enough feedback, you can create an XIP Draft for it, as described in the next section. A good standard for "enough feedback" is at least one comment from an XMTP community member and one from an *XMTP Core Developer* (currently the XMTP Labs team).
 
-### Shepherding an XIP
+### Shepherd an XIP
 
-Parties involved in the process are you, the champion or *XIP author*, the *XMTP community*, the [*XIP editors*](#xip-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
+After vetting the idea as described above, your next responsibility is to present it as a formal XIP Draft that you'll shepherd through the XIP process described here.
 
-Vetting your idea within a discussion is a critical part of the XIP process. We encourage sharing the discussion with reviewers, interested parties, editors, developers, and the community to gather feedback.
-
-Additional vetting criteria may include reviewing reference implementations or assessing whether the idea is too specific for broad adoption within the XMTP ecosystem. It’s important to gauge whether the interest in your XIP is commensurate with the effort required to implement it and how many parties will need to conform to it. While the volume of interest by way of discussion is not an explicitly disqualifying characteristic, it may play a role in advancing beyond the idea stage.
-
-After vetting the idea as described above, your next responsibility is to present the idea as a formal XIP Draft by opening a [Pull Request](https://github.com/xmtp/XIPs/pulls).  Following this step, the [XIP Editors](#xip-editors) will review the Draft and make recommendations on its advancement.
+Parties involved in the XIP process are you (the champion or *XIP author*), the *XMTP community*, the [*XIP Editors*](#xip-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
 
 ### XIP Process
 
-- **Idea** - An idea that is pre-draft. This is not tracked within the XIP Repository. To learn more, see [Get started with an idea](#get-started-with-an-idea).
-- **Draft** - The first formally tracked stage of an XIP in development. The idea author (now the XIP Author) creates the XIP Draft based on the guidelines and template discussed in the following sections. The XIP Draft is merged by an XIP Editor into the XIP repository when properly formatted.
-- **Review** - An XIP Author marks an XIP as ready for and requesting Peer Review.
-- **Last Call** - This is the final review window for an XIP before moving to `Final`. An XIP editor will assign `Last Call` status and set a review end date (`last-call-deadline`), typically 14 days later. If this period results in necessary normative changes it will revert the XIP to `Review`.
-- **Final** - This XIP represents the final standard. A Final XIP exists in a state of finality and should only be updated to correct errata and add non-normative clarifications.
+- **Idea**: An idea is pre-draft and is not tracked within the XIP Repository. To learn more, see [Get started with an idea](#get-started-with-an-idea).
+
+- **Draft**: The first formally tracked stage of an XIP. The XIP Author creates the XIP Draft using the [XIP template](../xip-template.md) and following the guidelines in the following sections. The XIP Author then opens a pull request in the **XIPs** directory in this repo and tags the [XIP Editors](#xip-editors) for review.  
+   When ready, an XIP Editor creates an XIP Draft forum topic that includes the XIP text and reassigns ownership of the topic to the XIP Author. The XIP Editor takes the topic URL and provides it as the `discussions-to` value. They also set the `status` to `Review`. The XIP Editor merges the XIP Draft when it is properly formatted. 
+
+- **Review**: The XIP Author may open PRs to edit XIP based on feedback provided. Once the XIP Author marks an XIP as ready for and requesting Peer Review.
+
+- **Last Call**: This is the final review window for an XIP before moving to `Final`. An XIP editor will assign `Last Call` status and set a review end date (`last-call-deadline`), typically 14 days later. If this period results in necessary normative changes it will revert the XIP to `Review`.
+
+- **Final**: This XIP represents the final standard. A Final XIP exists in a state of finality and should only be updated to correct errata and add non-normative clarifications.
+
+Other exceptional statuses include:
+
 - **Stagnant** - Any XIP in `Draft` or `Review` or `Last Call` if inactive for a period of 6 months or greater is moved to `Stagnant`. An XIP may be resurrected from this state by Authors or XIP Editors through moving it back to `Draft` or its earlier status. If not resurrected, a proposal may stay forever in this status.
+
 - **Withdrawn** - The XIP Author(s) have withdrawn the proposed XIP. This state has finality and can no longer be resurrected using this XIP number. If the idea is pursued at a later date it is considered a new proposal.
+
 - **Living** - A special status for XIPs that are designed to be continually updated and not reach a state of finality. This includes most notably XIP-0.
 
 ## What belongs in a successful XIP?
@@ -186,6 +196,7 @@ If you are interested in assuming ownership of an XIP, send a message asking to 
 
 The current XIP editors are:
 
+- Jennifer Hasegawa (@jhaaaa)
 - Matt Galligan (@galligan)
 - Saul Carlin (@saulmc)
 - Steven Normore (@snormore)
