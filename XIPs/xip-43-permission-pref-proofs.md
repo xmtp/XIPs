@@ -17,7 +17,7 @@ This XIP proposes to add an _optional_ signed payload to conversations that clie
 
 Today, a recipient must use a full XMTP client to set a universal permission preference such as allowing a sender. This presents challenges to senders due to the XMTP client's bundle size and integration requirements. For integrations such as simple subscribe buttons, these hurdles can be blockers.
 
-To solve these issues, senders can simply ask users to produce a signature attesting to the permission preference update. Inbox apps can consider this signature as proof that the recipient has explicitly opted in to receive the sender's messages. This eliminates the bundle size problem, as very little code is required to initiate signing a message with a user's wallet. It also greatly simplifies integration by providing a single function to return a signed message.
+To solve these issues, senders can simply ask users to produce a signature attesting to the permission preference update. Inbox apps can consider this signature as proof that the recipient has explicitly opted in to receive the sender's messages. This eliminates the bundle size problem, as very little code is required to initiate signing a message with a user's wallet. It also greatly simplifies integration by providing a single function to obtain the user’s signature and return an encoded payload to be used by SDKs to verify the granted permission.
 
 ## Specification
 
@@ -80,7 +80,7 @@ Once the permission payload is verified and validated, the SDKs will then update
 
 ## Backward Compatibility
 
-The permission signature is an _optional_ parameter when starting a new conversation. Existing conversations will not be affected, and client apps using outdated SDKs will continue to work without updates.
+The encoded permission payload is an _optional_ parameter when starting a new conversation. Existing conversations will not be affected, and client apps using outdated SDKs will continue to work without updates.
 
 ## Security Considerations
 
