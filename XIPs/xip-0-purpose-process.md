@@ -69,7 +69,7 @@ Parties involved in the XIP process are you (the champion or *XIP author*), the 
 - **Idea**: An idea is pre-draft and is not tracked within the XIP Repository. To learn more, see [Get started with an idea](#get-started-with-an-idea).
 
 - **Draft**: The first formally tracked stage of an XIP. The XIP Author creates the XIP Draft using the [XIP template](../xip-template.md) and following the guidelines in the following sections. The XIP Author then opens a pull request in the **XIPs** directory in this repo and tags the [XIP Editors](#xip-editors) for review.  
-   When ready, an XIP Editor creates an XIP Draft forum topic that includes the XIP text and reassigns ownership of the topic to the XIP Author. The XIP Editor takes the topic URL and provides it as the `discussions-to` value. They also set the `status` to `Review`. The XIP Editor merges the XIP Draft when it is properly formatted. 
+   When ready, an XIP Editor creates an XIP Draft forum topic that includes the XIP text and reassigns ownership of the topic to the XIP Author. The XIP Editor takes the topic URL and provides it as the `discussions-to` value. The XIP Editor merges the XIP Draft when it is properly formatted. The XIP Author works on the XIP Draft with the community until it is 
 
 - **Review**: The XIP Author may open PRs to edit XIP based on feedback provided. Once the XIP Author marks an XIP as ready for and requesting Peer Review.
 
@@ -77,7 +77,7 @@ Parties involved in the XIP process are you (the champion or *XIP author*), the 
 
 - **Final**: This XIP represents the final standard. A Final XIP exists in a state of finality and should only be updated to correct errata and add non-normative clarifications.
 
-Other exceptional statuses include:
+Special statuses:
 
 - **Stagnant** - Any XIP in `Draft` or `Review` or `Last Call` if inactive for a period of 6 months or greater is moved to `Stagnant`. An XIP may be resurrected from this state by Authors or XIP Editors through moving it back to `Draft` or its earlier status. If not resurrected, a proposal may stay forever in this status.
 
