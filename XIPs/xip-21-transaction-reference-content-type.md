@@ -3,7 +3,7 @@ title: On-chain transaction reference content type
 description: Provides an on-chain transaction hash or ID sent as a message.
 author: @rygine (Ry Racherbaumer), @lourou (Louis Rouffineau), @nmalzieu (Noé Malzieu), @galligan (Matt Galligan), @nakajima (Pat Nakajima), @yash-luna (Yash Lunagaria)
 discussions-to: https://community.xmtp.org/t/xip-21-on-chain-transaction-reference-content-type/532
-status: Review
+status: Last Call
 type: Standards Track
 category: XRC
 created: 2024-01-26
