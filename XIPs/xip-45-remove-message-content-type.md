@@ -103,7 +103,7 @@ From Babak: I assume that [previous discussions](https://github.com/orgs/xmtp/di
 
 ## Security considerations
 
-No security concerns in a soft delete world. This only becomes a topic when we discuss hard deletes.
+No security concerns in a remove message, or soft delete, world. This only becomes a topic when we discuss hard deletes.
 
 ## Copyright
 
