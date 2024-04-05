@@ -40,7 +40,7 @@ Here is the proposed XMTP content type for remove message functionality:
 ```json
 {
   authorityId: "xmtp.org"
-  typeId: "delete"
+  typeId: "remove"
   versionMajor: 0
   versionMinor: 1
 }
