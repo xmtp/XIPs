@@ -71,7 +71,7 @@ It takes this approach because a "delete message" or "hard delete" approach woul
 
 ### Why impose a 24-hour time limit?
 
-This XIP proposes a 24-hour time limit based on providing Signal parity.
+This XIP proposes a 24-hour time limit for message removal based on the timing provided by Signal for message deletion.
 
 - With Signal, a sender has 24 hours after sending to delete a message for everyone.
 
