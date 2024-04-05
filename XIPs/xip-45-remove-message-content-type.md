@@ -50,7 +50,7 @@ The encoded content MUST have the following parameters:
 
 ```json
 {
-  // The message ID for the message being deleted
+  // The message ID for the message being removed
   referencing_message_id: string,
 }
 ```
