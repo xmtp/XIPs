@@ -3,7 +3,7 @@ title: Permission preference proofs
 description: Enables recipients to sign to specify inbox permission preferences
 author: Ry Racherbaumer (@rygine), Nick Molnar (@neekolas), Saul Carlin (@saulmc)
 discussions-to: https://community.xmtp.org/t/xip-43-permission-preference-proofs/552
-status: Review
+status: Draft
 type: Standards
 category: Interface
 created: 2024-02-22
