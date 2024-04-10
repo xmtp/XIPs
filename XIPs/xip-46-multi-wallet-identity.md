@@ -377,7 +377,7 @@ Both nodes and clients must apply the following algorithm during validation:
 
 #### Identity action processing rules
 
-##### CreateInbox
+##### CreateInbox (identity action processing rule)
 
 - CreateInbox actions must be the first Identity Action in the first Identity Update for an Inbox ID
 - The `inbox_id` is derived via `SHA256(CONCAT($account_address, $nonce))`
@@ -407,7 +407,7 @@ Both nodes and clients must apply the following algorithm during validation:
 - Remove the `revoked_member` from the Association State’s member list
 - Remove any members in the Association State’s member list which are both: of type installation AND have their `added_by_member` field set to the `revoked_member`
 
-##### ChangeRecoveryAddress
+##### ChangeRecoveryAddress (identity action processing rule)
 
 - A CreateInbox action must have been applied before any ChangeRecoveryAddress actions may be applied
 - The `existing_recovery_address_signature` must not be present in the Association State’s `seen_signatures` HashSet
