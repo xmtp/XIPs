@@ -50,19 +50,19 @@ message MemberIdentifier {
 
 The user may perform identity updates, such as adding or removing wallets and installations to an Inbox ID, which are signed by these keys. When a member is associated with an Inbox ID, it is assigned a role. The permissions granted to each role are defined as follows.
 
-| Permission | Associated address | Installation key | Recovery address |
-| --- | --- | --- | --- |
-| Is typically a wallet | Yes | No | Yes |
-| Addressable for incoming messages | Yes | No | No |
-| Can be used to authenticate on new apps | Yes | No | No |
-| Used by the app to sign messages | No | Yes | No |
-| Can add more associated addresses | Yes | Yes | Yes |
-| Can add more installation keys | Yes | No | Yes |
-| Can revoke other associated addresses and installation keys | No | No | Yes |
-| Can revoke self | Yes | Yes | No |
-| Can change the recovery address | No | No | Yes |
-| Can be revoked | Yes | Yes | No |
-| Is automatically revoked when its parent is revoked | No | Yes | No |
+| Permission                                                  | Associated address | Installation key | Recovery address |
+| ----------------------------------------------------------- | ------------------ | ---------------- | ---------------- |
+| Is typically a wallet                                       | Yes                | No               | Yes              |
+| Addressable for incoming messages                           | Yes                | No               | No               |
+| Can be used to authenticate on new apps                     | Yes                | No               | No               |
+| Used by the app to sign messages                            | No                 | Yes              | No               |
+| Can add more associated addresses                           | Yes                | Yes              | Yes              |
+| Can add more installation keys                              | Yes                | No               | Yes              |
+| Can revoke other associated addresses and installation keys | No                 | No               | Yes              |
+| Can revoke self                                             | Yes                | Yes              | No               |
+| Can change the recovery address                             | No                 | No               | Yes              |
+| Can be revoked                                              | Yes                | Yes              | No               |
+| Is automatically revoked when its parent is revoked         | No                 | Yes              | No               |
 
 In short, all roles are able to associate additional members, which provides similar privileges to their existing privileges, but only the recovery address may remove members, which is needed to recover from compromise.
 
@@ -148,7 +148,7 @@ Identity updates follow a deterministic algorithm to construct a ‘signing text
 XMTP : Authenticate to inbox
 
 Inbox ID: ${INBOX_ID}
-Current time: ${iso8601_utc(client_timestamp_ns)}
+Current time: ${YYYY-MM-DD HH:MM:SS UTC}
 
 ```
 
@@ -240,7 +240,7 @@ message Erc1271Signature {
 
 // An existing address on xmtpv2 may have already signed a legacy identity key
 // of type SignedPublicKey via the 'Create Identity' signature.
-// For migration to xmtpv3, the legacy key is permitted to sign on behalf of the 
+// For migration to xmtpv3, the legacy key is permitted to sign on behalf of the
 // address to create a matching xmtpv3 installation key.
 // This signature type can ONLY be used for CreateInbox and AddAssociation
 // payloads, and can only be used once in xmtpv3.
@@ -333,7 +333,7 @@ message GetIdentityUpdatesResponse {
 
 The address log is also an append-only, strictly-ordered log. The server is expected to append to the address log only if validation succeeded on the affected inbox log.
 
-However, clients only ever need to know the latest Inbox ID that an address was associated with (modeled in the API description below). Clients do not need to validate the address log, other than validating the inbox log that the latest inbox ID that the address points to.
+However, clients only ever need to know the latest Inbox ID that an address was associated with (modeled in the API description below). Clients do not need to validate the address log, other than validating the inbox log of the latest inbox ID that the address points to.
 
 ```protobuf
 // Request to retrieve the InboxIDs for the given addresses
@@ -417,10 +417,10 @@ Both nodes and clients must apply the following algorithm during validation:
 
 #### Allowed Associations
 
-| Existing member type | New member type |
-| --- | --- |
-| Wallet | Installation OR Wallet |
-| Installation | Wallet |
+| Existing member type | New member type        |
+| -------------------- | ---------------------- |
+| Wallet               | Installation OR Wallet |
+| Installation         | Wallet                 |
 
 #### Synchronizing MLS State With Inbox State
 
@@ -458,11 +458,11 @@ The `UpdateGroupMembership` proposal contains a new `GroupMembership` object. To
 For each item in the new mapping:
 
 1. Check to see if the `inbox_id` is already present in the current mapping
-    1. If present, the new `sequence_id` must be greater than or equal to the current value
-    2. If not present, the creator of the commit must have permission to add new members to the group
+   1. If present, the new `sequence_id` must be greater than or equal to the current value
+   2. If not present, the creator of the commit must have permission to add new members to the group
 2. If the `sequence_id` is higher than the newest record in the client’s local cache of Identity Updates for that `inbox_id`, go to the network and request all updates newer than the newest record
-    1. If a record matching the `sequence_id` is not found, retry for up to 1 minute until a matching record is found
-    2. If no matching record is found after 1 minute, the commit has failed validation and must be aborted
+   1. If a record matching the `sequence_id` is not found, retry for up to 1 minute until a matching record is found
+   2. If no matching record is found after 1 minute, the commit has failed validation and must be aborted
 
 For each item in the current mapping:
 
@@ -480,7 +480,7 @@ To validate the commit, each member must take the list of added and removed `inb
 For each inbox that has been added or modified:
 
 1. Generate the Association State for the inbox ID at its previous state by replaying all updates up to the old `sequence_id`. This may be cached by the client.
-    1. If the previous `sequence_id` is 0, because the Inbox is newly added, skip this step
+   1. If the previous `sequence_id` is 0, because the Inbox is newly added, skip this step
 2. Process all Identity Updates between the old `sequence_id` and the new `sequence_id` and compute the final Association State, computing a list of installations that were added and removed between the two states
 3. Verify that the list of proposals matches the expected output from step 2. If any additions or removals are missing, or if there are any additional members added, the commit must fail validation and be aborted
 
@@ -500,7 +500,7 @@ In XMTP v2, users were requested for a ‘Create Identity’ wallet signature us
 ```protobuf
 // An existing address on xmtpv2 may have already signed a legacy identity key
 // of type SignedPublicKey via the 'Create Identity' signature.
-// For migration to xmtpv3, the legacy key is permitted to sign on behalf of the 
+// For migration to xmtpv3, the legacy key is permitted to sign on behalf of the
 // address to create a matching xmtpv3 installation key.
 // This signature type can ONLY be used for CreateInbox and AddAssociation
 // payloads, and can only be used once in xmtpv3.
@@ -514,7 +514,7 @@ The rules for processing this signature are as follows:
 
 1. The recovered address of the ‘Create Identity’ signature in the `delegated_key` is the address that this action is being performed on behalf of.
 2. The ‘Create Identity’ signature of the `delegated_key` is implicitly treated as a `CreateInbox` action, with a nonce of 0.
-    1. During server-side validation, if the address is already associated with an Inbox ID (has pre-existing [Address Log](https://www.notion.so/Multi-Wallet-Identity-XIP-ba30e6ddb30c45acb2dc4ff9eccae7ee?pvs=21) entries), the whole `IdentityUpdate` is invalid.
+   1. During server-side validation, if the address is already associated with an Inbox ID (has pre-existing [Address Log](https://www.notion.so/Multi-Wallet-Identity-XIP-ba30e6ddb30c45acb2dc4ff9eccae7ee?pvs=21) entries), the whole `IdentityUpdate` is invalid.
 3. The `delegated_key` may be used to perform a single `AddAssociation` action for a new installation key.
 
 This delegated signing action may only be performed in one `InboxUpdate`. This is enforced via the `seen_signatures` HashSet described in previous sections.
