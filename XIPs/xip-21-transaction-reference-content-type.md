@@ -3,7 +3,7 @@ title: On-chain transaction reference content type
 description: Provides an on-chain transaction hash or ID sent as a message.
 author: @rygine (Ry Racherbaumer), @lourou (Louis Rouffineau), @nmalzieu (Noé Malzieu), @galligan (Matt Galligan), @nakajima (Pat Nakajima), @yash-luna (Yash Lunagaria)
 discussions-to: https://community.xmtp.org/t/xip-21-on-chain-transaction-reference-content-type/532
-status: Draft
+status: Review
 type: Standards Track
 category: XRC
 created: 2024-01-26
@@ -35,9 +35,9 @@ The goal of the transaction reference content type is to provide transaction det
 ```ts
 type TransactionReference = {
   /**
-   * The namespace for the networkId
+   * The CAIP-2 chain ID where the transaction happened in the format `<namespace>:<reference>`
    */
-  namespace?: string;
+  chainId?: string;
   /**
    * The networkId for the transaction, in decimal or hexidecimal format
    */
@@ -45,7 +45,7 @@ type TransactionReference = {
   /**
    * The transaction hash
    */
-  reference: string;
+  transactionHash: string;
   /**
    * Optional metadata object
    */
@@ -62,7 +62,7 @@ type TransactionReference = {
 
 ## Rationale
 
-The `networkId` provides details of the network used for the transaction, while the `reference` field contains the hash of the transaction on the network. These two fields should be enough to display a basic reference to the transaction. An optional `namespace` field can be used for a more human-readable description of the network.
+The `chainId` provides details of the network used for the transaction in [CAIP-2 format](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md), while the `transactionHash` field contains the hash of the transaction on the network. These two fields should be enough to display a basic reference to the transaction. An optional `namespace` field can be used for a more human-readable description of the network.
 
 In addition, optional `metadata` can be added to provide more details and a richer display of the transaction.
 
