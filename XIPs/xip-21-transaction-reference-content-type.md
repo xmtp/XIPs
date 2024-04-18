@@ -39,10 +39,6 @@ type TransactionReference = {
    */
   chainId?: string;
   /**
-   * The networkId for the transaction, in decimal or hexidecimal format
-   */
-  networkId: number | string;
-  /**
    * The transaction hash
    */
   transactionHash: string;
