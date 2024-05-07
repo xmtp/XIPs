@@ -18,7 +18,8 @@ For many compelling group chat use cases—such as those with open invitations, 
 
 ### Background
 
-The XMTP Group chat implementation utilizes the Messaging Layer Security Protocol( or **MLS)** described in [IETF RFC 9420](https://www.rfc-editor.org/rfc/rfc9420.html). The MLS standard includes a `Group Context` object that represents the shared configuration between all members of the group, and contains flexibility for defining custom `UnknownExtensions` that contain arbitrary byte data. 
+The XMTP Group chat implementation utilizes the Messaging Layer Security Protocol( or **MLS)** described in
+[IETF RFC 9420](https://www.rfc-editor.org/rfc/rfc9420.html). The MLS standard includes a `Group Context` object that represents the shared configuration between all members of the group, and contains flexibility for defining custom `UnknownExtensions` that contain arbitrary byte data. 
 
 By utilizing MLS Group Context Extensions to store our “Permissions” configuration data, we can ensure that all group members agree on the current state of the permissions parameters of the group, that the settings remain encrypted and unreadable to any non members, and that no one outside the group will have the ability to affect the permissions configuration.
 
@@ -50,7 +51,7 @@ We also propose to add the following new **Permission Options**:
 
 To enable the two new permission options the following will be added to Mutable metadata Protobuf definitions:
 
-```
+```proto
 message GroupMutableMetadataV1 {
 ...
   AccountAddresses admin_list = 2;
@@ -66,8 +67,8 @@ message AccountAddresses {
 
 The above Permission options will enable use cases like the following:
 
-1. **Admins can update permissions** -- The group starts out small with open permissions and then adds restrictions over time as they pass a few dozen users so that only admins can remove users or update the group name and project URL. 
-2. **Group creator can add another admin** -- The leader of an online project starts a group chat with themselves as the super admin who can add and remove admins and update group information etc. There is no fear that admins take over the group because they are still the only super admin. After some time, they would like to move on from the project, so they can add someone else to be a super admin. 
+1. **Admins can update permissions** -- The group starts out small with open permissions and then adds restrictions over time as they pass a few dozen users so that only admins can remove users or update the group name and project URL.
+2. **Group creator can add another admin** -- The leader of an online project starts a group chat with themselves as the super admin who can add and remove admins and update group information etc. There is no fear that admins take over the group because they are still the only super admin. After some time, they would like to move on from the project, so they can add someone else to be a super admin.
 3. **Admins can update permissions when new functionality is available** -- 6 months from now XMTP adds new group functions like mute members. There is an update path so that existing groups can get these new features without losing the existing group history.
 
 **Sensible Default Options** - In order to allow flexibility of permissions without making it too confusing for developers and users, the approach will be to have only a few default permission sets that cover most use cases that can easily be passed in as a parameter on group creation. For developers who want to fine tune individual permission options for different group actions, we will allow those developers to construct their own initial permission set on group creation. In both cases permissions sets can be updated over time, following the `update_permissions_policy`. Example default policies include:
@@ -92,7 +93,7 @@ In addition to adding the new Permission Policies, the new Permission Options, a
 
 ## Reference implementation
 
-An example of the updates required for protobuf objects can be seen in the PR here: https://github.com/xmtp/proto/pull/175
+An example of the updates required for protobuf objects can be seen in this [PR in the XMTP proto GitHub repo](https://github.com/xmtp/proto/pull/175).
 
 ```solidity
 // Message for group mutable permissions
