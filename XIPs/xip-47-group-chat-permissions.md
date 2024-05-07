@@ -19,7 +19,7 @@ For many compelling group chat use cases—such as those with open invitations, 
 ### Background
 
 The XMTP Group chat implementation utilizes the Messaging Layer Security Protocol( or **MLS)** described in
-[IETF RFC 9420](https://www.rfc-editor.org/rfc/rfc9420.html). The MLS standard includes a `Group Context` object that represents the shared configuration between all members of the group, and contains flexibility for defining custom `UnknownExtensions` that contain arbitrary byte data. 
+[IETF RFC 9420](https://www.rfc-editor.org/rfc/rfc9420.html). The MLS standard includes a `Group Context` object that represents the shared configuration between all members of the group, and contains flexibility for defining custom `UnknownExtensions` that contain arbitrary byte data.
 
 By utilizing MLS Group Context Extensions to store our “Permissions” configuration data, we can ensure that all group members agree on the current state of the permissions parameters of the group, that the settings remain encrypted and unreadable to any non members, and that no one outside the group will have the ability to affect the permissions configuration.
 
@@ -40,14 +40,14 @@ Each of those policies can have one of the following **Permission Options**:
 
 This XIP is proposing to add the following new **Permission Policies**:
 
-4. `add_admin_policy`
-5. `remove_admin_policy`
-6. `update_permissions_policy`
+1. `add_admin_policy`
+2. `remove_admin_policy`
+3. `update_permissions_policy`
 
 We also propose to add the following new **Permission Options**:
 
-5. `ALLOW_IF_ADMIN_OR_SUPER_ADMIN`
-6. `ALLOW_IF_SUPER_ADMIN`
+1. `ALLOW_IF_ADMIN_OR_SUPER_ADMIN`
+2. `ALLOW_IF_SUPER_ADMIN`
 
 To enable the two new permission options the following will be added to Mutable metadata Protobuf definitions:
 
@@ -80,7 +80,7 @@ The above Permission options will enable use cases like the following:
 
 The need for admin functionality in groups of larger size is self evident for anyone who’s ever used discord, telegram, or tried to maintain usefulness of any group with a size over a few dozen people.
 
-One implementation detail we considered is whether permissions could function on a two tier system of members and admins, or if we needed a three tiered system of members, admins, and super admins. At this point, contributors agree the three-tier system is necessary because of the case when a creator wants to delegate some responsibilities(`remove_member`, `update_metadata`) to be “admin only”, and they might not want to immediately risk other admins removing them as an admin. In other words, the three-tier system allows a happy medium of delegatable admin responsibilities without risking group takeover. 
+One implementation detail we considered is whether permissions could function on a two tier system of members and admins, or if we needed a three tiered system of members, admins, and super admins. At this point, contributors agree the three-tier system is necessary because of the case when a creator wants to delegate some responsibilities(`remove_member`, `update_metadata`) to be “admin only”, and they might not want to immediately risk other admins removing them as an admin. In other words, the three-tier system allows a happy medium of delegatable admin responsibilities without risking group takeover.
 
 Another consideration that was made was whether it is worth the extra complexity to make permissions upgradable. The choice to allow permissions to be updated, as long as the member updating qualifies against the `update_permissions_policy` seems necessary because of the use case of accidental initial group permission misconfiguration, as well as a group’s trust dynamic evolving over time which also seems like a valid use case to consider. Just because an online project chat starts as a small group of all well-intentioned contributors does not mean that the group can not evolve to have a larger variety of member trustworthiness and contributor type over time.
 
