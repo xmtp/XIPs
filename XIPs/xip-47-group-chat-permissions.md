@@ -12,7 +12,7 @@ created: 2024-05-07
 
 ## Abstract
 
-For many compelling group chat use cases—such as those with open invitations, semi-anonymous identities, or a large number of members—a permission system becomes critical for the chat to function effectively. This XIP aims to provide application developers with the tools to implement trustworthy permission features without excessive complexity, while still retaining flexibility. 
+For many compelling group chat use cases—such as those with open invitations, semi-anonymous identities, or a large number of members—a permission system becomes critical for the chat to function effectively. This XIP aims to provide application developers with the tools to implement trustworthy permission features without excessive complexity, while still retaining flexibility.
 
 The following proposal describes how XMTP can use MLS Group Context Extensions to configure which users in a chat are allowed to perform actions like adding or removing group members, as well as who is allowed to modify those permissions over time.
 
@@ -88,13 +88,13 @@ For developers who want to fine-tune individual permission options for different
 
 ## Rationale
 
-For anyone who has ever used Discord, Telegram, or tried to maintain the usefulness of a group chat with over a few dozen people, the need for admin functionality in larger-sized groups is self-evident. 
+For anyone who has ever used Discord, Telegram, or tried to maintain the usefulness of a group chat with over a few dozen people, the need for admin functionality in larger-sized groups is self-evident.
 
-One implementation detail we considered is whether permissions could function on a two-tier system of members and admins or if we needed a three-tiered system of members, admins, and super admins. 
+One implementation detail we considered is whether permissions could function on a two-tier system of members and admins or if we needed a three-tiered system of members, admins, and super admins.
 
 At this point, contributors agree the three-tier system is necessary based on the use case in which a group creator wants to delegate some responsibilities (`remove_member`, `update_metadata`) to be "admin only," and they don't want to immediately risk other admins removing them as an admin. In other words, the three-tier system allows a happy medium of delegatable admin responsibilities without risking group takeover.
 
-Another consideration was whether the extra complexity is worth making permissions updateable. The choice to allow permissions to be updated, as long as the member performing the update qualifies against the `update_permissions_policy`, seems necessary. 
+Another consideration was whether the extra complexity is worth making permissions updateable. The choice to allow permissions to be updated, as long as the member performing the update qualifies against the `update_permissions_policy`, seems necessary.
 
 The ability to update permissions is needed to address the use cases of initial group permission misconfiguration and the inevitable evolution of a group’s trust dynamic. For example, just because an online project group chat starts as a small group of well-intentioned contributors does not mean that the group may not evolve to have a larger variety of member trustworthiness and contributor types over time.
 
