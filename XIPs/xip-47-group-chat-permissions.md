@@ -106,7 +106,7 @@ In addition to adding the new **Permission Policies** and **Permission Options**
 
 - Deprecation and update of the Permissions or Metadata Extensions in an existing group's Group Context
 
-- Existing groups will not be able to include an entirely new Permissions or Metadata Extension until all group members update to a new version of libxmtp and perform a "leaf node update" commit they updated their "supported capabilities."  
+- Existing groups will not be able to include an entirely new Permissions or Metadata Extension until all group members update to a new version of libxmtp and perform a "leaf node update commit" that updates their "supported capabilities."  
 
   One way this could work for existing groups would be to have a generous grace period, such as a few weeks or months, after which an admin could remove any group member who has not upgraded. We could then update the group to enable new permission / metadata extensions. The hope is that we might never need to perform this type of update or that it will be rare and even less frequent as time passes. For more information, see [MLS RFC - Required Capabilities](https://www.rfc-editor.org/rfc/rfc9420.html#name-required-capabilities).
 
