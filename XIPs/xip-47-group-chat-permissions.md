@@ -104,7 +104,7 @@ In addition to adding the new **Permission Policies** and **Permission Options**
 
 - `libxmtp` can be updated so existing groups can add new **Permission Policies** via the proto `map<string, MetadataPolicy> update_metadata_policy`. This means that if later on we want to add a new Permission Policy to groups, such as "The Ability to Mute Group Members," we can add it without breaking any existing groups.
 
-- Deprecation and upgrade of the Permissions or Metadata Extensions in an existing group's Group Context
+- Deprecation and update of the Permissions or Metadata Extensions in an existing group's Group Context
 
 - Existing groups will not be able to include an entirely new Permissions or Metadata Extension until all group members update to a new version of libxmtp and perform a "leaf node update" commit they updated their "supported capabilities."  
 
