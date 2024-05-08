@@ -2,7 +2,7 @@
 xip: 47
 title: Group Chat Permissions
 description: This proposal describes a simple, flexible, updatable group chat permissions system.
-author: Cameron Voell (@Cameron_Voell), Eleanor Hofstedt (@Eleanor_Hofstedt)
+author: Cameron Voell (@cameronvoell), Eleanor Hofstedt (@eleanorhofstedt)
 discussions-to: TBD
 status: Draft
 type: Standards
@@ -12,44 +12,49 @@ created: 2024-05-07
 
 ## Abstract
 
-For many compelling group chat use cases—such as those with open invitations, semi-anonymous identities, or a large number of members—a permission system becomes critical for the chat to function effectively. This XIP proposal aims to provide application developers with the tools necessary to implement trustworthy permission features without excessive complexity, while still retaining flexibility. The following proposal describes how XMTP can utilize MLS Group Context Extensions in order to configure which users in a chat are allowed to perform actions like add or remove group members, as well as who is allowed to modify those permissions over time.
+For many compelling group chat use cases—such as those with open invitations, semi-anonymous identities, or a large number of members—a permission system becomes critical for the chat to function effectively. This XIP aims to provide application developers with the tools to implement trustworthy permission features without excessive complexity, while still retaining flexibility. 
+
+The following proposal describes how XMTP can use MLS Group Context Extensions to configure which users in a chat are allowed to perform actions like adding or removing group members, as well as who is allowed to modify those permissions over time.
 
 ## Specification
 
 ### Background
 
-The XMTP Group chat implementation utilizes the Messaging Layer Security Protocol( or **MLS)** described in
-[IETF RFC 9420](https://www.rfc-editor.org/rfc/rfc9420.html). The MLS standard includes a `Group Context` object that represents the shared configuration between all members of the group, and contains flexibility for defining custom `UnknownExtensions` that contain arbitrary byte data.
+The XMTP Group Chat implementation uses the Messaging Layer Security (MLS) protocol described in [IETF RFC 9420](https://www.rfc-editor.org/rfc/rfc9420.html). The MLS standard includes a `Group Context` object that represents the shared configuration between all group members and contains flexibility for defining custom `UnknownExtensions` that contain arbitrary byte data.
 
-By utilizing MLS Group Context Extensions to store our “Permissions” configuration data, we can ensure that all group members agree on the current state of the permissions parameters of the group, that the settings remain encrypted and unreadable to any non members, and that no one outside the group will have the ability to affect the permissions configuration.
+By using MLS Group Context Extensions to store our “Permissions” configuration data, we can ensure that:
 
-Currently in groups beta we have the following **Permissions Policies**:
+- All group members agree on the current state of the permissions parameters of the group
+- Settings remain encrypted and unreadable to any non-members
+- No one outside the group will have the ability to affect the permissions configuration
 
-1. `add_member_policy`
-2. `remove_member_policy`
-3. `update_metadata_policy`
+Currently, XMTP Group Chat beta provides the following **Permissions Policies**:
 
-Each of those policies can have one of the following **Permission Options**:
+- `add_member_policy`
+- `remove_member_policy`
+- `update_metadata_policy`
 
-1. `UNSPECIFIED`
-2. `ALLOW`
-3. `DENY`
-4. `CREATOR_ONLY`
+Each of these policies can have one of the following **Permission Options**:
+
+- `UNSPECIFIED`
+- `ALLOW`
+- `DENY`
+- `CREATOR_ONLY`
 
 ### Mutable Admin Permissions Update Specification
 
-This XIP is proposing to add the following new **Permission Policies**:
+This XIP proposes to add the following new **Permission Policies**:
 
-1. `add_admin_policy`
-2. `remove_admin_policy`
-3. `update_permissions_policy`
+- `add_admin_policy`
+- `remove_admin_policy`
+- `update_permissions_policy`
 
 We also propose to add the following new **Permission Options**:
 
-1. `ALLOW_IF_ADMIN_OR_SUPER_ADMIN`
-2. `ALLOW_IF_SUPER_ADMIN`
+- `ALLOW_IF_ADMIN_OR_SUPER_ADMIN`
+- `ALLOW_IF_SUPER_ADMIN`
 
-To enable the two new permission options the following will be added to Mutable metadata Protobuf definitions:
+To enable the two new permission options, we propose adding the following to Mutable metadata Protobuf definitions:
 
 ```proto
 message GroupMutableMetadataV1 {
@@ -62,38 +67,52 @@ message GroupMutableMetadataV1 {
 message AccountAddresses {
   repeated string account_addresses = 1;
 }
-
 ```
 
-The above Permission options will enable use cases like the following:
+These new **Permission Options** will enable use cases such as:
 
-1. **Admins can update permissions** -- The group starts out small with open permissions and then adds restrictions over time as they pass a few dozen users so that only admins can remove users or update the group name and project URL.
-2. **Group creator can add another admin** -- The leader of an online project starts a group chat with themselves as the super admin who can add and remove admins and update group information etc. There is no fear that admins take over the group because they are still the only super admin. After some time, they would like to move on from the project, so they can add someone else to be a super admin.
-3. **Admins can update permissions when new functionality is available** -- 6 months from now XMTP adds new group functions like mute members. There is an update path so that existing groups can get these new features without losing the existing group history.
+- **Admins can update permissions**: The group starts small with open permissions and then adds restrictions over time as they pass a few dozen users so that only admins can remove users or update the group name and project URL.
 
-**Sensible Default Options** - In order to allow flexibility of permissions without making it too confusing for developers and users, the approach will be to have only a few default permission sets that cover most use cases that can easily be passed in as a parameter on group creation. For developers who want to fine tune individual permission options for different group actions, we will allow those developers to construct their own initial permission set on group creation. In both cases permissions sets can be updated over time, following the `update_permissions_policy`. Example default policies include:
+- **Group creator can add another admin**: The leader of an online project creates a group chat with themself as the super admin who can add and remove admins and update group information, etc. There is no fear that admins will take over the group because the group creator is still the only super admin. After some time, if the group creator wants to move on from the project, they can make someone else the super admin.
 
-1. All Members can perform all actions (except add/remove admin/super admin)
-2. Only Admins can add/remove or update group data (group name, links, etc)
+- **Admins can update permissions when new functionality is available**: In the future, XMTP may add new group features, such as mute members. These permission options provide an update path so existing groups can get these new features without losing the existing group history.
+
+### Sensible Default Options
+
+This proposal aims to provide only a few default permission sets that can cover most use cases and easily pass in as parameters on group creation. This approach allows flexibility of permissions without making it too confusing for developers and users.
+
+For developers who want to fine-tune individual permission options for different group actions, we will allow those developers to construct their own initial permission set on group creation. In both cases, we will allow updates to permission sets over time, following the `update_permissions_policy`. Example default policies include:
+
+- All Members can perform all actions (except add/remove admin/super admin)
+- Only Admins can add/remove or update group data (group name, links, etc.)
 
 ## Rationale
 
-The need for admin functionality in groups of larger size is self evident for anyone who’s ever used discord, telegram, or tried to maintain usefulness of any group with a size over a few dozen people.
+For anyone who has ever used Discord, Telegram, or tried to maintain the usefulness of a group chat with over a few dozen people, the need for admin functionality in larger-sized groups is self-evident. 
 
-One implementation detail we considered is whether permissions could function on a two tier system of members and admins, or if we needed a three tiered system of members, admins, and super admins. At this point, contributors agree the three-tier system is necessary because of the case when a creator wants to delegate some responsibilities(`remove_member`, `update_metadata`) to be “admin only”, and they might not want to immediately risk other admins removing them as an admin. In other words, the three-tier system allows a happy medium of delegatable admin responsibilities without risking group takeover.
+One implementation detail we considered is whether permissions could function on a two-tier system of members and admins or if we needed a three-tiered system of members, admins, and super admins. 
 
-Another consideration that was made was whether it is worth the extra complexity to make permissions upgradable. The choice to allow permissions to be updated, as long as the member updating qualifies against the `update_permissions_policy` seems necessary because of the use case of accidental initial group permission misconfiguration, as well as a group’s trust dynamic evolving over time which also seems like a valid use case to consider. Just because an online project chat starts as a small group of all well-intentioned contributors does not mean that the group can not evolve to have a larger variety of member trustworthiness and contributor type over time.
+At this point, contributors agree the three-tier system is necessary based on the use case in which a group creator wants to delegate some responsibilities (`remove_member`, `update_metadata`) to be "admin only," and they don't want to immediately risk other admins removing them as an admin. In other words, the three-tier system allows a happy medium of delegatable admin responsibilities without risking group takeover.
+
+Another consideration was whether the extra complexity is worth making permissions updateable. The choice to allow permissions to be updated, as long as the member performing the update qualifies against the `update_permissions_policy`, seems necessary. 
+
+The ability to update permissions is needed to address the use cases of initial group permission misconfiguration and the inevitable evolution of a group’s trust dynamic. For example, just because an online project group chat starts as a small group of well-intentioned contributors does not mean that the group may not evolve to have a larger variety of member trustworthiness and contributor types over time.
 
 ## Backward compatibility
 
-In addition to adding the new Permission Policies, the new Permission Options, and making Permission Updatable, we will also make the permission system itself upgradable in the following ways:
+In addition to adding the new **Permission Policies** and **Permission Options** and making **Permissions Updatable**, we will also make the permission system itself updateable in the following ways:
 
-1. `libxmtp` can be updated so that existing groups can add new Permission Policies via the proto `map<string, MetadataPolicy> update_metadata_policy.` This means that if later on we would like to add a new Permission Policy to groups like "The Ability to Mute Group Members", we would be able to add that without breaking any existing groups.
-2. Deprecation and upgrade of the Permissions or Metadata Extensions in an existing groups Group Context - Existing groups would not be able to include an entirely new Permissions or Metadata Extension until all members of the group updated to a new version of libxmtp and performed a "leaf node update" commit they updated their "supported capabilities". For existing groups, one way this could work would be to have a generous grace period, say of a few weeks or months, after which, any group member who has not been upgraded could be removed by an admin. At that point the group could be updated to enable new permission / metadata extensions. The hope is that this type of upgrade might never have to happen, or could be very rare 9less than once a year and even less frequent as time passes). For more information see the [MLS RFC Required Capabilities section.](https://www.rfc-editor.org/rfc/rfc9420.html#name-required-capabilities)
+- `libxmtp` can be updated so existing groups can add new **Permission Policies** via the proto `map<string, MetadataPolicy> update_metadata_policy`. This means that if later on we want to add a new Permission Policy to groups, such as "The Ability to Mute Group Members," we can add it without breaking any existing groups.
+
+- Deprecation and upgrade of the Permissions or Metadata Extensions in an existing group's Group Context
+
+- Existing groups will not be able to include an entirely new Permissions or Metadata Extension until all group members update to a new version of libxmtp and perform a "leaf node update" commit they updated their "supported capabilities."  
+
+  One way this could work for existing groups would be to have a generous grace period, such as a few weeks or months, after which an admin could remove any group member who has not upgraded. We could then update the group to enable new permission / metadata extensions. The hope is that we might never need to perform this type of update or that it will be rare and even less frequent as time passes. For more information, see [MLS RFC - Required Capabilities](https://www.rfc-editor.org/rfc/rfc9420.html#name-required-capabilities).
 
 ## Reference implementation
 
-An example of the updates required for protobuf objects can be seen in this [PR in the XMTP proto GitHub repo](https://github.com/xmtp/proto/pull/175).
+For an example of the updates required for protobuf objects, see this [Mutable Group Permissions PR](https://github.com/xmtp/proto/pull/175) in the XMTP **proto** GitHub repo.
 
 ```solidity
 // Message for group mutable permissions
@@ -129,7 +148,11 @@ message AccountAddresses {
 
 ## Security considerations
 
-The main security consideration with this update is to ensure that 1. Developers and Users of XMTP can understand how permissions are intended to work, and 2. That permissions does not have any bugs that would allow a super admin to be cast kicked out of their own group, or for a groups permissions to not behave as expected. Though it will likely always possible for someone to lose admin controls over their own group if they take actions to remove themselves, we will strive to make tests and documentations and Default permission options as intuitive as possible in order to minimize this risk.
+The main security considerations for this update are to ensure that:
+
+- Developers and users of XMTP understand how permissions work
+
+- Permissions do not have any bugs that would allow a super admin to be kicked out of their own group or for group permissions to not behave as expected. Though it will likely always be possible for someone to lose admin control over their own group if they take action to remove themself, we will strive to provide tests, documentation, and intuitive default permission options to minimize this risk.
 
 ## Copyright
 
