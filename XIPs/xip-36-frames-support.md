@@ -12,29 +12,32 @@ created: 2024-01-31
 
 ## Abstract
 
-This XIP explores the new tooling required for XMTP apps to render and interact with Frames inside XMTP conversations. This takes a deep dive through the Farcaster Frames spec and evaluates how compatible it is with XMTP.
+This XIP explores the new tooling required for XMTP apps to render and interact with Frames inside XMTP conversations. The XIP also takes a deep dive into the Farcaster Frames specification and evaluates its compatibility with XMTP.
 
 ## Motivation
 
-Developers on XMTP have been asking for a way to embed generic interactive content into messages for a long time. [XMTP Content Types](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-5-message-content-types.md) make sense for the head of the curve usecases (replies, reactions, media embeds) where the requirements are well known ahead of time, but there is a very long long tail of demands from developers. Making application devs support hundreds of different content types to handle all those needs was never going to be a practical solution. We need a “one size fits all” way of enabling the long tail.
+Developers building with XMTP have been asking for a way to embed generic interactive content into messages for a long time. [XMTP Content Types](../XIPs/xip-5-message-content-types.md) make sense for the head-of-the-curve use cases (such as replies, reactions, and media embeds) where requirements are well known ahead of time, but there is a very long tail of developer demands. Making app devs support hundreds of different content types to handle all those needs would never be a practical solution. We need a “one size fits all” way of enabling the long tail.
 
-We could build a competing protocol that would work for this, but I don’t see why we would create a new standard when one already exists and has traction. The question is: how could we extend Frames to work inside XMTP conversations, and what are the trade-offs?
+We could build a competing protocol that would work for this, but I don’t see why we would create a new standard when one already exists and has traction. The question is: How could we extend Frames to work inside XMTP conversations, and what are the trade-offs?
 
-The goal here is to allow existing Frames developers to reach users in private DM channels outside of Farcaster, and in public Farcaster posts, with the minimum amount of code change for the Frame developer.
+The goal here is to allow existing Frames developers to reach users in private DM channels outside of Farcaster and in public Farcaster posts, with the minimum amount of code changes for the Frames developers.
 
 ## Specification
 
-There are three new capabilities required for client applications to be able to render and interact with Frames.
+Three new capabilities are required for client apps to render and interact with Frames:
 
-1. Rendering. Client apps need to be able to render the “initial frame” before any interaction
-2. Interaction. Client apps need to be able to interact with Frames, and the HTTP POST requests in those interactions need to include signed content that can irrefutably identify the sender as the holder of an XMTP identity
-3. Verification. Frame developers need to be able to read the HTTP POST requests from #2 and verify the signatures, allowing them to provably know who clicked the button
+1. **Rendering**  
+Client apps need to be able to render the "initial frame" before any interaction
+2. **Interaction**  
+Client apps need to be able to interact with Frames, and the HTTP POST requests in those interactions need to include signed content that can irrefutably identify the sender as the holder of an XMTP identity
+3. **Verification**  
+Frame developers need to be able to read the HTTP POST requests from #2 and verify the signatures, allowing them to provably know who clicked the button
 
 ### Rendering
 
-Users already include URLs in standard XMTP `ContentTypeText` messages. Some client applications choose to render link previews for those URLs. Frames would just be an extension of that link preview functionality.
+Users already include URLs in standard XMTP `ContentTypeText` messages. Some client apps choose to render link previews for those URLs. Frames would just be an extension of that link preview functionality.
 
-In order to [render a Frame](https://www.notion.so/Farcaster-Frames-4bd47fe97dc74a42a48d3a234636d8c5?pvs=21), developers just need to be able to render some special HTML meta tags into UI, similar to how they already render OpenGraph tags. This is a typical frame payload:
+To [render a Frame](https://docs.farcaster.xyz/learn/what-is-farcaster/frames), developers need to be able to render some special HTML meta tags into the UI, similar to how they already render Open Graph tags. This is a typical frame payload:
 
 ```html
 <meta property="fc:frame" content="vNext" />
@@ -50,9 +53,11 @@ In order to [render a Frame](https://www.notion.so/Farcaster-Frames-4bd47fe97dc7
 />
 ```
 
-XMTP client app devs don’t need any special help from us to be able to render an existing Farcaster Frame.
+XMTP client app devs don’t need any special help from XMTP to render an existing Farcaster Frame.
 
-The problem here is that some Frames will be able to support POST requests from XMTP clients while others will only be able to receive POSTs from Farcaster clients that include a signed payload with a `fid`. I am proposing that Frame developers add a new meta tag to posts to tell clients that they are capable of receiving XMTP responses.
+The problem is that some Frames will be able to support POST requests from XMTP clients, while others will only be able to receive POSTs from Farcaster clients that include a signed payload with an `fid`.
+
+This XIP proposes that Frames developers add a new meta tag to POSTs to tell clients they can receive XMTP responses.
 
 ```html
 <meta
@@ -61,11 +66,11 @@ The problem here is that some Frames will be able to support POST requests from 
 />
 ```
 
-We have developed a prototype implementation of a rendering helper library [here](https://github.com/xmtp/xmtp-web/tree/main/packages/frames-client).
+For a prototype implementation of a rendering helper library, see this [frames-client](https://github.com/xmtp/xmtp-web/tree/main/packages/frames-client) in the **xmtp-web** GitHub repo.
 
 ### Interaction
 
-When a user clicks a button in a Frame, the application POSTs a signed message to the frame URL (or a different URL specified in the initial frame by the `post_url` tag).
+When a user clicks a button in a Frame, the app POSTs a signed message to the Frame URL, or a different URL specified in the initial Frame using the `post_url` tag.
 
 This is an example Farcaster Frame payload:
 
@@ -146,21 +151,20 @@ There are clearly parts of this flow that are very Farcaster-specific. It refere
 
 At a high level, what developers are doing with all this code is validating three things:
 
-1. That the POST coming in was from a legitimate button click
-2. What button did they click
+1. The incoming POST was from a legitimate button click
+2. Which button was clicked
 3. Who clicked the button
 
-With that information, the developer then responds with HTML outlining an update to the Frame’s state using the same format as the initial render.
+With this information, the developer then responds with HTML outlining an update to the Frame’s state using the same format as the initial render.
 
-Over the weekend Coinbase [released `FrameKit`](https://github.com/coinbase/onchainkit), with some high level APIs designed to verify
-Frame POST payloads. Those APIs are (`getFrameAccountAddress`, `getFrameMetadata`,
-`getFrameValidatedMessage`). XMTP already has all the primitives needed to craft payloads that can enable these same workflows.
+In Jan 2024, Coinbase [released `FrameKit`](https://github.com/coinbase/onchainkit), with some high-level APIs designed to verify
+Frame POST payloads. Those APIs are `getFrameAccountAddress`, `getFrameMetadata`, and `getFrameValidatedMessage`. XMTP already has all the primitives needed to craft payloads that can enable these same workflows.
 
-We have developed a prototype implementation of a privacy-preserving interaction library [here](https://github.com/xmtp/xmtp-web/tree/main/packages/frames-client).
+We've developed a prototype implementation of a privacy-preserving interaction library. See the [frames-client](https://github.com/xmtp/xmtp-web/tree/main/packages/frames-client) in the **xmtp-web** GitHub repo.
 
 ### Verification
 
-With the goal of making things as straightforward for existing Frames devs as possible, here is a proposed interaction payload structure for an XMTP Frame.
+With the goal of making things as straightforward for existing Frames devs as possible, here is a proposed interaction payload structure for an XMTP Frame:
 
 ```json
 {
@@ -192,42 +196,59 @@ message FrameAction {
 }
 ```
 
-These payloads are meaningfully different from the FC payloads. We can provide some helper libraries that would allow a Frames developer to take the JSON payload above and get back the information required to move forward to the next Frame (`isValid`, `verifiedSenderWalletAddress`, `buttonIndex`). Because XMTP is a private network, instead of a public one, our goal should be to include the minimum amount of metadata to make this work.
+We could choose to add some additional metadata to this payload that would give the Frame developer more context about where the click originated. For example, `message_id` and `conversation_id` come to mind. The tradeoff here is privacy.
 
-On the sender side (the person clicking the button), XMTP SDKs already have generic interfaces for signing messages. All we need to do is define the payload format and any application developer should be able to generate a payload matching this format and transmit it directly to the frame URL (see privacy addendum below).
+All messages on the XMTP network are stored in topics. Topics have an opaque identifier, and only the participants in a conversation know that a given topic is "theirs." Adding the `message_id` or `conversation_id` to the payload would leak that information to the Frame developer, allowing them to track how many messages were sent in a particular conversation. This feels like an unnecessary privacy leak and should be avoided unless there is a _very_ strong need to share this information with the Frame developer.
 
-The `FrameAction` includes a signature of the `FrameActionBody` encoded as bytes. To verify and recover the wallet address from this payload a developer must:
+These payloads are meaningfully different from the Farcaster payloads. We can provide some helper libraries to allow a Frames developer to take the JSON payload above and get back the information required to move forward to the next Frame (`isValid`, `verifiedSenderWalletAddress`, `buttonIndex`). Because XMTP is a private network instead of a public one, the goal should be to include the minimum amount of metadata to make this work.
+
+On the sender side (the person clicking the button), XMTP SDKs already have generic interfaces for signing messages. All we need to do is define the payload format, and any app developer should be able to generate a payload matching this format and transmit it directly to the Frame URL.
+
+The `FrameAction` includes a signature of the `FrameActionBody` encoded as bytes. To verify and recover the wallet address from this payload, a developer must:
 
 1. Recover the public key from the signature
 2. Verify that the public key matches the identity key in the `SignedPublicKeyBundle`
 3. Recover the wallet address from the signature in the `SignedPublicKeyBundle`
 
-We have developed a prototype implementation of a verification library that does the above [here](https://github.com/xmtp/xmtp-node-js-tools/tree/main/packages/frames-validator).
+For a prototype implementation of a verification library that does this, see the [frames-validator](https://github.com/xmtp/xmtp-node-js-tools/tree/main/packages/frames-validator) in the **xmtp-node-js-tools** GitHub repo.
 
-We could choose to add some additional metadata to this payload (`message_id`, `conversation_id` come to mind) that would give the Frame developer more context on where the click originated from. The trade-off here is privacy. All messages on the XMTP network are stored in topics. Topics have an opaque identifier, and only the participants of a conversation know that a given topic is “theirs”. Adding either the `message_id` or `conversation_id` to the payload would leak that information to the Frame developer, which would allow the Frame developer to track how many messages have been sent in a particular conversation. That feels like an unnecessary privacy leak and should be avoided unless there is a _very_ strong need for that information to be shared with the Frame developer.
+## Backward compatibility
 
-## Backward Compatibility
+- All Frames will be sent using ordinary XMTP text messages.
+- Client apps can choose to expand URLs found in these messages into Frames at their discretion.
+- No new Content Types are required.
+- No new SDK changes are necessary for XMTP SDKs that allow app developers to sign messages with the XMTP identity key.
+- The new helper libraries that facilitate Frame rendering, interaction, and verification are strictly opt-in.
 
-All Frames would be sent through ordinary XMTP text messages. Client applications can choose to expand URLs found in these messages into Frames at their discretion. No new Content Types are required, and no new SDK changes are necessary for XMTP SDKs that allow application developers to sign messages with the XMTP identity key.
+## Reference implementations
 
-The new helper libraries developed to facilitate Frames rendering, interaction, and verification are strictly opt-in.
+We've developed reference implementations for all three components required to enable Frames on XMTP:
 
-## Reference Implementations
+1. [Rendering/interaction helper library](https://github.com/xmtp/xmtp-web/tree/main/packages/frames-client)  
+Needs some updates to accommodate changes to the POST message schema made after development began
 
-We have developed reference implementations for all three of the components required to enable Frames on XMTP
+2. [POST payload verification helper library](https://github.com/xmtp/xmtp-node-js-tools/tree/main/packages/frames-validator)  
+Needs some updates to accommodate changes to the POST message schema made after development began
 
-1. [The rendering/interaction helper library](https://github.com/xmtp/xmtp-web/tree/main/packages/frames-client) (needs some updates to accommodate changes to the POST message schema made since development)
-2. [The POST payload verification helper library](https://github.com/xmtp/xmtp-node-js-tools/tree/main/packages/frames-validator) (needs some updates to accommodate changes to the POST message schema made since development)
-3. [The Open Graph Proxy service](https://github.com/neekolas/og-proxy) (still missing support for proxying requests for images, which will be a hard requirement for launch).
+3. [Open Graph Proxy service](https://github.com/neekolas/og-proxy)  
+Still missing support for proxying requests for images. This support will be a hard requirement for launch.
 
-Additionally, Add a reference to Open Frames specification: They suggest including a link to the Open Frames specification ( FramesJS.org ) in the XIP, so that people can refer to it for more details on the Frames spec. http://framesjs.org/
+Here are some specifications you might also want to explore as a part of working with these reference implementations:
 
-## Security Considerations
+- [Farcaster Frames specification](https://docs.farcaster.xyz/reference/frames/spec)  
+The Frames spec for creating interactive and authenticated experiences on Farcaster, embeddable in any Farcaster client
 
-In the Farcaster model of Frames, messages are signed on a server by the application and the server is the one doing the POST request to the Frame URL. This means that the Frame app developer only sees requests coming from the server IP and never the client. Farcaster clients such as Warpcast, however, do download the Frame image directly. [This leaks the IP address of the viewer to the Frame developer.](https://twitter.com/danfinlay/status/1752500815200399633?t=1psurRGh-JTii3AHjvUrMg) According to a [reply on X](https://x.com/dwr/status/1752506807548072140?s=20), they are “working on it”.
+- [Open Frames specification](https://github.com/open-frames/standard)  
+A lightweight extension to the Frames spec to help enable non-Farcaster apps and protocols to support Frames.
 
-In the proposed scheme above, messages would be signed and sent directly from the client. Privacy is a hard requirement for any adoption of Frames on the XMTP network. Without it, I can create a maliciously crafted Frame that logs IP addresses and send a link to it to an anon account. This would allow me to learn their IP the moment they view the message. We absolutely cannot leak client IP addresses to Frame app developers in either the Rendering or Interaction phase.
+## Security considerations
 
-This can be solved by having developers route these requests through a proxy server to anonymize the sender. [I’ve already started prototyping what a simple Frame proxy would look like](https://github.com/neekolas/og-proxy). This proxy server should be used for the initial frame rendering, downloading of the Frame image, and interacting with POST requests. Client app developers can host their own instance of this open source proxy, and I propose XMTP labs should run an instance as a public good. Developers can also use this proxy server to privately gather the information needed for link previews, which is a nice added bonus.
+In the Farcaster model of Frames, messages are signed on a server by the app and the server makes the POST request to the Frame URL. This means the Frame app developer only sees requests from the server IP and never the client.
 
-At some scale this becomes challenging. Signal Protocol previously used a proxy for link previews, but because of their massive scale they started getting blocked by popular websites like YouTube and had to [roll the feature back](https://community.signalusers.org/t/beta-feedback-for-the-upcoming-android-4-69-release/16219/4). Having many proxy services instead of a single proxy will help avoid this problem, but at some scale we will need to reconsider the approach.
+However, Farcaster clients, like Warpcast, download the Frame image directly. This [leaks the IP address of the viewer to the Frame developer](https://twitter.com/danfinlay/status/1752500815200399633?t=1psurRGh-JTii3AHjvUrMg). According to a reply on X, they are "[working on it](https://x.com/dwr/status/1752506807548072140?s=20)."
+
+In the proposed scheme above, messages would be signed and sent directly from the client. Privacy is a hard requirement for any Frames adoption on the XMTP network. Without it, I can create a maliciously crafted Frame that logs IP addresses and send a link to it to an anon account. This would allow me to learn their IP the moment they view the message. We absolutely cannot leak client IP addresses to Frame app developers in either the Rendering or Interaction phase.
+
+This can be solved by having developers route these requests through a proxy server to anonymize the sender. I’ve already started [prototyping what a simple Frame proxy](https://github.com/neekolas/og-proxy) would look like. This proxy server should be used for the initial Frame rendering, downloading of the Frame image, and interacting with POST requests. Client app developers can host their own instance of this open source proxy. I propose that XMTP Labs should run an instance as a public good. Developers can also use this proxy server to privately gather the information needed for link previews, which is a nice added bonus.
+
+At some scale, this becomes challenging. Signal Protocol previously used a proxy for link previews, but because of their massive scale they started getting blocked by popular websites like YouTube and had to [roll the feature back](https://community.signalusers.org/t/beta-feedback-for-the-upcoming-android-4-69-release/16219/4). Having many proxy services instead of a single proxy will help avoid this problem, but at some scale, we will need to reconsider the approach.
