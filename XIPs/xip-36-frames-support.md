@@ -157,8 +157,7 @@ At a high level, what developers are doing with all this code is validating thre
 
 With this information, the developer then responds with HTML outlining an update to the Frame’s state using the same format as the initial render.
 
-In Jan 2024, Coinbase [released `FrameKit`](https://github.com/coinbase/onchainkit), with some high-level APIs designed to verify
-Frame POST payloads. Those APIs are `getFrameAccountAddress`, `getFrameMetadata`, and `getFrameValidatedMessage`. XMTP already has all the primitives needed to craft payloads that can enable these same workflows.
+In Jan 2024, Coinbase [released `FrameKit`](https://github.com/coinbase/onchainkit), with some high-level APIs designed to verify Frame POST payloads. Those APIs are `getFrameAccountAddress`, `getFrameMetadata`, and `getFrameValidatedMessage`. XMTP already has all the primitives needed to craft payloads that can enable these same workflows.
 
 We've developed a prototype implementation of a privacy-preserving interaction library. See the [frames-client](https://github.com/xmtp/xmtp-web/tree/main/packages/frames-client) in the **xmtp-web** GitHub repo.
 
