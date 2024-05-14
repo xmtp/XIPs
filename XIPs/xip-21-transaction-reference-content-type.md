@@ -2,7 +2,7 @@
 title: On-chain transaction reference content type
 description: Provides an on-chain transaction hash or ID sent as a message.
 author: @rygine (Ry Racherbaumer), @lourou (Louis Rouffineau), @nmalzieu (Noé Malzieu), @galligan (Matt Galligan), @nakajima (Pat Nakajima), @yash-luna (Yash Lunagaria)
-status: Review
+status: Last call
 type: Standards
 category: XRC
 created: 2024-01-26
