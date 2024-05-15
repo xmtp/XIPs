@@ -3,7 +3,7 @@ xip: 14
 title: Conversation context metadata schema
 description: Schema to enable standardized sharing of conversation context
 author: Yash Lunagaria (@yash-luna)
-status: Review
+status: Stagnant
 type: Standards Track
 category: XRC
 created: 2023-01-31
