@@ -22,10 +22,14 @@ The goal of the XIP project is to document standardized protocols for XMTP clien
 
 ## Index of proposals
 
-### Standards track
-
-| ID | Title | Type | Status |
-| -- | -- | -- | -- |
-| 0 | [XIP Purpose, Process, & Guidelines](./XIPs/xip-0-purpose-process.md) | Process | Living |
-| 5 | [Message content types](./XIPs/xip-5-message-content-types.md) | Interface | Final |
-| 9 | [Composite content type](./XIPs/xip-9-composite-content-type.md) | XRC | Final |
+| ID | Title | Type | Category | Status |
+| -- | -- | -- | -- | -- |
+| 0 | [XIP Purpose, Process, & Guidelines](./XIPs/xip-0-purpose-process.md) | Process | n/a | Living |
+| 5 | [Message content types](./XIPs/xip-5-message-content-types.md) | Standards | Interface | Final |
+| 9 | [Composite content type](./XIPs/xip-9-composite-content-type.md) | Standards | XRC | Superseded by [XIP-19](./XIPs/xrc-19-deprecate-comp-codec.md) |
+| 15 | [Attachment content type](./XIPs/xip-15-attachment-content-type.md) | Standards | XRC | Review |
+| 17 | [Remote attachment content type](./XIPs/xip-17-remote-attachment-content-type-proposal.md) | Standards | XRC | Review |
+| 18 | [Add contentLength and filename to remote attachment content type](./XIPs/xip-18-adding-contentlength-filename-to-remote-attachments.md) | Standards | XRC | Draft |
+| 19 | [Deprecate the Composite Codec](./XIPs/xrc-19-deprecate-comp-codec.md) | Standards | XRC | Final |
+| 20 | [Reactions content type](./XIPs/xrc-20-reaction-content-type.md) | Standards | XRC | Final |
+| 21 | [On-chain transaction reference content type](./XIPs/xip-21-transaction-reference-content-type.md) | Standards | XRC | Review |
