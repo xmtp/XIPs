@@ -7,6 +7,7 @@ status: Final
 type: Standards Track
 category: XRC
 created: 2022-04-07
+superseded-by: XRC-19
 ---
 
 ## Abstract
