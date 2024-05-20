@@ -3,8 +3,7 @@ xip: 47
 title: Group Chat Permissions
 description: This proposal describes a simple, flexible, updatable group chat permissions system.
 author: Cameron Voell (@cameronvoell), Eleanor Hofstedt (@eleanorhofstedt)
-discussions-to: https://community.xmtp.org/t/xip-47-group-chat-permissions/651
-status: Draft
+status: Review
 type: Standards
 category: Core
 created: 2024-05-07
@@ -83,8 +82,20 @@ This proposal aims to provide only a few default permission sets that can cover 
 
 For developers who want to fine-tune individual permission options for different group actions, we will allow those developers to construct their own initial permission set on group creation. In both cases, we will allow updates to permission sets over time, following the `update_permissions_policy`. Example default policies include:
 
-- All Members can perform all actions (except add/remove admin/super admin)
-- Only Admins can add/remove or update group data (group name, links, etc.)
+- All Members Policy:  
+  - All group members can add new members
+  - Only admins can remove members, update metadata
+  - Only super admins can add/remove admins, update permissions
+- Admins Only Policy:
+  - Only admins can add/remove members, update metadata
+  - Only super admins can add/remove admins, update permissions
+
+There are a few more rules that apply to all permission policies:
+
+- The group creator always defaults as the group's only super admin
+- Admins can not remove super admins from a group
+- Only super admins can add other super admins
+- Super admins can remove other super admins from the group or remove the super admin role from an address, but there must always be at least one super admin in the group. So removing all super admin will fail. This means you can remove yourself as a super admin if at least one other super admin is in the group.
 
 ## Rationale
 
@@ -94,13 +105,13 @@ One implementation detail we considered is whether permissions could function on
 
 At this point, contributors agree the three-tier system is necessary based on the use case in which a group creator wants to delegate some responsibilities (`remove_member`, `update_metadata`) to be "admin only," and they don't want to immediately risk other admins removing them as an admin. In other words, the three-tier system allows a happy medium of delegatable admin responsibilities without risking group takeover.
 
-Another consideration was whether the extra complexity is worth making permissions updateable. The choice to allow permissions to be updated, as long as the member performing the update qualifies against the `update_permissions_policy`, seems necessary.
+Another consideration was whether the extra complexity is worth making permissions updatable. The choice to allow permissions to be updated, as long as the member performing the update qualifies against the `update_permissions_policy`, seems necessary.
 
 The ability to update permissions is needed to address the use cases of initial group permission misconfiguration and the inevitable evolution of a group’s trust dynamic. For example, just because an online project group chat starts as a small group of well-intentioned contributors does not mean that the group may not evolve to have a larger variety of member trustworthiness and contributor types over time.
 
 ## Backward compatibility
 
-In addition to adding the new **Permission Policies** and **Permission Options** and making **Permissions Updatable**, we will also make the permission system itself updateable in the following ways:
+In addition to adding the new **Permission Policies** and **Permission Options** and making **Permissions Updatable**, we will also make the permission system itself updatable in the following ways:
 
 - `libxmtp` can be updated so existing groups can add new **Permission Policies** via the proto `map<string, MetadataPolicy> update_metadata_policy`. This means that if later on we want to add a new Permission Policy to groups, such as "The Ability to Mute Group Members," we can add it without breaking any existing groups.
 
