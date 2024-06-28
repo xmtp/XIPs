@@ -1,0 +1,19 @@
+classDiagram
+class R["Backup Requester"]{
+    The new installation requesting missing messages
+    Responsible for selecting a Backup Storage Provider and obtaining authorization
+    Creates MessageHistoryBackupRequests
+    Reads MessageHistoryBackupResponses
+}
+class M["Message Backup Provider"]{
+    An existing installation that has access to message history
+    Reads MessageHistoryBackupRequests
+    Creates MessageHistoryBackupResponses
+    Uploads Message Backup Files to the pre-selected storage provider
+    Responsible for generating one-time encryption keys
+}
+class S["Backup Storage Provider"]{
+    A cloud service with durable storage
+    Stores encrypted backups for a few days
+    Responsible for authenticating requests to reduce abuse
+}

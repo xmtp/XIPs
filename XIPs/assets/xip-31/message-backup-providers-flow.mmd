@@ -1,0 +1,15 @@
+sequenceDiagram
+    Participant B as Backup Requester
+    Participant S as Backup Storage Provider
+    Participant N as XMTP Network
+    Participant M as Message Backup Provider
+    B->>N: Send a MessageHistoryBackupRequest to each potential Message Backup Provider
+    M->>N: Check for MessageHistoryBackupRequest
+    N-->>M: Receive MessageHistoryBackupRequest
+    M->>S: Upload backup file
+    M->>N: Send MessageHistoryBackupResponse
+    B->>N: Check for MessageHistoryBackupResponse
+    N-->>B: Receive response
+    B->>S: Request file from URL in response
+    S-->>B: Receive file
+    B-->>B: Decrypt and load file into database
