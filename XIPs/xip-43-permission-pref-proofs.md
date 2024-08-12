@@ -2,8 +2,7 @@
 title: Consent proofs
 description: Enables recipients to sign to specify inbox consent preferences
 author: Ry Racherbaumer (@rygine), Nick Molnar (@neekolas), Saul Carlin (@saulmc)
-discussions-to: https://community.xmtp.org/t/xip-43-permission-preference-proofs/552
-status: Draft
+status: Review
 type: Standards
 category: Interface
 created: 2024-02-22
@@ -21,13 +20,13 @@ To solve these issues, senders can simply ask users to produce a signature attes
 
 ## Specification
 
-There are 3 components to the proposed workflow:
+There are three components to the proposed workflow:
 
-1. Obtain a consent signature from the user
+1. Obtain a consent signature from the user  
    _Requires actions by the **sender** and **receiver**_
-2. Create a new conversation with the encoded payload
+2. Create a new conversation with the encoded payload  
    _Requires actions by the **sender**_
-3. Verify the consent payload to allow the sender
+3. Verify the consent payload to allow the sender  
    _Requires actions by the **client SDK**_
 
 ### Obtain a consent signature from the user
@@ -58,13 +57,13 @@ From Address: <ethereum address>
 For more info: https://xmtp.org/signatures/
 ```
 
-A lightweight JavaScript bundle will provide a function that will initiate the signing process and return an encoded payload that senders must store on their end. This function is intended to be used as a callback to a click event, such as clicking on a Subscribe button.
+A lightweight JavaScript bundle will provide a function that will initiate the signing process and return an encoded payload that senders must store on their end. This function is intended to be used as a callback to a click event, such as clicking a Subscribe button.
 
 ### Create a new conversation with the encoded payload
 
 Once senders have the encoded payload, they can include it when starting a new conversation with a user.
 
-An example of what this might look like:
+Here is an example of what this might look like:
 
 ```ts
 const conversation = await client.conversations.newConversation(
@@ -74,19 +73,19 @@ const conversation = await client.conversations.newConversation(
 );
 ```
 
-Users who have created a consent signature may not have an identity on the XMTP network. Senders should check for an identity with `Client.canMessage` prior to starting a new conversation. If a user does not yet have an XMTP identity, the sender can routinely check for a network identity and start a conversation when it's found.
+Users who have created a consent signature might not have an identity on the XMTP network. Senders should check for an identity with `Client.canMessage` before starting a new conversation. If a user does not yet have an XMTP identity, the sender can routinely check for a network identity and start a conversation when it's found.
 
 ### Verify the consent payload
 
-In order to finalize the consent preference, SDKs must look for the consent payload in new conversations. Using this payload, SDKs can verify that the current user's wallet signed the consent message and validate that the addresses and timestamp match the expected values.
+To finalize the consent preference, SDKs must look for the consent payload in new conversations. Using this payload, SDKs can verify that the current user's wallet signed the consent message and validate that the addresses and timestamp match the expected values.
 
-Once the consent payload is verified and validated, the SDKs will then update network consent preferences automatically.
+After the consent payload is verified and validated, the SDKs will then automatically update network consent preferences.
 
-## Backward Compatibility
+## Backward compatibility
 
 The encoded consent payload is an _optional_ parameter when starting a new conversation. Existing conversations will not be affected, and client apps using outdated SDKs will continue to work without updates.
 
-## Security Considerations
+## Security considerations
 
 There are no known negative security implications introduced as a result of collecting a signature from a user and including it as part of a conversation. The contents of the message being signed will be shown to the user beforehand, and the resulting signature is only useful to SDKs connected to the wallet that signed the message.
 

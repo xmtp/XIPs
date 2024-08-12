@@ -2,9 +2,8 @@
 title: On-chain transaction reference content type
 description: Provides an on-chain transaction hash or ID sent as a message.
 author: @rygine (Ry Racherbaumer), @lourou (Louis Rouffineau), @nmalzieu (Noé Malzieu), @galligan (Matt Galligan), @nakajima (Pat Nakajima), @yash-luna (Yash Lunagaria)
-discussions-to: https://community.xmtp.org/t/xip-21-on-chain-transaction-reference-content-type/532
-status: Last Call
-type: Standards Track
+status: Final
+type: Standards
 category: XRC
 created: 2024-01-26
 ---
@@ -35,13 +34,13 @@ The goal of the transaction reference content type is to provide transaction det
 ```ts
 type TransactionReference = {
   /**
-   * The namespace for the networkId
+   * The chain ID for the transaction as outlined in EIP-155
    */
-  namespace?: string;
+  chainId: number;
   /**
-   * The networkId for the transaction, in decimal or hexidecimal format
+   * The networkId for the transaction
    */
-  networkId: number | string;
+  networkId?: number;
   /**
    * The transaction hash
    */
@@ -52,7 +51,7 @@ type TransactionReference = {
   metadata?: {
     transactionType: string;
     currency: string;
-    amount: number;
+    amount: bigint;
     decimals: number;
     fromAddress: string;
     toAddress: string;
@@ -62,23 +61,23 @@ type TransactionReference = {
 
 ## Rationale
 
-The `networkId` provides details of the network used for the transaction, while the `reference` field contains the hash of the transaction on the network. These two fields should be enough to display a basic reference to the transaction. An optional `namespace` field can be used for a more human-readable description of the network.
+The `chainId` provides details of the network used for the transaction as defined in [EIP-155](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md), while the `reference` field contains the hash of the transaction on the network. These two fields should be enough to display a basic reference to the transaction. An optional `networkId` field can be used when it differs from the `chainId`.
 
 In addition, optional `metadata` can be added to provide more details and a richer display of the transaction.
 
-## Backward Compatibility
+## Backward compatibility
 
 To maintain backward compatibility, a content fallback is stored in the codec as text — ensuring that the intent of the transaction reference content type is conveyed even in non-supporting clients.
 
-## Test Cases
+## Test cases
 
 Test cases will validate the interpretation of schema type and effective use of a content fallback. These are essential for ensuring interoperability across XMTP platforms.
 
-## Reference Implementation
+## Reference implementation
 
-You can find a reference implementation of this transaction reference content type in the [xmtp-js-content-types](https://github.com/xmtp/xmtp-js-content-types) repo under the [packages/content-type-transaction-reference](https://github.com/xmtp/xmtp-js-content-types/tree/main/packages/content-type-transaction-reference) directory.
+You can find a WIP reference implementation of this transaction reference content type in the [xmtp-js-content-types](https://github.com/xmtp/xmtp-js-content-types) repo under the [packages/content-type-transaction-reference](https://github.com/xmtp/xmtp-js-content-types/tree/main/packages/content-type-transaction-reference) directory.
 
-## Security Considerations
+## Security considerations
 
 While there are no known negative security implications in the data of the on-chain transaction reference content type, clients could pass inaccurate or misleading values for these fields. In addition, clients could display inaccurate or misleading values for these fields and/or link to unrelated transactions.
 
