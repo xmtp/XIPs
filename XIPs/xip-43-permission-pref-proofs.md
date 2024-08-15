@@ -1,8 +1,9 @@
 ---
+xip: 43
 title: Consent proofs
 description: Enables recipients to sign to specify inbox consent preferences
 author: Ry Racherbaumer (@rygine), Nick Molnar (@neekolas), Saul Carlin (@saulmc)
-status: Review
+status: Last call
 type: Standards
 category: Interface
 created: 2024-02-22
