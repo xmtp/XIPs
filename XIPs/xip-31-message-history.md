@@ -37,7 +37,7 @@ It's also worth noting that there are many use cases for XMTP where message hist
 1. Message history synchronization should be opt-in for developers.
 1. It should be simple for developers to implement message history synchronization correctly. Implementation work should be focused on app-specific UX choices, with the SDK responsible for core transport and security decisions.
 1. Compatibility between apps is expected. Apps should be able to share history irrespective of operating system, SDK version, or device type (web vs. mobile vs. server).
-1. Even if developers of some popular apps choose to not support message history synchronization, it should be simple for users to opt enable themselves.
+1. Even if developers of some popular apps choose to not support message history synchronization, it should be simple for users to opt-in to enable it for themselves.
 
 ## Specification
 
