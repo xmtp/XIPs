@@ -44,23 +44,23 @@ It's also worth noting that there are many use cases for XMTP where message hist
 This specification offers the user two modes of message backup, which accommodate different use cases:
 
 - Remote Message Backups  
-This is the lowest friction solution, provided the blockchain account has access to another existing installation.
+  This is the lowest friction solution, provided the blockchain account has access to another existing installation.
 
 - Backup Account Files  
-This is an emergency solution for cases where the user has lost access to all of their XMTP apps (for example, if they lost the only device they have used to connect to XMTP).
+  This is an emergency solution for cases where the user has lost access to all of their XMTP apps (for example, if they lost the only device they have used to connect to XMTP).
 
 ### Actors
 
 There are three types of actors in this specification. The first two types of actors are XMTP Clients, and the implementation required to fulfill the responsibilities of both roles would be built into `libxmtp`.
 
 - Backup requesters  
-These are XMTP Clients that are missing message history and would like to receive a backup.
+  These are XMTP Clients that are missing message history and would like to receive a backup.
 
 - Message Backup Providers  
-These are XMTP Clients that have a message history and are capable of sending it to a requester.
+  These are XMTP Clients that have a message history and are capable of sending it to a requester.
 
 - Backup Storage Provider  
-This is a remote service responsible for temporarily storing backup files, and is only needed for Remote Message Backups.
+  This is a remote service responsible for temporarily storing backup files, and is only needed for Remote Message Backups.
 
 ![Graphic describing the three types of actors in this specification: Backup Requesters, Message Backup Providers, and Backup Storage Providers|690x101, 100%](./assets/xip-31/message-history-actors.png)
 
@@ -84,15 +84,13 @@ For mobile apps already handling push notifications, `MessageHistoryBackupReques
 
    5a. Ensure there is a `MessageHistoryBackupRequest` with a matching `requestId` stored in the database. If not, ignore.
 
-   5b. Ensure the `backupUrl` is on the same host as the requested `backupStorageProviderUploadUrl`. If not, ignore.
+   5b. Download the file from the `backupUrl` and decrypt using the credentials provided in the `MessageHistoryBackupResponse`.
 
-   5c. Download the file from the `backupUrl` and decrypt using the credentials provided in the `MessageHistoryBackupResponse`. If the hash of the downloaded file does not match the hash in the `MessageHistoryBackupResponse`, abort.
+   5c. Load each message into the local database, ignoring any duplicate messages.
 
-   5d. Load each message into the local database, ignoring any duplicate messages.
+   5d. Delete the `MessageHistoryBackupResponse` and all associated credentials.
 
-   5e. Delete the `MessageHistoryBackupResponse` and all associated credentials.
-
-   5f. Set the status of the `MessageHistoryBackupRequest` to `Applied`.
+   5e. Set the status of the `MessageHistoryBackupRequest` to `Applied`.
 
 #### Flow for Message Backup Providers
 
@@ -102,7 +100,7 @@ For mobile apps already handling push notifications, `MessageHistoryBackupReques
 1. Convert all messages in the local database into a Message Backup File (maybe we want to chunk here?)
 1. Generate ephemeral encryption key, salt, and nonce. Encrypt the file using these keys.
 1. Upload the file to the `backupStorageProviderUploadUrl` from the request.
-1. Reply to the message with a `MessageHistoryBackupResponse` containing the encryption details, the hash of the backup file, and the `backupUrl` provided by the Backup Storage Provider.
+1. Reply to the message with a `MessageHistoryBackupResponse` containing the encryption details and the `backupUrl` provided by the Backup Storage Provider.
 1. Delete the `MessageHistoryBackupRequest`, the local database dump, and all the encryption keys.
 
 #### End-to-end flow
@@ -136,7 +134,7 @@ While some apps may choose to support Backup Account Files directly, we can also
 
 #### Converting a Backup Account File into a Remote Message Backup
 
-XMTP Labs should create a simple web app to convert Backup Account Files into Remote Message Backups. In this app, a user could import their Backup Account File (with the file never leaving their machine) and create a temporary client instance with that backup file. The user would be presented with any outstanding `MessageHistoryBackupRequests` and select any backup requests they want to fulfill. The client would download all unread messages from the network and proceed with the regular Message Backup Provider flow for Remote Message Backups. All data would be cleared from the client as soon as the operation was completed.
+Ephemera should create a simple web app to convert Backup Account Files into Remote Message Backups. In this app, a user could import their Backup Account File (with the file never leaving their machine) and create a temporary client instance with that backup file. The user would be presented with any outstanding `MessageHistoryBackupRequests` and select any backup requests they want to fulfill. The client would download all unread messages from the network and proceed with the regular Message Backup Provider flow for Remote Message Backups. All data would be cleared from the client as soon as the operation was completed.
 
 This same web app could be used to create Backup Account Files for cases where a user's preferred XMTP app does not support creating Backup Account Files. This means every user on the XMTP network can create a Backup Account File if desired.
 
@@ -146,60 +144,54 @@ A Backup Storage Provider is a simple HTTP service with two endpoints. Anyone ca
 
 These are the required APIs for a minimal Backup Storage Provider:
 
-`POST /backups`:
+`POST /upload`:
 Request body would contain the file as multipart/form-data.
 
 Example response:
 
 ```json
 {
-  "downloadUrl": "https://backupproviderdomain.com/backups/some-long-unguessable-download-id"
+  "downloadUrl": "https://backupproviderdomain.com/files/some-long-unguessable-download-id"
 }
 ```
 
-`GET /backups/$DOWNLOAD_ID`:
+`GET /files/$DOWNLOAD_ID`:
 Returns the uploaded file matching the ID
 
-It would be the responsibility of the Backup Storage Provider to authenticate requests to `/backups` and mitigate abuse. Uploaded files would only need to be stored for maybe 72 hours before they could be safely purged, as backups are meant to be temporary storage. We could also just delete the file after it had been downloaded once.
+It would be the responsibility of the Backup Storage Provider to authenticate requests to `/upload` and mitigate abuse. Uploaded files would only need to be stored for maybe 72 hours before they could be safely purged, as backups are meant to be temporary storage. We could also just delete the file after it had been downloaded once.
 
-XMTP Labs would provide a reference implementation of a Backup Storage Provider.
+Ephemera would provide a reference implementation of a Backup Storage Provider.
 
-I am also proposing that XMTP Labs run a Backup Storage Provider as a free public good for the next two years, at which point this functionality would become part of an ecosystem of third-party gateway service providers.
+I am also proposing that Ephemera run a Backup Storage Provider as a free public good for the next two years, at which point this functionality would become part of an ecosystem of third-party gateway service providers.
 
 ### Changes to the v3 protocol buffers
 
 #### [Message Protos](https://github.com/xmtp/proto/blob/xmtpv3/proto/v3/message_contents/message.proto)
 
 ```proto
-// The decrypted message contents of any message on the installation's messaging topic
-message PadlockMessagePayload {
-    EdDsaSignature header_signature = 1;
-    oneof contents {
-        DirectMessage direct_message = 2;
-        MessageHistoryBackupRequest message_history_backup_request = 3;
-        MessageHistoryBackupResponse message_history_backup_response = 4;
-    }
+// Initiator or new installation id requesting a history will send a request
+message MessageHistoryRequest {
+  // Unique identifier for each request
+  string request_id = 1;
+  // Ensures a human is in the loop
+  string pin_code = 2;
 }
 
-// The decrypted contents of a MessageHistoryBackupRequest
-message MessageHistoryBackupRequest {
-    string request_id = 1;
-    int32 verification_pin = 2;
-    string upload_url = 3;
+// Pre-existing installation id capable of supplying a history sends this reply
+message MessageHistoryReply {
+  // Must match an existing request_id from a message history request
+  string request_id = 1;
+  // Where the messages can be retrieved from
+  string url = 2;
+  // Generated input 'secret' for the AES Key used to encrypt the message-bundle
+  MessageHistoryKeyType encryption_key = 3;
 }
 
-message MessageHistoryBackupResponse {
-    string request_id = 1;
-    string backup_url = 2;
-    // TBD on exact parameter definitions. Want to have flexibilty to change key types later
-    EncryptionParameters encryption_parameters = 3;
-    bytes backup_file_hash = 4;
-    int64 expiration_time_ns = 5;
-}
-
-message DirectMessage {
-    string convo_id = 1;
-    bytes content_bytes = 2;
+// Key used to encrypt the message-bundle
+message MessageHistoryKeyType {
+  oneof key {
+    bytes chacha20_poly1305 = 1;
+  }
 }
 ```
 
@@ -232,89 +224,88 @@ message InstallationContactBundle {
 ### Changes to `libxmtp`
 
 ```rust
+pub enum MessageHistoryError {
+    #[error("pin not found")]
+    PinNotFound,
+    #[error("pin does not match the expected value")]
+    PinMismatch,
+    #[error("IO error: {0}")]
+    IO(#[from] std::io::Error),
+    #[error("Serialization/Deserialization Error {0}")]
+    Serde(#[from] serde_json::Error),
+    #[error("AES-GCM encryption error")]
+    AesGcm(#[from] aes_gcm::Error),
+    #[error("reqwest error: {0}")]
+    Reqwest(#[from] reqwest::Error),
+    #[error("storage error: {0}")]
+    Storage(#[from] StorageError),
+    #[error("type conversion error")]
+    Conversion,
+    #[error("utf-8 error: {0}")]
+    UTF8(#[from] std::str::Utf8Error),
+    #[error("client error: {0}")]
+    Client(#[from] ClientError),
+    #[error("group error: {0}")]
+    Group(#[from] GroupError),
+    #[error("request ID of reply does not match request")]
+    ReplyRequestIdMismatch,
+    #[error("reply already processed")]
+    ReplyAlreadyProcessed,
+    #[error("no pending request to reply to")]
+    NoPendingRequest,
+    #[error("no reply to process")]
+    NoReplyToProcess,
+    #[error("generic: {0}")]
+    Generic(String),
+    #[error("missing history sync url")]
+    MissingHistorySyncUrl,
+    #[error("invalid history message payload")]
+    InvalidPayload,
+    #[error("invalid history bundle url")]
+    InvalidBundleUrl,
+}
+
+// client methods for message history
 impl Client<A> {
-    ...
-    /**
-    Methods for Backup Requesters
-    **/
-    pub fn requestRemoteMessageHistoryBackup(&self) -> Result<Vec<MessageHistoryBackupRequest>, ClientError> {
-        // Create and send a MessageHistoryBackupRequest to all other installations associated with the current blockchain account
-        ...
-    }
+    // Get the sync group for the client
+    pub fn get_sync_group(&self) -> Result<MlsGroup, GroupError> {}
 
-    pub fn getRemoteMessageHistoryBackupRequestStatus(&self, requestId: String) -> Result<BackupHistoryRequestStatus, ClientError> {
-        // Get the status of a pending backup request
-        ...
-    }
+    // Enable message history sync for the client
+    pub async fn enable_history_sync(&self) -> Result<(), GroupError> {}
 
-    pub fn applyRemoteMessageHistoryBackup(&self, requestId: String) -> Result<(), BackupApplyError> {
-        // Applies the following steps:
-        // 1. Look for the matching MessageHistoryBackupResponse and MessageHistoryBackupRequest in the database
-        // 2. If either are not found, return `ResponseNotFound`
-        // 3. Download the backup from the URI specified in the MessageHistoryBackupResponse
-        // 4. Decrypt the backup using the keys specified in the MessageHistoryBackupResponse
-        // 5. Run loadMessageBackupFile with the decrypted file
-        // 6. Delete the MessageHistoryBackupResponse from the local database, removing all sensitive key material
-        // 7. Set the MessageHistoryBackupRequest status to Applied
-        ...
-    }
+    // Send a history request to the network
+    pub async fn send_history_request(&self) -> Result<(String, String), MessageHistoryError> {}
 
-    pub fn loadMessageBackupFile(&self, file: std::fs::File) -> Result<(), BackupApplyError> {
-        // Read from the file line by line and add each message to the database. If message already exists, skip it and move on to the next line
-    }
+    // Send a history reply to the network
+    pub async fn send_history_reply(
+        &self,
+        contents: MessageHistoryReply,
+    ) -> Result<(), MessageHistoryError> {}
 
-    /**
-    Methods for Message Backup Providers
-    **/
-    pub fn listInboundBackupRequests(&self) -> Result<Vec<MessageHistoryBackupRequest>, ClientError> {
-        // Return all pending backup requests.
-        ...
-    }
+    // Get the latest pending history request
+    pub async fn get_pending_history_request(
+        &self,
+    ) -> Result<Option<(String, String)>, MessageHistoryError> {}
 
-    pub fn respondToBackupRequest(&self, requestId: String, approve: bool) -> Result<(), BackupCreateError> {
-        // Perform the following steps:
-        // 1. If approve is false, delete the MessageHistoryBackupRequest from the local database and return
-        // 2. Dump all messages from the database into a correctly encoded MessageHistoryBackupFile format
-        // 3. Generate a random encryption key, nonce, and salt
-        // 4. Encrypt the file using the encryption parameters from step 2.
-        // 5. Upload the file to the provided `backupStorageProviderUploadUrl`
-        // 6. Send a message over the XMTP network containing the encryption parameters and the `backupUrl` returned from the backup storage provider
-        // 7. Delete the backup request from the database and return
-        ...
-    }
+    // Reply to the latest pending history request
+    pub async fn reply_to_history_request(
+        &self,
+    ) -> Result<MessageHistoryReply, MessageHistoryError> {}
 
-    /**
-    Methods for Backup Account Files
-    **/
-    pub fn createBackupAccountFile(&self, path: String) -> Result<(), BuckupCreateError> {
-        // Create a file with a new account's private keys and return the contents of the file
-        ...
-    }
+    // Get the latest history reply
+    pub async fn get_latest_history_reply(
+        &self,
+    ) -> Result<Option<MessageHistoryReply>, MessageHistoryError> {}
 
-    pub fn importFromBackupAccountFile(&self, path: String) -> Result<(), BackupApplyError> {
-        // Load the file from the path, spin up a temporary client with the account keys, download all messages, and create a new Message Backup File
-        // Technically we could simplify this to just load the messages directly into the database without the intermediate file, but I like the idea of reducing surface area and re-using as much code as possible from the remote option
-        ...
-    }
-}
+    // Process the latest history reply
+    pub async fn process_history_reply(&self) -> Result<(), MessageHistoryError> {}
 
-pub struct MessageHistoryBackupRequest {
-    pub requestId: String,
-    pub verificationPin: i16, // A four digit PIN that can be displayed in both the Backup Requester app and the Backup Provider app to ensure the user is responding to the correct backup request
-    pub backupStorageProviderUploadUrl: String,
-    pub status: BackupRequestStatus
-    ...
-}
-
-pub struct MessageHistoryBackupResponse {
-    pub requestId: String,
-    pub verificationPin: i16,
-    backupUrl: String,
-    encryptionKey: Vec<u8>,
-    nonce: Vec<u8>,
-    salt: Vec<u8>,
-    backupFileHash: Vec<u8>,
-    expirationTimeNs: u8
+    // Verify a PIN for a history request
+    pub fn verify_pin(
+        &self,
+        request_id: &str,
+        pin_code: &str,
+    ) -> Result<(), MessageHistoryError> {}
 }
 
 pub enum BackupRequestStatus {
@@ -322,19 +313,6 @@ pub enum BackupRequestStatus {
     Expired,
     Applied,
     Failed
-}
-
-pub enum BackupApplyError {
-    ResponseNotFound,
-    DecryptionFailed,
-    ValidationFailed,
-}
-
-pub enum BackupCreateError {
-    RequestNotFound,
-    InvalidRequest,
-    NetworkError,
-    EncryptionError
 }
 ```
 
@@ -356,8 +334,6 @@ Instead of storing backups in a remotely hosted file and serving via HTTP, messa
 
 - The XMTP network was not designed for storage of large files. The network currently has a 1MB per message limit so backups would be divided across potentially hundreds of chunks.
 - Costly as the network decentralizes and fees are added to the network. Given that alternative storage providers can be used in the current proposal, the benefits to decentralization are limited.
-
-I could get on board with this proposal if others felt strongly that we shouldn't create new infrastructure. While backups are an odd fit for the XMTP transport network, it would work in the short term and be easier to bootstrap.
 
 #### Use a QR code instead of an XMTP message
 
