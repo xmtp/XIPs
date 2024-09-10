@@ -97,7 +97,7 @@ For mobile apps already handling push notifications, `MessageHistoryBackupReques
 1. Receive a `MessageHistoryBackupRequest` as part of the normal message receiving flow.
 1. Retrieve the contact for the installation that sent the message and ensure it has not been revoked. If revoked, ignore.
 1. Ensure the installation that sent the message has a contact signed by the same blockchain account as the current user. If not, ignore.
-1. Convert all messages in the local database into a Message Backup File (maybe we want to chunk here?)
+1. Convert all messages in the local database into a Message Backup File
 1. Generate ephemeral encryption key, salt, and nonce. Encrypt the file using these keys.
 1. Upload the file to the `backupStorageProviderUploadUrl` from the request.
 1. Reply to the message with a `MessageHistoryBackupResponse` containing the encryption details and the `backupUrl` provided by the Backup Storage Provider.
