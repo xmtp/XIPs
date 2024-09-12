@@ -33,6 +33,8 @@ Client apps need to be able to interact with Frames, and the HTTP POST requests 
 3. **Verification**  
 Frame developers need to be able to read the HTTP POST requests from #2 and verify the signatures, allowing them to provably know who clicked the button
 
+For further reference, see the [Open Frames specification](https://github.com/open-frames/standard), a lightweight extension to the [Frames spec](https://docs.farcaster.xyz/reference/frames/spec) to help enable non-Farcaster apps and protocols to support Frames.
+
 ### Rendering
 
 Users already include URLs in standard XMTP `ContentTypeText` messages. Some client apps choose to render link previews for those URLs. Frames would just be an extension of that link preview functionality.
@@ -251,3 +253,9 @@ In the proposed scheme above, messages would be signed and sent directly from th
 This can be solved by having developers route these requests through a proxy server to anonymize the sender. I’ve already started [prototyping what a simple Frame proxy](https://github.com/neekolas/og-proxy) would look like. This proxy server should be used for the initial Frame rendering, downloading of the Frame image, and interacting with POST requests. Client app developers can host their own instance of this open source proxy. I propose that XMTP Labs should run an instance as a public good. Developers can also use this proxy server to privately gather the information needed for link previews, which is a nice added bonus.
 
 At some scale, this becomes challenging. Signal Protocol previously used a proxy for link previews, but because of their massive scale they started getting blocked by popular websites like YouTube and had to [roll the feature back](https://community.signalusers.org/t/beta-feedback-for-the-upcoming-android-4-69-release/16219/4). Having many proxy services instead of a single proxy will help avoid this problem, but at some scale, we will need to reconsider the approach.
+
+### Threat model
+
+While not exhaustive, these are some of the most important potential attacks this system must mitigate:
+
+-
