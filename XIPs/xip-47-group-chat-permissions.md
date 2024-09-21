@@ -109,6 +109,17 @@ Another consideration was whether the extra complexity is worth making permissio
 
 The ability to update permissions is needed to address the use cases of initial group permission misconfiguration and the inevitable evolution of a group’s trust dynamic. For example, just because an online project group chat starts as a small group of well-intentioned contributors does not mean that the group may not evolve to have a larger variety of member trustworthiness and contributor types over time.
 
+## Threat Model
+
+There are three main categories of threats that are considered when designing the permissions system:
+
+1. Can group creators share responsibility with admins while retaining the ability to recover from malicious admins?  
+   This threat is mitigated by the three tiered permission system, the fact that super admins can not be removed by admins, and only super admins can update permissions.
+2. Does the permissions sytem have some recoverability in case an action was taken by mistake and needs to be undone?  
+   This threat is mitigated by the ability to update permissions, which allows a previously configured permission set to be adjusted if necessary.
+3. Is the group permission system safe from malicious actors who are running modified versions of our client code?  
+   This threat is mitigated by client side verification of all group actions that are subject to group permission policies. 
+
 ## Backward compatibility
 
 In addition to adding the new **Permission Policies** and **Permission Options** and making **Permissions Updatable**, we will also make the permission system itself updatable in the following ways:
