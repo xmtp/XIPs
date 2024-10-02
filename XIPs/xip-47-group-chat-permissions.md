@@ -118,7 +118,7 @@ There are three main categories of threats that are considered when designing th
 2. Does the permissions system have some recoverability in case an action was taken by mistake and needs to be undone?  
    This threat is mitigated by the ability to update permissions, which allows a previously configured permission set to be adjusted if necessary.
 3. Is the group permission system safe from malicious actors who are running modified versions of our client code?  
-   This threat is mitigated by client side verification of all group actions that are subject to group permission policies. 
+   This threat is mitigated by client side verification of all group actions that are subject to group permission policies.
 
 ## Backward compatibility
 
