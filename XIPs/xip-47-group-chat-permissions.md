@@ -115,7 +115,7 @@ There are three main categories of threats that are considered when designing th
 
 1. Can group creators share responsibility with admins while retaining the ability to recover from malicious admins?  
    This threat is mitigated by the three tiered permission system, the fact that super admins can not be removed by admins, and only super admins can update permissions.
-2. Does the permissions sytem have some recoverability in case an action was taken by mistake and needs to be undone?  
+2. Does the permissions system have some recoverability in case an action was taken by mistake and needs to be undone?  
    This threat is mitigated by the ability to update permissions, which allows a previously configured permission set to be adjusted if necessary.
 3. Is the group permission system safe from malicious actors who are running modified versions of our client code?  
    This threat is mitigated by client side verification of all group actions that are subject to group permission policies. 
