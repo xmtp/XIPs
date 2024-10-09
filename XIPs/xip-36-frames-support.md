@@ -27,11 +27,11 @@ The goal here is to allow existing Frames developers to reach users in private D
 Three new capabilities are required for client apps to render and interact with Frames:
 
 1. **Rendering**  
-Client apps need to be able to render the "initial frame" before any interaction
+   Client apps need to be able to render the "initial frame" before any interaction
 2. **Interaction**  
-Client apps need to be able to interact with Frames, and the HTTP POST requests in those interactions need to include signed content that can irrefutably identify the sender as the holder of an XMTP identity
+   Client apps need to be able to interact with Frames, and the HTTP POST requests in those interactions need to include signed content that can irrefutably identify the sender as the holder of an XMTP identity
 3. **Verification**  
-Frame developers need to be able to read the HTTP POST requests from #2 and verify the signatures, allowing them to provably know who clicked the button
+   Frame developers need to be able to read the HTTP POST requests from #2 and verify the signatures, allowing them to provably know who clicked the button
 
 For further reference, see the [Open Frames specification](https://github.com/open-frames/standard), a lightweight extension to the [Frames spec](https://docs.farcaster.xyz/reference/frames/spec) to help enable non-Farcaster apps and protocols to support Frames.
 
@@ -226,21 +226,21 @@ For a prototype implementation of a verification library that does this, see the
 We've developed reference implementations for all three components required to enable Frames on XMTP:
 
 1. [Rendering/interaction helper library](https://github.com/xmtp/xmtp-web/tree/main/packages/frames-client)  
-Needs some updates to accommodate changes to the POST message schema made after development began
+   Needs some updates to accommodate changes to the POST message schema made after development began
 
 2. [POST payload verification helper library](https://github.com/xmtp/xmtp-node-js-tools/tree/main/packages/frames-validator)  
-Needs some updates to accommodate changes to the POST message schema made after development began
+   Needs some updates to accommodate changes to the POST message schema made after development began
 
 3. [Open Graph Proxy service](https://github.com/neekolas/og-proxy)  
-Still missing support for proxying requests for images. This support will be a hard requirement for launch.
+   Still missing support for proxying requests for images. This support will be a hard requirement for launch.
 
 Here are some specifications you might also want to explore as a part of working with these reference implementations:
 
 - [Farcaster Frames specification](https://docs.farcaster.xyz/reference/frames/spec)  
-The Frames spec for creating interactive and authenticated experiences on Farcaster, embeddable in any Farcaster client
+  The Frames spec for creating interactive and authenticated experiences on Farcaster, embeddable in any Farcaster client
 
 - [Open Frames specification](https://github.com/open-frames/standard)  
-A lightweight extension to the Frames spec to help enable non-Farcaster apps and protocols to support Frames.
+  A lightweight extension to the Frames spec to help enable non-Farcaster apps and protocols to support Frames.
 
 ## Security considerations
 
@@ -258,4 +258,8 @@ At some scale, this becomes challenging. Signal Protocol previously used a proxy
 
 While not exhaustive, these are some of the most important potential attacks this system must mitigate:
 
--
+- A Frame developer may deploy a Frame that attempts to inject malicious code into the client application
+- A Frame developer may deploy a Frame that stores the IP address of the Frame viewer in connection with their wallet address
+- An attacker may attempt to find a weakness in our signature validation logic on the server, allowing them to impersonate a user without possession of their XMTP credentials
+- A Frame developer may try to replay actions sent to their Frame on another Frame in order to impersonate the user
+- For a transaction Frame, the developer may deploy a malicious smart contract and convince the user to execute a transaction that steals their funds instead of performing the intended action. This attack can be targeted to only a subset of users.
