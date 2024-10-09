@@ -3,7 +3,6 @@ xip: 36
 title: Frames Support
 description: Explores the new tooling required for XMTP apps to render and interact with Frames inside XMTP conversations
 author: Nicholas Molnar (@neekolas)
-discussions-to: https://community.xmtp.org/t/xip-36-supporting-frames-in-xmtp/534
 status: Review
 type: Standards
 category: Interface
