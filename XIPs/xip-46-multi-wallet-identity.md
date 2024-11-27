@@ -59,7 +59,7 @@ The user may perform identity updates, such as adding or removing wallets and in
 | Addressable for incoming messages | Yes | No | No |
 | Can be used to authenticate on new apps | Yes | No | No |
 | Used by the app to sign messages | No | Yes | No |
-| Can add more associated addresses | Yes | No | Yes |
+| Can add more associated addresses | Yes | Yes | Yes |
 | Can add more installation keys | Yes | No | Yes |
 | Can revoke other associated addresses and installation keys | No | No | Yes |
 | Can revoke self | No | No | No |
@@ -76,6 +76,12 @@ The member list of an inbox is expected to have the following properties:
 1. Every added member was bidirectionally approved by an existing member and the newly added member.
 2. There is a way to recover control over the inbox if any member other than the recovery address is compromised.
 3. Any client can verify that (1) is true, and all clients should see the same member list.
+
+### Role of the recovery address
+
+The recovery address is the only address that is allowed to revoke installations or wallets. Changing the recovery address does not require a signature from the new recovery address, allowing users to delegate recovery to a third party if desired. Recovery addresses are not used for reverse resolution (address -> inbox), so changing the recovery address of an inbox to an address that you do not control does not allow the user to impersonate any other address.
+
+Applications building a revocation flow are encouraged to show the list of addresses and installations in a hierarchical form, and allow the user to choose to recursively revoke members that were added by the installation targeted for revocation. This protects against cases where a compromised installation or account may have added additional compromised members. This recursive revocation is not required by the protocol, with the exception of installations added directly by a revoked wallet, allowing users choice in how broadly they would like to revoke access.
 
 ### Identity updates
 
