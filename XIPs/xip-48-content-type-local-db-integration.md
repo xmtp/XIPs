@@ -20,19 +20,20 @@ During the upgrade from XMTP V2 (Direct Messaging Only) to XMTP V3 (Groups via t
 
 1. Given a message ID, return all the reactions, replies, and read receipt status associated with that message.
 2. Given a group ID, return all messages along with each message's reactions, replies, and read receipt status.
-3. Given a group ID, return a list of messages filtered by content type, or potentially by content type attribute. 
+3. Given a group ID, return a list of messages filtered by content type, or potentially by content type attribute.
 
-In addition to enabling queries that will make integrators lives easier, storing content types in protobufs and rust will allow us to re-use encoding and decoding logic across platforms. 
+In addition to enabling queries that will make integrators lives easier, storing content types in protobufs and rust will allow us to re-use encoding and decoding logic across platforms.
 
 ## Specification
 
-Previously, each XMTP SDK included their own ContentType implementations that would aim to serialize and deserialize message contents to the same JSON format. 
+Previously, each XMTP SDK included their own ContentType implementations that would aim to serialize and deserialize message contents to the same JSON format.
 
 This XIP proposes new ContentTypes be defined using protobuf definitions that are integrated into our core rust library. Then, binding structs and encoding/decoding functions can be generated for each language, all from our [libxmtp](https://github.com/xmtp/libxmtp) rust repo. For a demonstration of code reuse, see the examples below.
 
 ### SDK Code Before Content Types in Rust
 
-#### xmtp-ios:
+#### xmtp-ios
+
 ```swift
 public struct Reaction: Codable {
     public var reference: String
@@ -55,7 +56,8 @@ public struct ReactionCodec: ContentCodec {
     ...
 ```
 
-#### xmtp-android:
+#### xmtp-android
+
 ```kotlin
 data class Reaction(
     val reference: String,
@@ -79,9 +81,11 @@ data class ReactionCodec(override var contentType: ContentTypeId = ContentTypeRe
     }
     ...
 ```
+
 ### SDK Code After Content Types in Rust
 
-#### libxmtp:
+#### libxmtp
+
 By moving content types to rust, we can define Foreign Function Interface (FFI) objects, as well as encoding and decoding functions that can be re-used in both xmtp-ios and xmtp-android.
 
 ```rust
@@ -111,7 +115,8 @@ pub fn encode_reaction(reaction: FfiReaction) -> Result<Vec<u8>, GenericError> {
 }
 ```
 
-#### Updated xmtp-ios content codec (using FfiReaction and encodeReaction defined in Rust):
+#### Updated xmtp-ios content codec (using FfiReaction and encodeReaction defined in Rust)
+
 ```swift
 public struct ReactionCodec: ContentCodec {
 
@@ -121,7 +126,8 @@ public struct ReactionCodec: ContentCodec {
     ...
 ```
 
-#### Updated xmtp-android content codec (using FfiReaction and encodeReaction defined in Rust):
+#### Updated xmtp-android content codec (using FfiReaction and encodeReaction defined in Rust)
+
 ```kotlin
 data class ReactionCodec(override var contentType: ContentTypeId = ContentTypeReaction) :
     ContentCodec<FfiReaction> {
@@ -133,6 +139,7 @@ data class ReactionCodec(override var contentType: ContentTypeId = ContentTypeRe
 ```
 
 ### Example of queryable content fields in rust
+
 In addition to consolidating encode/decode logic to our libxmtp repo, we can use libxmtp defined protobuf definitions for deserializing message contents in order to store content type specific data in our local database.
 
 An example of how this could work with the "Reaction" content type is below:
@@ -220,11 +227,11 @@ message Reaction {
 
 With existing code, we are defining our content types in JSON. So why the switch to protobuf?
 
-JSON is especially well suited for our most popular SDKs, xmtp-js and xmtp-react-native. We initally had a `xmtp-js-content-types` repo that unoffically served as the reference implementation for how to define content types in JSON. This repo eventually was combined into `xmtp-js` in order to decrease maintenance overhead, and now our other SDKs have an XIP mandate to all follow the same JSON format, but we can not easily create test cases to enforce this, and different SDKs may temporarily diverge from one another. 
+JSON is especially well suited for our most popular SDKs, xmtp-js and xmtp-react-native. We initally had a `xmtp-js-content-types` repo that unoffically served as the reference implementation for how to define content types in JSON. This repo eventually was combined into `xmtp-js` in order to decrease maintenance overhead, and now our other SDKs have an XIP mandate to all follow the same JSON format, but we can not easily create test cases to enforce this, and different SDKs may temporarily diverge from one another.
 
-Moving content types into rust allows us to re-think from first principles what would be the best way to define content types so that they are consistent across platforms, and are performant and easy to use in our core rust library. Our [xmtp-proto](https://github.com/xmtp/proto) repo is a perfect language agnostic solution for addressing those goals. There are some tradeoffs with backward compatibility, which we will discuss below, with different options for mitigating them. 
+Moving content types into rust allows us to re-think from first principles what would be the best way to define content types so that they are consistent across platforms, and are performant and easy to use in our core rust library. Our [xmtp-proto](https://github.com/xmtp/proto) repo is a perfect language agnostic solution for addressing those goals. There are some tradeoffs with backward compatibility, which we will discuss below, with different options for mitigating them.
 
-One last perspective to address is whether moving content types from our JSON and our JS repo to Protocol Buffers and our Rust repo will make it less accessible for developers to contribute new content types. However, experience has shown that defining new content types has been much easier than making those content types easy to use for developers in high quality consumer apps. The intuition we have is that developers prefer a rich set of well adopted content types that are easy to use over the ability to rapidly add new types that will not be easily adopted by other developers. 
+One last perspective to address is whether moving content types from our JSON and our JS repo to Protocol Buffers and our Rust repo will make it less accessible for developers to contribute new content types. However, experience has shown that defining new content types has been much easier than making those content types easy to use for developers in high quality consumer apps. The intuition we have is that developers prefer a rich set of well adopted content types that are easy to use over the ability to rapidly add new types that will not be easily adopted by other developers.
 
 <!-- The rationale fleshes out the specification by describing what motivated the design and particular design decisions. The rationale should describe alternate designs that were considered and related work, such as how the feature supports other languages. The rationale may also provide evidence of consensus within the community and should share important objections or concerns raised during those discussions. -->
 
@@ -262,12 +269,11 @@ message EncodedContent {
 }
 ```
 
-
 Users on older SDK versions both using JSON encoding will be fine, and new users both using protobuf encoding will be fine. The cases where backward compatibility will be an issue are the following:
 
 1. You are on an older XMTP SDK version, and you receive a message with a new protobuf content type.
 
-> In this case, your SDK version should recognize that it does not know how to decode the content type because of it's higher ContentTypeId version, and it will instead use the fallback string of the EncodedContent wrapper struct. 
+> In this case, your SDK version should recognize that it does not know how to decode the content type because of it's higher ContentTypeId version, and it will instead use the fallback string of the EncodedContent wrapper struct.
 
 2. You are on an older XMTP SDK version, and you are sending messages with old JSON content types to users on newer SDK versions.
 
@@ -277,7 +283,7 @@ Users on older SDK versions both using JSON encoding will be fine, and new users
 
 > You may see a content type message the same as today if SDKs retain JSON decoding logic for old versions, or you may see a fallback string if SDKs do not.
 
-4. You are on a new XMTP SDK version, and you are sending protobuf messages to users on older SDK versions who can not decode them. 
+4. You are on a new XMTP SDK version, and you are sending protobuf messages to users on older SDK versions who can not decode them.
 
 > You can expect that users on older versions will see fallback string message versions of your content type messages until they use a client that is updated to a later SDK version.
 
@@ -300,7 +306,7 @@ The following content types are proposed for migration to protobufs:
 Each of these content types should have:
 
 1. A test case showing that they work as expected when their corresponding codecs are registered upon client creation.
-2. A test case showing that when the content type or version is not supported, that the fallback string is returned as expected. 
+2. A test case showing that when the content type or version is not supported, that the fallback string is returned as expected.
 
 ## Reference implementation
 
@@ -318,7 +324,7 @@ No new security considerations are introduced with this XIP. The security consid
 
 > This API change allows transmitting arbitrary and therefore potentially dangerous types of content. Complex decoding or presentation logic can trigger undesirable or dangerous behavior in the receiving client. The authority of any given content type SHOULD provide suitable guidance on how to handle the content type safely.
 
-> \* In the case of content types managed by https://github.com/xmtp the authority would be contributors/admins of the relevant GitHub repos.
+> \* In the case of content types managed by the [XMTP GitHub organization](https://github.com/xmtp) the authority would be contributors/admins of the relevant GitHub repos.
 <!-- The security considerations include design decisions, concerns, and implementation-specific guidance and pitfalls that might be important to security discussions about the proposed change. It surfaces threats and risks and how they are being addressed. The information should be useful throughout the proposal's lifecycle.
 
 An XIP cannot proceed to Final status without a discussion of security considerations deemed sufficient by the XIP reviewers. XIP submissions missing security considerations will be rejected outright. -->
