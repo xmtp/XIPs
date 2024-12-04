@@ -283,7 +283,7 @@ Users on older SDK versions both using JSON encoding will be fine, and new users
 
 Our proposed recommendation at this point is to prioritize getting as many of the content types as possible migrated to protobufs before widespread adoption of our V3 MLS group chat protocol. The default SDK behavior will be to only support the latest protobuf version of a ContentTypeId, and to use fallback string for messages that are on older versions. If there is widespread adoption of groups that use some older JSON based content types, then for those specific cases, we reserve the ability to check in the SDKs for older ContentTypeId versions, and to use JSON deserialization in XMTP SDKs for those cases.
 
-## Test cases*
+## Test cases
 
 <!-- Include tests inline in the XIP as data, such as input/expected output pairs. If the test suite is too large to reasonably include inline, consider adding it as one or more files in `../assets/xip-n/<filename>`, where `n` is to be replaced with the XIP number. *Test cases are optional. -->
 
@@ -297,7 +297,12 @@ The following content types are proposed for migration to protobufs:
 
 > \* The default Text content type automatically works in rust because the content and fallback fields are the same. Also, Group Updated Messages and Member Change messages are already implemented in protobufs and rust, so those are already queryable.
 
-## Reference implementation*
+Each of these content types should have:
+
+1. A test case showing that they work as expected when their corresponding codecs are registered upon client creation.
+2. A test case showing that when the content type or version is not supported, that the fallback string is returned as expected. 
+
+## Reference implementation
 
 The following PRs demonstrate declaring the Reaction content type in protobufs, generating the binding code and extracting queryable fields in rust, and updating the encoding/decoding and codec structs in Android:
 
