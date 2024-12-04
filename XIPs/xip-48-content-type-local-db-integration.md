@@ -273,25 +273,17 @@ message EncodedContent {
 
 Users on older SDK versions both using JSON encoding will be fine, and new users both using protobuf encoding will be fine. The cases where backward compatibility will be an issue are the following:
 
-#### 1. An older XMTP SDK version receives a message with a new protobuf content type
+#### 1. A message is sent from a new SDK version to an older SDK version
 
-In this case, your SDK version should recognize that it does not know how to decode the content type because of it's higher ContentTypeId version, and it will instead use the fallback string of the EncodedContent wrapper struct.
+In this case, the older SDK version will not know how to decode the content type because of its higher ContentTypeId version, and it will instead **use the fallback string** of the EncodedContent wrapper struct.
 
-#### 2. An older XMTP SDK version sends messages with old JSON content types to users on newer SDK versions
+#### 2. A message is sent from an older SDK version to a newer SDK version
 
-One option is for integrator targeted SDKs to retain code for decoding older JSON content types. A second option is to update integrator targeted SDKs to only support the latest protobuf based content types that will work in new content type based message functions, and to only use fallback text for messages that are not compatible with the latest content types.
-
-#### 3. A new XMTP SDK version receives a message with an old JSON content type
-
-You may see a content type message the same as today if SDKs retain JSON decoding logic for old versions, or you may see a fallback string if SDKs do not.
-
-#### 4. A new XMTP SDK version sends protobuf messages to users on older SDK versions who can not decode them
-
-You can expect that users on older versions will see fallback string message versions of your content type messages until they use a client that is updated to a later SDK version.
+One option is for integrator targeted **SDKs to retain code for decoding older JSON content types**. A second option is to update integrator targeted SDKs to only support the latest protobuf based content types that will work in new content type based message functions, and to only use fallback text for messages that are not compatible with the latest content types.
 
 ### Recommendation
 
-Our proposed recommendation at this point is to prioritize getting as many of the content types as possible migrated to protobufs before widespread adoption of our V3 MLS group chat protocol. The default SDK behavior will be to only support the latest protobuf version of a ContentTypeId, and to use fallback string for messages that are on older versions. If there is widespread adoption of groups that use some older JSON based content types, then for those specific cases, we reserve the ability to check in the SDKs for older ContentTypeId versions, and to use JSON deserialization in XMTP SDKs for those cases.
+While users on older versions will not be able to decode new content types and will instead see fallback text, it should be relatively straightforward to retain JSON decoding logic in our updated SDKs so that apps on the latest version will keep receiving content types as expected even if not all their chat counterparts have upgraded to new content types yet. This means users on the latest SDK version should not have to settle for fallback text simply because of compatibility issues.
 
 ## Test cases
 
