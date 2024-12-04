@@ -269,23 +269,27 @@ message EncodedContent {
 }
 ```
 
+### Backward compatibility cases to consider
+
 Users on older SDK versions both using JSON encoding will be fine, and new users both using protobuf encoding will be fine. The cases where backward compatibility will be an issue are the following:
 
-1. You are on an older XMTP SDK version, and you receive a message with a new protobuf content type.
+#### 1. An older XMTP SDK version receives a message with a new protobuf content type
 
-> In this case, your SDK version should recognize that it does not know how to decode the content type because of it's higher ContentTypeId version, and it will instead use the fallback string of the EncodedContent wrapper struct.
+In this case, your SDK version should recognize that it does not know how to decode the content type because of it's higher ContentTypeId version, and it will instead use the fallback string of the EncodedContent wrapper struct.
 
-2. You are on an older XMTP SDK version, and you are sending messages with old JSON content types to users on newer SDK versions.
+#### 2. An older XMTP SDK version sends messages with old JSON content types to users on newer SDK versions
 
-> One option is for integrator targeted SDKs to retain code for decoding older JSON content types. A second option is to update integrator targeted SDKs to only support the latest protobuf based content types that will work in new content type based message functions, and to only use fallback text for messages that are not compatible with the latest content types.
+One option is for integrator targeted SDKs to retain code for decoding older JSON content types. A second option is to update integrator targeted SDKs to only support the latest protobuf based content types that will work in new content type based message functions, and to only use fallback text for messages that are not compatible with the latest content types.
 
-3. You are on a new XMTP SDK version, and you receive a message with an old JSON content type.
+#### 3. A new XMTP SDK version receives a message with an old JSON content type
 
-> You may see a content type message the same as today if SDKs retain JSON decoding logic for old versions, or you may see a fallback string if SDKs do not.
+You may see a content type message the same as today if SDKs retain JSON decoding logic for old versions, or you may see a fallback string if SDKs do not.
 
-4. You are on a new XMTP SDK version, and you are sending protobuf messages to users on older SDK versions who can not decode them.
+#### 4. A new XMTP SDK version sends protobuf messages to users on older SDK versions who can not decode them
 
-> You can expect that users on older versions will see fallback string message versions of your content type messages until they use a client that is updated to a later SDK version.
+You can expect that users on older versions will see fallback string message versions of your content type messages until they use a client that is updated to a later SDK version.
+
+### Recommendation
 
 Our proposed recommendation at this point is to prioritize getting as many of the content types as possible migrated to protobufs before widespread adoption of our V3 MLS group chat protocol. The default SDK behavior will be to only support the latest protobuf version of a ContentTypeId, and to use fallback string for messages that are on older versions. If there is widespread adoption of groups that use some older JSON based content types, then for those specific cases, we reserve the ability to check in the SDKs for older ContentTypeId versions, and to use JSON deserialization in XMTP SDKs for those cases.
 
@@ -324,7 +328,7 @@ No new security considerations are introduced with this XIP. The security consid
 
 > This API change allows transmitting arbitrary and therefore potentially dangerous types of content. Complex decoding or presentation logic can trigger undesirable or dangerous behavior in the receiving client. The authority of any given content type SHOULD provide suitable guidance on how to handle the content type safely.
 
-> \* In the case of content types managed by the [XMTP GitHub organization](https://github.com/xmtp) the authority would be contributors/admins of the relevant GitHub repos.
+\* In the case of content types managed by the [XMTP GitHub organization](https://github.com/xmtp) the authority would be contributors/admins of the relevant GitHub repos.
 <!-- The security considerations include design decisions, concerns, and implementation-specific guidance and pitfalls that might be important to security discussions about the proposed change. It surfaces threats and risks and how they are being addressed. The information should be useful throughout the proposal's lifecycle.
 
 An XIP cannot proceed to Final status without a discussion of security considerations deemed sufficient by the XIP reviewers. XIP submissions missing security considerations will be rejected outright. -->
