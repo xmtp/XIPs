@@ -104,7 +104,7 @@ Authority ID identifies the entity that governs a suite of content types, their 
 
 Type ID identifies particular type of content that can be handled by a specific implementation of its encoding/decoding rules. Content type version allows future evolution of the content type definition.
 
-Type version is captured in the common major.minor form intended to convey the associated semantics that versions differing in the minor version only MUST be backward compatible, i.e. a client supporting an earlier version MUST be able to adequately present content with later version. Content type authority MUST manage the evolution of content type in a manner that respects this constraint.
+Type version is captured in the common major.minor form intended to convey the associated semantics that versions differing in the minor version only MUST be backward compatible, i.e. a client supporting an earlier version MUST be able to adequately present content with the later version. Content type authority MUST manage the evolution of content type in a manner that respects this constraint.
 
 For human communication only we are also proposing an alternative representation of an ID in the form of a string with the following structure `authority/type[:major.minor]`. For the plain text type identifier proposed below that translates to `xmtp.org/text` or `xmtp.org/text:1.0`. This representation MUST NOT be used at the protocol level, only the binary representation is allowed. Clients MUST NOT be expected to parse this string.
 
