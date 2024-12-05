@@ -96,7 +96,7 @@ message ContentTypeId {
 }
 ```
 
-Any content type MUST have well defined parameters (or clearly state that no parameters are required/allowed), and any implementation MUST support all valid parameters for the content type.
+Any content type MUST have well-defined parameters (or clearly state that no parameters are required/allowed), and any implementation MUST support all valid parameters for the content type.
 
 Authority ID identifies the entity that governs a suite of content types, their definitions and implementations. Authority ID SHOULD be unique and be widely recognized as belonging to the entity. DNS domains or ENS names can serve this purpose (e.g. `uniswap.eth`). The authority is responsible for providing a definition of the content type and its encoding parameters as well as the associated implementation.
 
