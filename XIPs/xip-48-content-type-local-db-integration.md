@@ -319,7 +319,7 @@ No new security considerations are introduced with this XIP. The security consid
 
 ### Threat model
 
-As usual, users and developers should aspire to be using the latest XMTP SDK versions whenever possible, but you can never be sure whether inboxes you are chatting with on XMTP are using older or modified versions of the SDK. This means that users could configure their messages to specify that they are sending a certain content type, but the format, contents, or intentions of the actual data in the message could be something different. Fortunately, we haven't identified any security issues that would arise from this possibility, but it is something developers utilizing "complex decoding or presentation logic" as mentioned in the quote above, should be aware of. If any more specific threats or example of misuse arise, this section will be updated.
+As usual, users and developers should aspire to use the latest XMTP SDK versions whenever possible, but you can never be sure whether inboxes you are chatting with on XMTP are using older or modified versions of the SDK. This means that users could configure their messages to specify that they are sending a certain content type, but the format, contents, or intentions of the actual data in the message could be something different. Fortunately, we haven't identified any security issues that would arise from this possibility, but it is something developers utilizing "complex decoding or presentation logic" as mentioned in the quote above, should be aware of. If any more specific threats or examples of misuse arise, this section will be updated.
 
 ## Copyright
 
