@@ -1,9 +1,9 @@
 ---
 xip: 48
-title: Queryable Content Types in Rust
-description: This XIP proposes a new way of managing content types in XMTP in order to make complex content types like reactions, replies, and message filtering easier for XMTP integrators.
+title: Queryable content types in Rust
+description: This XIP proposes a new way of managing content types in XMTP to make complex content types like reactions, replies, and message filtering easier for XMTP integrators.
 author: cameronvoell; cameron@ephemerahq.com; cvoell.eth
-discussions-to: URL where the XIP draft will be discussed.
+discussions-to: https://community.xmtp.org/t/xip-48-queryable-content-types-in-rust/845
 status: Draft
 type: Standards
 category: XRC
@@ -12,25 +12,25 @@ created: 2024-11-27
 
 ## Abstract
 
-This XIP proposes a way of managing XMTP content types in protobufs and rust in order to make complex content types like reactions, replies, and message filtering easier for XMTP integrators.
+This XIP proposes a way of managing XMTP content types in protobufs and Rust to make complex content types like reactions, replies, and message filtering easier for XMTP integrators.
 
 ## Motivation
 
-During the upgrade from XMTP V2 (Direct Messaging Only) to XMTP V3 (Groups via the MLS protocol), one developer experience improvement was that the new "V3" SDKs manage a local SQLITE database containing all of a user's groups and messages. At the same time, our core "libxmtp" library that manages all the database logic remained completely agnostic to the message "content types" that were being stored in the database. The fact that our local database code is content type agnostic has made some queries that would be common in a production consumer messaging app impossible without forcing developers to implement their own extra local persistent data management. This XIP proposes a way to integrate XMTP content types with our core library and local SQLITE storage. This solution will enable the following new SDK functions:
+During the upgrade from XMTP V2 (Direct Messaging Only) to XMTP V3 (Groups via the MLS protocol), one developer experience improvement was that the new "V3" SDKs manage a local SQLITE database containing all of a user's groups and messages. At the same time, the core "libxmtp" library that manages all the database logic remained completely agnostic to the message "content types" that were being stored in the database. The fact that the local database code is content type-agnostic has made some queries that would be common in a production consumer messaging app impossible without forcing developers to implement their own extra local persistent data management. This XIP proposes a way to integrate XMTP content types with the core library and local SQLITE storage. This solution will enable the following new SDK functions:
 
 1. Given a message ID, return all the reactions, replies, and read receipt status associated with that message.
 2. Given a group ID, return all messages along with each message's reactions, replies, and read receipt status.
 3. Given a group ID, return a list of messages filtered by content type, or potentially by content type attribute.
 
-In addition to enabling queries that will make integrators lives easier, storing content types in protobufs and rust will allow us to re-use encoding and decoding logic across platforms.
+In addition to enabling queries that will make integrators lives easier, storing content types in protobufs and Rust will allow the re-use of encoding and decoding logic across platforms.
 
 ## Specification
 
-Previously, each XMTP SDK included their own ContentType implementations that would aim to serialize and deserialize message contents to the same JSON format.
+Previously, each XMTP SDK included its own ContentType implementations that would aim to serialize and deserialize message contents to the same JSON format.
 
-This XIP proposes new ContentTypes be defined using protobuf definitions that are integrated into our core rust library. Then, binding structs and encoding/decoding functions can be generated for each language, all from our [libxmtp](https://github.com/xmtp/libxmtp) rust repo. For a demonstration of code reuse, see the examples below.
+This XIP proposes that new ContentTypes be defined using protobuf definitions that are integrated into the core Rust library. Then, binding structs and encoding/decoding functions can be generated for each language, all from the [libxmtp](https://github.com/xmtp/libxmtp) Rust repo. For a demonstration of code reuse, see the examples below.
 
-### SDK Code Before Content Types in Rust
+### SDK code before content types in Rust
 
 #### xmtp-ios
 
@@ -82,11 +82,11 @@ data class ReactionCodec(override var contentType: ContentTypeId = ContentTypeRe
     ...
 ```
 
-### SDK Code After Content Types in Rust
+### SDK code after content types in Rust
 
 #### libxmtp
 
-By moving content types to rust, we can define Foreign Function Interface (FFI) objects, as well as encoding and decoding functions that can be re-used in both xmtp-ios and xmtp-android.
+By moving content types to Rust, we can define Foreign Function Interface (FFI) objects, as well as encoding and decoding functions that can be re-used in both xmtp-ios and xmtp-android.
 
 ```rust
 #[derive(uniffi::Record, Clone, Default)]
@@ -138,9 +138,9 @@ data class ReactionCodec(override var contentType: ContentTypeId = ContentTypeRe
     ...
 ```
 
-### Example of queryable content fields in rust
+### Example of queryable content fields in Rust
 
-In addition to consolidating encode/decode logic to our libxmtp repo, we can use libxmtp defined protobuf definitions for deserializing message contents in order to store content type specific data in our local database.
+In addition to consolidating encode/decode logic to the libxmtp repo, we can use libxmtp-defined protobuf definitions for deserializing message contents to store content type-specific data in the local database.
 
 An example of how this could work with the "Reaction" content type is below:
 
@@ -195,17 +195,17 @@ An example of how this could work with the "Reaction" content type is below:
 
 ```
 
-### What about Custom Content Types?
+### What about custom content types?
 
 Since the goal of queryable content types is to make _core_ content types easier to use, this XIP will not affect how custom content types are already working in XMTP. Integrators can continue to define and use custom content types as they have been doing. [See docs for more info](https://docs.xmtp.org/inboxes/content-types/custom).
 
 ### How will the remote attachment content type be affected by this XIP?
 
-Though querying performance and usability is not the primary concern of the Remote Attachment content type like it is with others like Reaction, Reply, and Read Receipt, there are other advantages of having our core rust library being aware of the Remote Attachment content type. Much like how content types in rust can promote reusing rust defined encoding/decoding logic across platforms, having the remote attachment content type in rust allows us to reuse code for encrypting/decrypting remote attachments and potentially code for downloading / uploading remote attachments as well. Though this is not the primary goal of the XIP, it exemplifies another advantage of moving core content types to rust. See [XIP-17 Remote AttachmentContent Types](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-17-remote-attachment-content-type-proposal.md) for more context.
+Though querying performance and usability is not the primary concern of the Remote Attachment content type like it is with others like Reaction, Reply, and Read Receipt, there are other advantages of having the core Rust library being aware of the Remote Attachment content type. Much like how content types in Rust can promote reusing Rust defined encoding/decoding logic across platforms, having the remote attachment content type in Rust allows us to reuse code for encrypting/decrypting remote attachments and potentially code for downloading / uploading remote attachments as well. Though this is not the primary goal of the XIP, it exemplifies another advantage of moving core content types to Rust. See [XIP-17 Remote AttachmentContent Types](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-17-remote-attachment-content-type-proposal.md) for more context.
 
 ## Rationale
 
-The example specification above utilizes the following protobuf definition to tell our rust code how to serialize and deserialize the "Reaction" content type:
+The example specification above utilizes the following protobuf definition to tell the Rust code how to serialize and deserialize the "Reaction" content type:
 
 ```proto
 // Reaction message type
@@ -228,21 +228,17 @@ message Reaction {
 }
 ```
 
-With existing code, we are defining our content types in JSON. So why the switch to protobuf?
+With existing code, we are defining content types in JSON. So why the switch to protobuf?
 
-JSON is especially well suited for our most popular SDKs, xmtp-js and xmtp-react-native. We initally had a `xmtp-js-content-types` repo that unoffically served as the reference implementation for how to define content types in JSON. This repo eventually was combined into `xmtp-js` in order to decrease maintenance overhead, and now our other SDKs have an XIP mandate to all follow the same JSON format, but we can not easily create test cases to enforce this, and different SDKs may temporarily diverge from one another.
+JSON is especially well suited for XMTP's most popular SDKs, xmtp-js and xmtp-react-native. We initially had a `xmtp-js-content-types` repo that unofficially served as the reference implementation for how to define content types in JSON. This repo eventually was combined into `xmtp-js` to decrease maintenance overhead, and now the other XMTP SDKs have an XIP mandate to all follow the same JSON format, but we can not easily create test cases to enforce this, and different SDKs may temporarily diverge from one another.
 
-Moving content types into rust allows us to re-think from first principles what would be the best way to define content types so that they are consistent across platforms, and are performant and easy to use in our core rust library. Our [xmtp-proto](https://github.com/xmtp/proto) repo is a perfect language agnostic solution for addressing those goals. There are some tradeoffs with backward compatibility, which we will discuss below, with different options for mitigating them.
+Moving content types into Rust allows us to re-think from first principles what would be the best way to define content types so that they are consistent across platforms, and are performant and easy to use in the core Rust library. The [xmtp-proto](https://github.com/xmtp/proto) repo is a perfect language-agnostic solution for addressing those goals. There are some tradeoffs with backward compatibility, which we will discuss below, with different options for mitigating them.
 
-One last perspective to address is whether moving content types from our JSON and our JS repo to Protocol Buffers and our Rust repo will make it less accessible for developers to contribute new content types. However, experience has shown that defining new content types has been much easier than making those content types easy to use for developers in high quality consumer apps. The intuition we have is that developers prefer a rich set of well adopted content types that are easy to use over the ability to rapidly add new types that will not be easily adopted by other developers.
-
-<!-- The rationale fleshes out the specification by describing what motivated the design and particular design decisions. The rationale should describe alternate designs that were considered and related work, such as how the feature supports other languages. The rationale may also provide evidence of consensus within the community and should share important objections or concerns raised during those discussions. -->
+One last perspective to address is whether moving content types from JSON and the JS repo to Protocol Buffers and the Rust repo will make it less accessible for developers to contribute new content types. However, experience has shown that defining new content types has been much easier than making those content types easy to use for developers in high quality consumer apps. The intuition we have is that developers prefer a rich set of well adopted content types that are easy to use over the ability to rapidly add new types that will not be easily adopted by other developers.
 
 ## Backward compatibility
 
-<!-- All XIPs that introduce backward incompatibilities must include a section describing these incompatibilities and their severity. The XIP must explain how the author proposes to deal with these incompatibilities. XIP submissions without a sufficient backward compatibility treatise may be rejected outright. -->
-
-As alluded to above, one downside of moving content types from JSON to protobufs is that it will introduce the possibility of two users on different SDK versions expecting to send and receive messages with different encoding logic. Luckily, the `EncodedContent` wrapper struct that wraps all content types has two fields to help deal with these scenarios: the `ContentTypeId` and the `fallback` string. See Protobuf definitions below:
+As alluded to above, one downside of moving content types from JSON to protobufs is that it will introduce the possibility of two users on different SDK versions expecting to send and receive messages with different encoding logic. Luckily, the `EncodedContent` wrapper struct that wraps all content types has two fields to help deal with these scenarios: the `ContentTypeId` and the `fallback` string. See protobuf definitions below:
 
 ```proto
 // ContentTypeId is used to identify the type of content stored in a Message.
@@ -282,15 +278,13 @@ In this case, the older SDK version will not know how to decode the content type
 
 #### 2. A message is sent from an older SDK version to a newer SDK version
 
-One option is for integrator targeted **SDKs to retain code for decoding older JSON content types**. A second option is to update integrator targeted SDKs to only support the latest protobuf based content types that will work in new content type based message functions, and to only use fallback text for messages that are not compatible with the latest content types.
+One option is for integrator targeted **SDKs to retain code for decoding older JSON content types**. A second option is to update integrator targeted SDKs to only support the latest protobuf-based content types that will work in new content type based message functions, and to only use fallback text for messages that are not compatible with the latest content types.
 
 ### Recommendation
 
-While users on older versions will not be able to decode new content types and will instead see fallback text, it should be relatively straightforward to retain JSON decoding logic in our updated SDKs so that apps on the latest version will keep receiving content types as expected even if not all their chat counterparts have upgraded to new content types yet. This means users on the latest SDK version should not have to settle for fallback text simply because of compatibility issues.
+While users on older versions will not be able to decode new content types and will instead see fallback text, it should be relatively straightforward to retain JSON decoding logic in the updated SDKs so that apps on the latest version will keep receiving content types as expected even if not all their chat counterparts have upgraded to new content types yet. This means users on the latest SDK version should not have to settle for fallback text simply because of compatibility issues.
 
 ## Test cases
-
-<!-- Include tests inline in the XIP as data, such as input/expected output pairs. If the test suite is too large to reasonably include inline, consider adding it as one or more files in `../assets/xip-n/<filename>`, where `n` is to be replaced with the XIP number. *Test cases are optional. -->
 
 The following content types are proposed for migration to protobufs:
 
@@ -300,7 +294,7 @@ The following content types are proposed for migration to protobufs:
 4. Reply
 5. Transaction Reference
 
-> \* The default Text content type automatically works in rust because the content and fallback fields are the same. Also, Group Updated Messages and Member Change messages are already implemented in protobufs and rust, so those are already queryable.
+> \* The default Text content type automatically works in Rust because the content and fallback fields are the same. Also, Group Updated Messages and Member Change messages are already implemented in protobufs and Rust, so those are already queryable.
 
 Each of these content types should have:
 
@@ -309,13 +303,11 @@ Each of these content types should have:
 
 ## Reference implementation
 
-The following PRs demonstrate declaring the Reaction content type in protobufs, generating the binding code and extracting queryable fields in rust, and updating the encoding/decoding and codec structs in Android:
+The following PRs demonstrate declaring the Reaction content type in protobufs, generating the binding code and extracting queryable fields in Rust, and updating the encoding/decoding and codec structs in Android:
 
 - [xmtp/proto Draft PR](https://github.com/xmtp/proto/pull/232)
 - [libxmtp Draft PR](https://github.com/xmtp/libxmtp/pull/1345)
 - [xmtp-android Draft PR](https://github.com/xmtp/xmtp-android/pull/343)
-
-<!-- A reference/example implementation that people can use to assist in understanding or implementing this specification. If the implementation is too large to reasonably be included inline, then consider adding it as one or more files in `../assets/xip-n/<filename>`, where `n` is to be replaced with the XIP number. *A reference implementation is optional. -->
 
 ## Security considerations
 
@@ -324,9 +316,6 @@ No new security considerations are introduced with this XIP. The security consid
 > This API change allows transmitting arbitrary and therefore potentially dangerous types of content. Complex decoding or presentation logic can trigger undesirable or dangerous behavior in the receiving client. The authority of any given content type SHOULD provide suitable guidance on how to handle the content type safely.
 
 \* In the case of content types managed by the [XMTP GitHub organization](https://github.com/xmtp) the authority would be contributors/admins of the relevant GitHub repos.
-<!-- The security considerations include design decisions, concerns, and implementation-specific guidance and pitfalls that might be important to security discussions about the proposed change. It surfaces threats and risks and how they are being addressed. The information should be useful throughout the proposal's lifecycle.
-
-An XIP cannot proceed to Final status without a discussion of security considerations deemed sufficient by the XIP reviewers. XIP submissions missing security considerations will be rejected outright. -->
 
 ## Copyright
 
