@@ -193,12 +193,13 @@ An example of how this could work with the "Reaction" content type is below:
         }
     }
 ```
+### What about Custom Content Types?
 
-<!-- The specification should describe the technical syntax and semantics of any new feature. The specification should be detailed enough to enable competing and interoperable implementations for any current XMTP platform.
+Since the goal of queryable content types is to make _core_ content types easier to use, this XIP will not affect how custom content types are already working in XMTP. Integrators can continue to define and use custom content types as they have been doing. [See docs for more info](https://docs.xmtp.org/inboxes/content-types/custom).
 
-Follow RFC 2119 for terminology and start the specification section with this paragraph:
+### How will the remote attachment content type be affected by this XIP?
 
-The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt). -->
+Though querying performance and usability is not the primary concern of the Remote Attachment content type like it is with others like Reaction, Reply, and Read Receipt, there are other advantages of having our core rust library being aware of the Remote Attachment content type. Much like how content types in rust can promote reusing rust defined encoding/decoding logic across platforms, having the remote attachment content type in rust allows us to reuse code for encrypting/decrypting remote attachments and potentially code for downloading / uploading remote attachments as well. Though this is not the primary goal of the XIP, it exemplifies another advantage of moving core content types to rust. See [XIP-17 Remote AttachmentContent Types](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-17-remote-attachment-content-type-proposal.md) for more context. 
 
 ## Rationale
 
