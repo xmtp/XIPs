@@ -2,7 +2,7 @@
 xip: 48
 title: Queryable content types in Rust
 description: This XIP proposes a new way of managing content types in XMTP to make complex content types like reactions, replies, and message filtering easier for XMTP integrators.
-author: cameronvoell; cameron@ephemerahq.com; cvoell.eth
+author: Cameron Voell (@cameronvoell)
 status: Review
 type: Standards
 category: XRC
