@@ -947,7 +947,7 @@ On message query, in addition to validation required by MLS, clients must:
     2. The target topic matches the actual topic.
 4. Verify the client envelope AAD was correctly authenticated ([3.3.5. Cross-originator message ordering](#335-cross-originator-message-ordering))
 5. Verify that the payloads are causally consistent ([3.3.5. Cross-originator message ordering](#335-cross-originator-message-ordering)).
-6. Perform payload-specific validation, as defined in section XXX.
+6. Perform payload-specific validation, as defined in previous XIP's.
 7. (Optional) Query multiple nodes simultaneously to ensure no payloads were omitted.
 8. (Optional) Query the blockchain directly to ensure that blockchain payloads were not doctored.
 
