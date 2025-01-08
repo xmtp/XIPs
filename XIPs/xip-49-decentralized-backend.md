@@ -2,8 +2,8 @@
 xip: 49
 title: Decentralized backend for MLS messages
 description: This XIP defines an architecture for a decentralized XMTP network.
-author: Rich Hua (@richardhuaaa), Nick Molnar (@neekolas), Martin Kysel (@mkysel), and Francisco de Borja Aranda Castillejo (@fbac)
-discussions-to: TBD
+authors: Rich Hua (@richardhuaaa), Nick Molnar (@neekolas), Martin Kysel (@mkysel), and Francisco de Borja Aranda Castillejo (@fbac)
+discussions-to: https://community.xmtp.org/t/xip-49-decentralized-backend-for-mls-messages/856
 status: Draft
 type: Standards
 category: Network
@@ -447,7 +447,7 @@ The node registry serves as the source of truth for the complete list of nodes t
 | Field | Description | Mutable? | Unique? |
 | --- | --- | --- | --- |
 | **Node ID** | A strictly increasing index for the node entry. | N | Y |
-| **Public key** | A secp256k1 public key controlled by the node, used for signing and identification purposes. Format: Uncompressed point with prefix (0x04) [ P || X || Y ], 65 bytes | N | Y |
+| **Public key** | A secp256k1 public key controlled by the node, used for signing and identification purposes. Format: Uncompressed point with prefix (0x04) [ P \|\| X \|\| Y ], 65 bytes | N | Y |
 | **HTTP Address** | The IP address or DNS information for the node’s entry-point. A node is permitted to consist of multiple servers with shared state by having the HTTP Address point to a load balancer. | N | N |
 | **Status** | Either ‘enabled’ or ‘disabled’. | Y | N |
 
