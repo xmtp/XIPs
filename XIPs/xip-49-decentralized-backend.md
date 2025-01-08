@@ -77,7 +77,7 @@ In this system, there are four components involved in the delivery of messaging 
 3. The **broadcast network** will store and replicate payloads that do not require total ordering.
 4. The **L3 blockchain** will store payloads that require total ordering.
 
-![Diagram illustrating the flow of messaging payloads](./XIPs/assets/xip-49/payload-flow.png)
+![Diagram illustrating the flow of messaging payloads](./assets/xip-49/payload-flow.png)
 
 ## 2. Specification: L3 blockchain
 
@@ -121,7 +121,7 @@ The specifics of the XMTP app chain will be described in a future XIP, but there
 
 Each L2 rollup has a ceiling on the amount of gas that can be used per block. Paradigm has a [helpful table](https://www.paradigm.xyz/2024/04/reth-perf) that shows the amount of gas per second that a chain can handle.
 
-![Table showing the amount of gas per second that a chain can handle](./XIPs/assets/xip-49/gas-handling.png)
+![Table showing the amount of gas per second that a chain can handle](./assets/xip-49/gas-handling.png)
 
 The tables below shows several variations of our smart contract, and their gas usage. All per-second values are for Arbitrum One.
 
@@ -436,7 +436,7 @@ Because latency is critical for a messaging protocol, we choose to adopt a small
 
 With this size and topology, quality of nodes becomes important (stability, performance), as well as operational capability of node operators. In the testnet phase, we employ a node selection and removal process emphasizing high-quality, diverse, and trusted organizations, with future iterations of the selection process becoming permissionless.
 
-![Diagram illustrating message replication within the broadcast network](./XIPs/assets/xip-49/message-replication.png)
+![Diagram illustrating message replication within the broadcast network](./assets/xip-49/message-replication.png)
 
 The purpose of this topology is to increase decentralization and trust, not scalability. Each node represents a conceptual grouping of multiple servers run by a single organization, and may choose to scale internally using traditional infrastructure techniques such as sharding and replication across geographies, ensuring that increased demand can be met efficiently.
 
