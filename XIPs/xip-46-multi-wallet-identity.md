@@ -395,6 +395,7 @@ Both nodes and clients must apply the following algorithm during validation:
 - The `initial_address_signature` must be recoverable to the `account_address`
 - If the `initial_address_signature` comes from a Legacy Delegated Account, the Inbox must have been created with nonce `0`
 - The `account_address` will become the first member of the Inbox and will be set as the `recovery_address` for the inbox
+- The `account_address` must not already have an Address log pointing to a different `inbox_id`
 
 ##### AddAssociation
 
