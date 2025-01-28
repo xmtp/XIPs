@@ -11,15 +11,13 @@ created: 2025-01-28
 
 ## Abstract
 
-This XIP proposes a new `MultiRemoteAttachment` content type inspired by the existing `RemoteAttachment` content type, that instead allows for multiple remote attachments to be sent in a single message. 
+This XIP proposes a new `MultiRemoteAttachment` content type inspired by the existing `RemoteAttachment` content type, that instead allows for multiple remote attachments to be sent in a single message.
 
 Where the `RemoteAttachment` content is a URL pointing to an encrypted protobuf [EncodedContent](https://github.com/xmtp/proto/blob/9c2c26caa69367684d54919fe29a02cb3666a71c/proto/mls/message_contents/content.proto#L26-L42), the `MultiRemoteAttachment`  content is a protobuf struct containing an array of remote attachment structs, each specifying a URL, as well as a `contentDigest`, `contentLength`, `nonce`, `scheme`, and `filename`. The idea being that the multi remote attachment encoded content parameters  will specify a secret key and salt for encrypting/decrypting all attachments, but each attachment will have its own nonce, and contentDigest for validating the integrity of the individual attachments.
-
 
 ## Motivation
 
 Modern messaging apps commonly support sending multiple attachments, particularly images, in a single message. This XIP standardizes this functionality for the XMTP network.
-
 
 ## Specification
 
@@ -96,7 +94,7 @@ By using `EncodedMessage`, we can make it easier for clients to support any mess
 
 The reference implementation uses the `Attachment` type from XIP 15, but if we introduce richer types for things like images or video, those would work here as well, since clients should be able to understand those types once they're settled.
 
-The same secret key and salt are used for encrypting/decrypting all attachments. The SDKs will contain helper funcitons for ensuring that a different nonce is used for each attachment in the attachments array. 
+The same secret key and salt are used for encrypting/decrypting all attachments. The SDKs will contain helper funcitons for ensuring that a different nonce is used for each attachment in the attachments array.
 
 ## Rationale
 
@@ -108,7 +106,7 @@ Another design option we added was the option to include a filename and content 
 
 Clients encountering messages of this type must already be able to deal with messages of an unknown content type, so whatever considerations they're making there should work here too.
 
-The fallback text content will just notify the user that they received a multi attachment message which their client does not support. 
+The fallback text content will just notify the user that they received a multi attachment message which their client does not support.
 
 ## Reference implementation
 
@@ -123,7 +121,7 @@ Having arbitrary data anywhere can be risky, but this is already the case for ou
 
 ### Threat model
 
-The threat model is that if you are in a group chat with someone who is malicious, they may send aribtrary attachments in a chat. Remote attachments could also point to URL's intended to track the ip address of a client app downloading the attachment. The same is true for all URLs in messages in your encrypted group chat, so we recommend requiring a user action to initiate an attachment download to minimize the risk, or recommend users who do not wish to reveal the ip address to use a VPN when using an app that is downloading remote attchments. 
+The threat model is that if you are in a group chat with someone who is malicious, they may send aribtrary attachments in a chat. Remote attachments could also point to URL's intended to track the ip address of a client app downloading the attachment. The same is true for all URLs in messages in your encrypted group chat, so we recommend requiring a user action to initiate an attachment download to minimize the risk, or recommend users who do not wish to reveal the ip address to use a VPN when using an app that is downloading remote attchments.
 
 ## Copyright
 
