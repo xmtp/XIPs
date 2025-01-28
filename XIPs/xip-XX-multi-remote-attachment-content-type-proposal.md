@@ -1,9 +1,10 @@
 ---
-xip: XX
-title: Multi Remote Attachment Content Type
-description: Content type for remote attachments
+xip: 50
+title: Multiple remote attachment content type
+description: Content type for multiple remote attachments
 author: Cameron Voell (@cameronvoell)
-status: Review
+discussions-to: TBD
+status: Draft
 type: Standards Track
 category: XRC
 created: 2025-01-28
@@ -13,7 +14,7 @@ created: 2025-01-28
 
 This XIP proposes a new `MultiRemoteAttachment` content type inspired by the existing `RemoteAttachment` content type, that instead allows for multiple remote attachments to be sent in a single message.
 
-Where the `RemoteAttachment` content is a URL pointing to an encrypted protobuf [EncodedContent](https://github.com/xmtp/proto/blob/9c2c26caa69367684d54919fe29a02cb3666a71c/proto/mls/message_contents/content.proto#L26-L42), the `MultiRemoteAttachment`  content is a protobuf struct containing an array of remote attachment structs, each specifying a URL, as well as a `contentDigest`, `contentLength`, `nonce`, `scheme`, and `filename`. The idea being that the multi remote attachment encoded content parameters  will specify a secret key and salt for encrypting/decrypting all attachments, but each attachment will have its own nonce, and contentDigest for validating the integrity of the individual attachments.
+Where the `RemoteAttachment` content is a URL pointing to an encrypted protobuf [EncodedContent](https://github.com/xmtp/proto/blob/9c2c26caa69367684d54919fe29a02cb3666a71c/proto/mls/message_contents/content.proto#L26-L42), the `MultiRemoteAttachment` content is a protobuf struct containing an array of remote attachment structs, each specifying a URL, as well as a `contentDigest`, `contentLength`, `nonce`, `scheme`, and `filename`. The idea being that the multiple remote attachment encoded content parameters will specify a secret key and salt for encrypting/decrypting all attachments, but each attachment will have its own nonce, and `contentDigest` for validating the integrity of the individual attachments.
 
 ## Motivation
 
@@ -32,7 +33,7 @@ Proposed content type:
 }
 ```
 
-The multi remote attachment encoded content MUST have the following parameters:
+The multiple remote attachment encoded content MUST have the following parameters:
 
 ```proto
 {
@@ -44,7 +45,7 @@ The multi remote attachment encoded content MUST have the following parameters:
 }
 ```
 
-The content of the encoded message will be the following protobuf encoded MultiRemoteAttachment object:
+The content of the encoded message will be the following protobuf-encoded `MultiRemoteAttachment` object:
 
 ```proto
 {
@@ -92,21 +93,21 @@ Each attachment in the attachments array contains a URL that points to an encryp
 
 By using `EncodedMessage`, we can make it easier for clients to support any message content already used on the network (with the exception of `RemoteAttachment` and `MultiRemoteAttachment` as mentioned above).
 
-The reference implementation uses the `Attachment` type from XIP 15, but if we introduce richer types for things like images or video, those would work here as well, since clients should be able to understand those types once they're settled.
+The reference implementation uses the `Attachment` type from [XIP-15](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-15-attachment-content-type.md), but if we introduce richer types for things like images or video, those would work here as well, since clients should be able to understand those types once they're settled.
 
-The same secret key and salt are used for encrypting/decrypting all attachments. The SDKs will contain helper funcitons for ensuring that a different nonce is used for each attachment in the attachments array.
+The same secret key and salt are used for encrypting/decrypting all attachments. The SDKs will contain helper functions for ensuring that a different nonce is used for each attachment in the attachments array.
 
 ## Rationale
 
-Another design option would be to have separate secret keys and salts for each attachment in a remote attchement content type. This was decided against, because the array of secrets would still be sent in the same message payload, so it was not clear that this would be more secure than the current proposal. To ensure reusing the secret does not leak information, we use a unique nonce for each attachment in the attachments array.
+Another design option would be to have separate secret keys and salts for each attachment in a remote attachment content type. This was decided against, because the array of secrets would still be sent in the same message payload, so it was not clear that this would be more secure than the current proposal. To ensure reusing the secret does not leak information, we use a unique nonce for each attachment in the attachments array.
 
-Another design option we added was the option to include a filename and content length for each attachment. This allows clients to predict the size of an attachment before downloading it, and potentially reject a message if the attachment size does not match the expected size.
+A design option we added was the option to include a filename and content length for each attachment. This allows clients to predict the size of an attachment before downloading it, and potentially reject a message if the attachment size does not match the expected size.
 
 ## Backward compatibility
 
 Clients encountering messages of this type must already be able to deal with messages of an unknown content type, so whatever considerations they're making there should work here too.
 
-The fallback text content will just notify the user that they received a multi attachment message which their client does not support.
+The fallback text content will just notify the user that they received a multiple remote attachment message which their client does not support.
 
 ## Reference implementation
 
@@ -117,11 +118,11 @@ The fallback text content will just notify the user that they received a multi a
 
 Making requests to servers outside the network could reveal information similar to tracking pixels. This could be somewhat mitigated by not loading this content by default, or at least providing users with a setting.
 
-Having arbitrary data anywhere can be risky, but this is already the case for our messages, since there's no server side validation of message contents (besides size).
+Having arbitrary data anywhere can be risky, but this is already the case for messages, since there's no server-side validation of message contents (besides size).
 
 ### Threat model
 
-The threat model is that if you are in a group chat with someone who is malicious, they may send aribtrary attachments in a chat. Remote attachments could also point to URL's intended to track the ip address of a client app downloading the attachment. The same is true for all URLs in messages in your encrypted group chat, so we recommend requiring a user action to initiate an attachment download to minimize the risk, or recommend users who do not wish to reveal the ip address to use a VPN when using an app that is downloading remote attchments.
+The threat model is that if you are in a group chat with someone who is malicious, they may send arbitrary attachments in a chat. Remote attachments could also point to URLs intended to track the IP address of a client app downloading the attachment. The same is true for all URLs in messages in an encrypted group chat, so we recommend requiring a user action to initiate an attachment download to minimize the risk, or recommend that users who don't want to reveal their IP address use a VPN when using an app that is downloading remote attachments.
 
 ## Copyright
 
