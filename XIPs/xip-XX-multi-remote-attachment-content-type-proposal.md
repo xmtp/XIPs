@@ -1,6 +1,6 @@
 ---
 xip: 50
-title: Multiple remote attachment content type
+title: Multiple remote attachments content type
 description: Content type for multiple remote attachments
 author: Cameron Voell (@cameronvoell)
 discussions-to: TBD
