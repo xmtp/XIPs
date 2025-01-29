@@ -1,14 +1,14 @@
-# XIP-51: Agent messages
-
-- xip: 51
-- title: Agent messages
-- description: A way to help differentiate agent messages from human messages
-- author: Naomi Plasterer (@nplasterer), Fabri Guespe (@humanagent)
-- discussions-to: https://community.xmtp.org/t/xip-51-agent-messages/865
-- status: Draft
-- type: Standards
-- category: XRC
-- created: 2025-01-27
+---
+xip: 51
+title: Agent messages
+description: A way to help differentiate agent messages from human messages
+authors: Naomi Plasterer (@nplasterer), Fabri Guespe (@humanagent)
+discussions-to: https://community.xmtp.org/t/xip-51-agent-messages/865
+status: Draft
+type: Standards
+category: XRC
+created: 2025-01-27
+---
 
 ## Abstract
 
