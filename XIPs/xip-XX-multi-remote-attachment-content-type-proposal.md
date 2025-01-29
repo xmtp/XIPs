@@ -142,7 +142,10 @@ const message = await group.sendMessage(multiRemoteAttachment)
 
 ```ts
 const message = (await group.messages()).first()
-const multiRemoteAttachment = message.content()
+if (message.contentTypeId == 'xmtp.org/multiRemoteStaticContent:1.0') {
+    const multiRemoteAttachment: MultiRemoteAttachment = message.content()
+}
+
 ```
 
 #### 2. Download the attachments
