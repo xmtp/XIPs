@@ -5,7 +5,7 @@ description: Content type for multiple remote attachments
 author: Cameron Voell (@cameronvoell)
 discussions-to: TBD
 status: Draft
-type: Standards Track
+type: Standards
 category: XRC
 created: 2025-01-28
 ---
@@ -81,7 +81,7 @@ The same secret key and salt are used for encrypting/decrypting all attachments.
 
 ### An example flow of using the SDK to send a `MultiRemoteAttachment` content type
 
-#### 1. Create two attachment objects that you would like to send
+#### 1. Create two attachment objects that you want to send
 
 ```ts
 const attachment1: DecryptedLocalAttachment = {
@@ -120,7 +120,7 @@ const encryptedAttachmentsPostUpload: RemoteAttachmentInfo[] = await Promise.all
 );
 ```
 
-#### 4. Construct MultiRemoteAttachment content type
+#### 4. Construct `MultiRemoteAttachment` content type
 
 ```ts
 const multiRemoteAttachment: MultiRemoteAttachment = {
@@ -145,7 +145,6 @@ const message = (await group.messages()).first()
 if (message.contentTypeId == 'xmtp.org/multiRemoteStaticContent:1.0') {
     const multiRemoteAttachment: MultiRemoteAttachment = message.content()
 }
-
 ```
 
 #### 2. Download the attachments
@@ -160,9 +159,9 @@ const encryptedAttachments = downloadAttachments(multiRemoteAttachment)
 const decryptedAttachments = await client.decryptAttachments(encryptedAttachments)
 ```
 
-#### 4. Use the file URIs in the decrypted attachments objects in order to display the attachment
+#### 4. Use the file URIs in the decrypted attachments objects to display the attachment
 
-```typescript
+```ts
 const attachment1 = decryptedAttachments[0]
 const attachment2 = decryptedAttachments[1]
 
@@ -172,15 +171,15 @@ const attachment2 = decryptedAttachments[1]
 
 ## Rationale
 
-Another design option would be to have separate secret keys and salts for each attachment in a remote attachment content type. This was decided against, because the array of secrets would still be sent in the same message payload, so it was not clear that this would be more secure than the current proposal. To ensure reusing the secret does not leak information, we use a unique nonce for each attachment in the attachments array.
+Another design option would be to have separate secret keys and salts for each attachment in a remote attachment content type. We decided against this because the array of secrets would still be sent in the same message payload, so it wasn't clear that this would be more secure than the current proposal. To ensure reusing the secret doesn't leak information, we use a unique nonce for each attachment in the attachments array.
 
-A design option we added was the option to include a filename and content length for each attachment. This allows clients to predict the size of an attachment before downloading it, and potentially reject a message if the attachment size does not match the expected size.
+A design option we added was the option to include a filename and content length for each attachment. This allows clients to predict the size of an attachment before downloading it, and potentially reject a message if the attachment size doesn't match the expected size.
 
 ## Backward compatibility
 
 Clients encountering messages of this type must already be able to deal with messages of an unknown content type, so whatever considerations they're making there should work here too.
 
-The fallback text content will just notify the user that they received a multiple remote attachment message which their client does not support.
+The fallback text content will just notify the user that they received a multiple remote attachment message which their client doesn't support.
 
 ## Reference implementation
 
