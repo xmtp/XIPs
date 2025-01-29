@@ -79,7 +79,7 @@ The reference implementation uses the `Attachment` type from [XIP-15](https://gi
 
 The same secret key and salt are used for encrypting/decrypting all attachments. The SDKs will contain helper functions for ensuring that a different nonce is used for each attachment in the attachments array.
 
-### An example flow of using the SDK to send an `MultiRemoteAttachment` content type
+### An example flow of using the SDK to send a `MultiRemoteAttachment` content type
 
 #### 1. Create two attachment objects that you would like to send
 
