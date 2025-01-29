@@ -33,61 +33,43 @@ Proposed content type:
 }
 ```
 
-The multiple remote attachment encoded content MUST have the following parameters:
-
-```proto
-{
-  // A 32 byte hex string for decrypting the remote content payload
-  secret: string,
-  
-  // A hex string for the salt used to encrypt the remote content payload
-  salt: string,
-}
-```
-
 The content of the encoded message will be the following protobuf-encoded `MultiRemoteAttachment` object:
 
 ```proto
-{
-  numAttachments: uint32,
-  maxAttachmentContentLength: uint32,
-  attachments: [
-    {
-      // The SHA256 hash of the remote content
-      contentDigest: string,
-      
-      // A hex string for the nonce used to encrypt the remote content payload
-      nonce: string,
+message MultiRemoteAttachment {
+  // A 32 byte array for decrypting the remote content payload
+  bytes secret = 1;
+  
+  // A byte array for the salt used to encrypt the remote content payload
+  bytes salt = 2;
+  
+  // Array of attachment information
+  repeated RemoteAttachmentInfo attachments = 3;
 
-      // The scheme of the URL. Must be "https://"
-      scheme: "https://"
-
-      // The URL of the remote content
-      url: string
-
-      // The filename of the remote content
-      filename: string;
-    },
-    {
-      // The SHA256 hash of the remote content
-      contentDigest: string,
-      
-      // A hex string for the nonce used to encrypt the remote content payload
-      nonce: string,
-
-      // The scheme of the URL. Must be "https://"
-      scheme: "https://"
-
-      // The URL of the remote content
-      url: string
-
-      // The filename of the remote content
-      filename: string;
-    },
-    ...
-  ]
+   // The number of attachments in the attachments array
+  optional uint32 num_attachments = 3;
+  
+  // The maximum content length of an attachment in the attachments array
+  optional uint32 max_attachment_content_length = 4;
 }
-  ```
+
+message RemoteAttachmentInfo {
+  // The SHA256 hash of the remote content
+  string content_digest = 1;
+  
+  // A byte array for the nonce used to encrypt the remote content payload
+  bytes nonce = 2;
+  
+  // The scheme of the URL. Must be "https://"
+  string scheme = 3;
+  
+  // The URL of the remote content
+  string url = 4;
+  
+  // The filename of the remote content
+  string filename = 5;
+}
+```
 
 Each attachment in the attachments array contains a URL that points to an encrypted `EncodedContent` object. The content must be accessible by an HTTP `GET` request to the URL. The `EncodedContent`'s content type MUST not be another `RemoteAttachment` or `MultiRemoteAttachment`.
 
@@ -96,6 +78,94 @@ By using `EncodedMessage`, we can make it easier for clients to support any mess
 The reference implementation uses the `Attachment` type from [XIP-15](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-15-attachment-content-type.md), but if we introduce richer types for things like images or video, those would work here as well, since clients should be able to understand those types once they're settled.
 
 The same secret key and salt are used for encrypting/decrypting all attachments. The SDKs will contain helper functions for ensuring that a different nonce is used for each attachment in the attachments array.
+
+### An example flow of using the SDK to send an `MultiRemoteAttachment` content type
+
+#### 1. Create two attachment objects that you would like to send
+
+```ts
+const attachment1: DecryptedLocalAttachment = {
+  fileUri: "content://media/external/images/media/image-1.png",
+  mimeType: "image/png",
+  filename: "image-1.png"
+}
+
+const attachment2: DecryptedLocalAttachment = {
+  fileUri: "content://media/external/images/media/image-2.png",
+  mimeType: "image/png",
+  filename: "image-2.png"
+}
+```
+
+#### 2. Encrypt the attachments
+
+```ts
+const {encryptedAttachmentsPreUpload, secret, salt} = await client.encryptAttachments([attachment1, attachment2])
+```
+  
+#### 3. Upload the attachments
+
+```ts
+const encryptedAttachmentsPostUpload: RemoteAttachmentInfo[] = await Promise.all(
+  encryptedAttachmentsPreUpload.map(async (attachment) => {
+    // Integrator customizable code for uploading an attachment and retrieving the URL
+    const uploadedUrl = await upload(attachment); 
+    
+    // Merge the uploaded URL back into the original attachment data
+    return {
+      ...attachment,
+      url: uploadedUrl,
+    };
+  })
+);
+```
+
+#### 4. Construct MultiRemoteAttachment content type
+
+```ts
+const multiRemoteAttachment: MultiRemoteAttachment = {
+  secret,
+  salt,
+  attachments: encryptedAttachmentsPostUpload
+}
+```
+
+#### 5. Send the message
+
+```ts
+const message = await group.sendMessage(multiRemoteAttachment)
+```
+
+### Example flow of receiving a `MultiRemoteAttachment` content type
+
+#### 1. Decode the message received in the group
+
+```ts
+const message = (await group.messages()).first()
+const multiRemoteAttachment = message.content()
+```
+
+#### 2. Download the attachments
+
+```ts
+const encryptedAttachments = downloadAttachments(multiRemoteAttachment)
+```
+
+#### 3. Decrypt the attachments
+
+```ts
+const decryptedAttachments = await client.decryptAttachments(encryptedAttachments)
+```
+
+#### 4. Use the file URIs in the decrypted attachments objects in order to display the attachment
+
+```typescript
+const attachment1 = decryptedAttachments[0]
+const attachment2 = decryptedAttachments[1]
+
+<Image source={{ uri: attachment1.fileUri }} />
+<Image source={{ uri: attachment2.fileUri }} />
+```
 
 ## Rationale
 
