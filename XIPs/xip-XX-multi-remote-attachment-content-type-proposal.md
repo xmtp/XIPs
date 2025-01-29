@@ -47,10 +47,10 @@ message MultiRemoteAttachment {
   repeated RemoteAttachmentInfo attachments = 3;
 
    // The number of attachments in the attachments array
-  optional uint32 num_attachments = 3;
+  optional uint32 num_attachments = 4;
   
   // The maximum content length of an attachment in the attachments array
-  optional uint32 max_attachment_content_length = 4;
+  optional uint32 max_attachment_content_length = 5;
 }
 
 message RemoteAttachmentInfo {
