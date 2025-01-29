@@ -4,7 +4,7 @@
 - title: Agent messages
 - description: A way to help differentiate agent messages from human messages
 - author: Naomi Plasterer (@nplasterer), Fabri Guespe (@humanagent)
-- discussions-to: TBD
+- discussions-to: https://community.xmtp.org/t/xip-51-agent-messages/865
 - status: Draft
 - type: Standards
 - category: XRC
