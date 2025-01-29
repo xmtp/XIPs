@@ -1,14 +1,14 @@
-# XIP-50: Group announcements
-
-- xip: 50
-- title: Group announcements
-- description: A way to send a global group announcement to a group that can be displayed to all participants upon joining.
-- author: Naomi Plasterer (@nplasterer)
-- discussions-to: TBD
-- status: Draft
-- type: Standards
-- category: XRC
-- created: 2025-01-27
+---
+xip: 52
+title: Group announcements
+description: A way to send a global group announcement to a group that can be displayed to all participants upon joining.
+author: Naomi Plasterer (@nplasterer)
+discussions-to: https://community.xmtp.org/t/xip-52-group-announcements/866
+status: Draft
+type: Standards
+category: XRC
+created: 2025-01-27
+---
 
 ## Abstract
 
@@ -20,7 +20,7 @@ A groups grow larger, it’s important to be able to communicate a standard, suc
 
 ## Specification
 
-Proposal 1: A new metadata field called `announcement`.
+Proposal: A new metadata field called `announcement`.
 
 ```js
 group.announcement()
