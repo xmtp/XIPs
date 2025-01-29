@@ -1,27 +1,28 @@
-# XIP-X: Agent Messages
+# XIP-51: Agent messages
 
-- xip: X
-- title: Agent Messages
-- description: A way to help differentiate a agents messages from a humans message
+- xip: 51
+- title: Agent messages
+- description: A way to help differentiate agent messages from human messages
 - author: Naomi Plasterer (@nplasterer), Fabri Guespe (@humanagent)
+- discussions-to: TBD
 - status: Draft
-- type: Standards track
-- category: XRCX
+- type: Standards
+- category: XRC
 - created: 2025-01-27
 
-## **Abstract**
+## Abstract
 
-This XRC proposes several options for allowing senders to differentiate a agents messages from a humans message.
+This XRC proposes several options for allowing senders to differentiate an agent's message from a human's message.
 
-## **Motivation**
+## Motivation
 
-With the growing popularity of Agents on the internet it may become a common place for bots to want to identify themselves as a bot. This way integrators can display bot messages differently in UI making it clear the person you are talking to is not human. And if a bot is detected that does not identify themselves as a bot it can seem more untrustworthy to users.
+With the growing popularity of agents (bots) on the internet, it may become commonplace for an agent to want to identify itself as an agent. This way, integrators can display agent messages differently in the UI making it clear that the person you are talking to isn't a human. And if an agent is detected and it doesn't identify itself as an agent, it can seem more untrustworthy to users.
 
-## **Specification**
+## Specification
 
-Proposal 1: A Agent Message content type:
+Proposal 1: An agent message content type:
 
-```
+```json
 {
   authorityId: "xmtp.org"
   typeId: "agentMessage"
@@ -30,15 +31,15 @@ Proposal 1: A Agent Message content type:
 }
 ```
 
-This would be the same as a text message where the fallback and content would be the same that way even apps that don’t support displaying `agentMessages` differently would still see the messages correctly
+This would be the same as a text message where the fallback and content would be the same. In this way, even apps that don’t support displaying `agentMessages` differently would still see the messages correctly.
 
-Proposal 2: A additional field set on all messages for self election as a bot on send. Would default to false if not set.
+Proposal 2: An additional field set on all messages that enables an agent to self-identity as an agent upon message send. The value defaults to `false` if not set.
 
 ```jsx
 group.send("Gm I'm a bot", isAgent: true)
 ```
 
-Proposal 3: A agents election to identifying as a bot could happen at the client creation and not at each send message so instead it would be
+Proposal 3: Agent self-identification could happen upon client creation and not upon each message send. So instead, it would be:
 
 ```jsx
 client.create(signer, clientOptions {isAgent: true})
@@ -46,20 +47,20 @@ group.send("Gm I'm a bot")
 client.isAgent?(message.sender) // returns true or false if the user who sent the message identifies as an agent 
 ```
 
-Taking this a step further we could allow this at the identity level for the inboxId. So that it would be identifiable easily to any other inbox that this inbox is a bot. 
+Taking this a step further, the protocol could enable agent self-identification at the identity level for the `inboxId`. This would make it easier for any other inbox to identify the inbox as an agent.
 
-## **Backward compatibility**
+## Backward compatibility
 
 Clients encountering messages of this type must already be able to deal with messages of an unknown content type, so whatever considerations they're making there should work here too.
 
-## **Reference implementation**
+## Reference implementation
 
-- https://github.com/ephemeraHQ/xmtp-agents/blob/main/packages/agent-starter/src/content-types/agent-message.ts
+- [agent-message.ts](https://github.com/ephemeraHQ/xmtp-agents/blob/main/packages/agent-starter/src/content-types/agent-message.ts)
 
-## **Security considerations**
+## Security considerations
 
-Can this be abused by humans acting as bots or bots acting as humans who don’t choose to elect themselves as a bot?
+Can this feature be abused by a human acting as an agent? Or by an agent acting as a human that doesn’t choose to identify itself as an agent?
 
-## **Copyright**
+## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
