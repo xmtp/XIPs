@@ -1,30 +1,34 @@
 ---
 xip: 53
 title: XMTP V2 deprecation
-description: This XIP defines a plan to turn off writes to the XMTP V2 network and making it read only to encourage developers to upgrade to using the XMTP V3 network.
+description: This XIP defines a plan to turn off writes to the XMTP V2 network and making it read-only as a way to encourage developers to upgrade to using the XMTP V3 network.
 author: Naomi Plasterer (@nplasterer)
-discussions-to: TBD
+discussions-to: https://community.xmtp.org/t/xip-53-xmtp-v2-deprecation-plan/867
 status: Draft
 type: Standards
-category: XRC
+category: Core
 created: 2025-01-29
 ---
 
 ## Abstract
 
-XMTP V3 provides the framework for a more robust messaging ecosystem—supporting stronger security guarantees with MLS, modern features like group chats, and decentralization. These enhancements weren’t efficiently and effectively feasible with XMTP V2, which also can’t migrate seamlessly to V3.
+XMTP V3 provides the framework for a more robust messaging ecosystem—supporting stronger security guarantees with MLS (Messaging Layer Security), modern features like group chats, and decentralization. These enhancements weren’t efficiently and effectively feasible with XMTP V2, which also can’t migrate seamlessly to V3.
 
-To encourage adoption of XMTP V3 and ensure the network remains secure and future-proof, we provide this plan to remove the ability to write to XMTP V2. This step discourages reliance on outdated infrastructure and fosters a unified community transition to the more advanced V3 network.
+To encourage adoption of XMTP V3 and ensure the network remains secure and future-proof, we provide this plan to remove the ability to write to XMTP V2. This step forward discourages reliance on outdated infrastructure and fosters a unified community transition to the more advanced V3 network.
 
 ## Motivation
 
-Now that XMTP V3 is fully featured and developer-ready, it’s the ideal time to move V2 interactions to a more future-proof environment that provides a sustainable, long-term solution for the XMTP community. By transitioning to V3, these interactions can remain stable and continue to compound into the future.
+Now that XMTP V3 is fully featured and developer-ready, it’s the ideal time to move V2 interactions to V3, which provides a more sustainable and future-proof solution for the XMTP community. By transitioning to V3, these interactions can remain stable and continue to compound into the future.
 
 ## Specification
 
-**January 1, 2025**: Developers should start upgrading to XMTP V3, moving off any V2-compatible versions of XMTP SDKs. We recommend always updating your app to use the latest version of the SDK to ensure that you'll be on a stable release when it's ready.
+### January 1, 2025
 
-**April 1, 2025** - The brown out for XMTP V2 begins. On every Tuesday and Thursday in April 2025 (1, 3, 8, 10, 15, 17, 22, 24, and 29), the XMTP V2 network will be in read-only mode during the following time window:
+**Developers should upgrade to XMTP V3**, moving off any V2-compatible versions of the XMTP SDK. We recommend always updating your app to the latest SDK version to ensure you benefit from the most recent stable release.
+
+### April 1, 2025
+
+**The XMTP V2 read-only transition period begins.** On every Tuesday and Thursday in April 2025 (1, 3, 8, 10, 15, 17, 22, 24, and 29), the XMTP V2 network will be in read-only mode during the following times:
 
 North America
 
@@ -66,7 +70,19 @@ UTC
 
 - 02:00 AM - 06:00 AM UTC (next day)
 
-**May 1, 2025** - At 07:00 PM PDT, XMTP V2 will be permanently set to read-only mode. No more writes to the V2 network will be allowed.
+#### Why a read-only transition period?
+
+The read-only transition period provides a clear alert about the upcoming deprecation of XMTP V2. While the V2 deprecation plan will be communicated widely, the message will inevitably miss some developers. This transition period will provide a more reliable alert to all developers.
+
+This read-only transition period will also help developers identify some of the more nuanced ways in which they're using XMTP V2, but may not be aware of it. For example:
+
+- An app is using a version of the XMTP SDK that includes the `enableV3` flag and the flag is set to `true`. This setting enabled a hybrid V2/V3 version of the SDK for the app and didn't move it to V3 entirely. The app experience will break when XMTP V2 is in read-only mode.
+
+- A developer published an agent/bot using a version of the XMTP SDK that includes the `enableV3` flag set to `true`, and forgot about the agent. The agent experience will break when XMTP V2 is in read-only mode.
+
+### May 1, 2025
+
+**At 07:00 PM PDT, XMTP V2 will be permanently set to read-only mode.** No more writes to the V2 network will be allowed.
 
 ## Backward compatibility
 
@@ -81,6 +97,8 @@ However, users can still access their V2 messages in a read-only capacity using 
 ## Security considerations
 
 Identities on XMTP V3 are more secure than on XMTP V2. Upgrade your app to use XMTP V3 to give your users much stronger security guarantees.
+
+To learn more, see [Messaging security properties with XMTP](https://docs.xmtp.org/protocol/security).
 
 ## Copyright
 
