@@ -96,7 +96,7 @@ However, users can still access their V2 messages in a read-only capacity using 
 
 ## Security considerations
 
-Identities on XMTP V3 are more secure than on XMTP V2. Upgrade your app to use XMTP V3 to give your users much stronger security guarantees.
+Building upon the already robust security framework of XMTP V2, V3 introduces additional protections that provide even more advanced security guarantees, continuing to keep user communications private and secure.
 
 To learn more, see [Messaging security properties with XMTP](https://docs.xmtp.org/protocol/security).
 
