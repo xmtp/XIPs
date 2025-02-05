@@ -782,12 +782,13 @@ In order to publish a message to an originator it must be in the format of a sig
 
 While any holder of a funded wallet *can* be a payer and produce signed `PayerEnvelope`s, in many cases applications will choose to have a dedicated Payer Service that receives `ClientEnvelopes` from clients and signs them on behalf of the user, then forwards the signed payloads to either an originator or the blockchain. This has the advantage of both hiding the client’s IP address from the node as well as subsidizing the messaging fees on behalf of the end-user.
 
+It is likely that automated users (bots) might want to be their own payer and not depend on an external service.
+
 #### 3.3.2. Envelopes
 
 ```protobuf
 // Data visible to the server that has been authenticated by the client.
 message AuthenticatedData {
-  uint32 target_originator = 1;
   bytes target_topic = 2;
   Cursor last_seen = 3;
 }
@@ -812,9 +813,8 @@ message PayerEnvelope {
 
 When clients create `ClientEnvelope`s, they must additionally produce `AuthenticatedData`. `AuthenticatedData` is visible to the server, but for anonymity reasons are only verifiable by other clients. A hash of the `AuthenticatedData` will be embedded within each client envelope type, with more details on the authentication and verification mechanism specified in a future XIP. The data must specify the following:
 
-1. The target originator for the payload. Payers must forward the payload to the specified originator, and all originators must validate that they are the target of a publish request.
-2. The target topic for the payload, which specifies the location at which other clients may fetch it. Clients must construct topics where the first byte is a [topic kind](https://github.com/xmtp/xmtpd/blob/00a2898bf276f1502ae4204d2f70b7c468e2d7f8/pkg/topic/topic.go#L12-L14) matching the payload type, with all subsequent bytes matching the topic identifier.
-3. The cursor for the payload’s topic on the client, for causal ordering purposes - in other words the highest sequence ID seen for that topic, for each originator. If no payloads from an originator have been seen on a topic, the originator may be omitted, or the sequence ID may be set to 0.
+1. The target topic for the payload, which specifies the location at which other clients may fetch it. Clients must construct topics where the first byte is a [topic kind](https://github.com/xmtp/xmtpd/blob/00a2898bf276f1502ae4204d2f70b7c468e2d7f8/pkg/topic/topic.go#L12-L14) matching the payload type, with all subsequent bytes matching the topic identifier.
+2. The cursor for the payload’s topic on the client, for causal ordering purposes - in other words the highest sequence ID seen for that topic, for each originator with nodeId < 100. If no payloads from an originator have been seen on a topic, the originator may be omitted, or the sequence ID may be set to 0.
 
 #### 3.3.3. Client API
 
@@ -921,10 +921,9 @@ On message publish, originators must validate the incoming `PayerEnvelope`:
 
 1. Verify payer envelope signature
 2. Verify client envelope AAD:
-    1. Target originator matches self
-    2. Target topic matches payload type, as defined in [3.3.2. Envelopes](#332-envelopes)
-    3. The server’s cursor is greater than `last_seen`. If not, a 409 status code must be returned with the server’s current cursor.
-    4. The blockchain sequence ID in the cursor is equal to the latest blockchain payload published on the topic. If not, a 409 status code must be returned with the server’s current cursor.
+    1. Target topic matches payload type, as defined in [3.3.2. Envelopes](#332-envelopes)
+    2. The server’s cursor is greater than `last_seen`. If not, a 409 status code must be returned with the server’s current cursor.
+    3. The blockchain sequence IDs in the cursor are equal to the latest blockchain payloads published on the topic. If not, a 409 status code must be returned with the server’s current cursor.
 3. Perform payload-specific validation, as defined in previous XIP’s.
 4. Publish commits or identity updates to the blockchain, else sign the payload and originate it.
 
@@ -942,8 +941,7 @@ On message query, in addition to validation required by MLS, clients must:
 1. Verify the `originator_sequence_id` is strictly increasing per originator.
 2. Verify the `originator_signature` or `node_signature` on each payload.
 3. Verify the client envelope AAD on each payload:
-    1. The target originator matches the actual originator.
-    2. The target topic matches the actual topic.
+   1. The target topic matches the actual topic.
 4. Verify the client envelope AAD was correctly authenticated ([3.3.5. Cross-originator message ordering](#335-cross-originator-message-ordering))
 5. Verify that the payloads are causally consistent ([3.3.5. Cross-originator message ordering](#335-cross-originator-message-ordering)).
 6. Perform payload-specific validation, as defined in previous XIP's.
@@ -994,19 +992,11 @@ In the event that a dependency is not found, clients may choose from approaches 
 
 #### 3.3.6. Originator selection algorithm
 
-The originator selection algorithm for each published payload is client-defined, with possible schemes including round-robin across all originators, preferential treatment of more trusted originators, publishing to multiple originators simultaneously, etc.
+The originator selection algorithm for each published payload is payer-defined, with possible schemes including stable hashing, round-robin across all originators, preferential treatment of more trusted originators, publishing to multiple originators simultaneously, etc.
 
-It is worth noting that if all participants within a conversation publish and read all payloads from the same originator, they may benefit from improved latency, as well as upgrading from causal ordering to total ordering. Therefore, the protocol defines a ‘preferred node’ for each conversation topic, which is derived via the following algorithm:
+It is worth noting that if all participants within a conversation publish and read all payloads from the same originator, they may benefit from improved latency, as well as upgrading from causal ordering to total ordering. Therefore, the protocol defines a ‘preferred node’ for each conversation topic.
 
-```python
-def preferred_node(topic, excluded_nodes):
-  let nodes = [n for n in get_available_nodes(registry) if n not in excluded_nodes]
-  nodes.sort(key=lambda node: node.node_id)
-  index = crc32(topic) % len(nodes)
-  return nodes[index]
-```
-
-The ‘preferred node’ is a non-binding recommendation that should be used in the absence of any other preference by a given client. In the event that the preferred node is unreachable, it is added to the `excluded_nodes` array before the next preferred node is computed.
+The ‘preferred node’ is a non-binding recommendation that should be used in the absence of any other preference by a given payer.
 
 In addition to the other benefits listed above, following the preferred node algorithm improves the decentralization of the network by randomly allocating topics evenly across available originators.
 
