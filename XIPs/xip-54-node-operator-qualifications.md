@@ -11,7 +11,7 @@ created: 2025-02-03
 
 ## Abstract
 
-This XIP proposes a set of qualification criteria and a selection process for XMTP node operators. Unlike many permissionless networks, XMTP requires a limited group of 20 node operators to ensure cost-effective, high-performance messaging while maintaining robust **censorship resistance**. A censorship-resistant network is able to ensure that no single entity can block, alter, or remove data—essentially guaranteeing that the system operates as intended, regardless of external pressures.
+This XIP proposes a set of qualification criteria and a selection process for XMTP node operators. Unlike many permissionless networks, XMTP currently requires a limited group of 20 node operators to ensure cost-effective, high-performance messaging while maintaining robust **censorship resistance**. This number may evolve over time. A censorship-resistant network is able to ensure that no single entity can block, alter, or remove data—essentially guaranteeing that the system operates as intended, regardless of external pressures.
 
 This XIP introduces diversity-based requirements—geographic, geopolitical, cultural, and industry—that help mitigate collusion and regulatory pressures that can threaten censorship resistance.
 
