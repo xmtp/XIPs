@@ -31,7 +31,7 @@ This would be the similar to a description of a group, but each app can display 
 
 ## Backward compatibility
 
-If a group exists before we add group announcements. then it will have no value for group announcement in mutable metadata and no permission policy for who is allowed to update a mutable metadata field with the "groupAnnouncement" key.
+- Any group that existed before the `groupAnnouncement` feature was added won't have an entry for `groupAnnouncement` in its mutable metadata. There will also be no predefined permission policy for who is allowed to update the `groupAnnouncement` metadata field.
 Then someone on the new version calls updateGroupAnnouncement on that group to set that value, even though there is no existing permission policy in that group because it is already created. In that case we have default permission policies to evaluate if the metadata update is valid or not.
 If someone on an old version is invited to a group from someone on the new version, and so there is a permission policy set for groupAnnouncement.  Users on the older versions will actually be able to read the permission policy because it is fetched using that string key.
 
