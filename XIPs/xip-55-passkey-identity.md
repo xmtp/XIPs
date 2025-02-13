@@ -3,7 +3,7 @@ xip: 55
 title: Passkey identity
 description: Proposes a flexible identity model where new identity types can be adopted without needing coordination between all clients.
 authors: Dakota Brink (@codabrink), Nick Molnar (@neekolas), Naomi Plasterer (@nplasterer)
-discussions-to: TBD
+discussions-to: https://community.xmtp.org/t/xip-55-passkey-identity/874
 status: Draft
 type: Standards
 category: XRC
