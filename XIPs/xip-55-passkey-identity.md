@@ -142,7 +142,7 @@ impl PublicIdentifier {
 - Add a new `SignatureKind::P256` variant
 - Rename `associate_wallet` to `associate_member` and change it to take in a `MemberIdentifier` enum instead of a `new_wallet_address`, and block on the `MemberIdentifier::Installation` variant.
 - Adapt [generate_inbox_id](https://github.com/xmtp/libxmtp/blob/71b47a20020ecece139cdc0d56ab356d3f6637f1/xmtp_id/src/associations/hashes.rs#L22) to work with passkey addresses, mainly updating the valid address check.
-- Create an `Identifier` type, which is a public facing version of `MemberIdentifier` and doesn’t contain potentially sensitive metadata like the passkey’s relying partner.
+- Create a `PublicIdentifier` type, which is a public-facing version of `MemberIdentifier` and doesn’t contain potentially sensitive metadata like the passkey’s relying partner.
 - Rename `InboxState.account_addresses` to `InboxState.identifiers` and change the type to `Vec<Identifier>`
   - Also rename `InboxState.recovery_address` to `recovery_identifier` and change the type to `Identifier`
 
