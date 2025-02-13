@@ -54,6 +54,10 @@ The security considerations include design decisions, concerns, and implementati
 
 An XIP cannot proceed to Final status without a discussion of security considerations deemed sufficient by the XIP reviewers. XIP submissions missing security considerations will be rejected outright.
 
+### Threat model
+
+The design must consider and prevent potential attacks from malicious actors, including both XMTP nodes and protocol users. It must address all possible ways that systems and individuals might attempt to exploit or manipulate the system.
+
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
