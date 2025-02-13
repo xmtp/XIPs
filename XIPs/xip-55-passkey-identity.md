@@ -149,7 +149,7 @@ impl PublicIdentifier {
 
 #### Phase 2: Adding Solana support (non-breaking)
 
-- Add a new `MemberIdentifier::Solana` variant
+- Add a new `MemberIdentifier::Solana` variant that has restricted permissions. It will not be able to perform any identity updates, nor will it be allowed as the recovery identity.
 - XMTP will **not** be adding Solana variants for `UnverifiedSignature` or `SignatureKind`
 
 This means that the `MemberIdentifier` in the `AddAssociation` proto may come through as `None` in old versions that haven't received the Solana update. It must be verified that this behavior is acceptable.
