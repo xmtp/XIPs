@@ -145,7 +145,7 @@ impl PublicIdentifier {
 - Create a `PublicIdentifier` type, which is a public-facing version of `MemberIdentifier` and doesn’t contain potentially sensitive metadata like the passkey’s relying partner.
 - Rename `InboxState.account_addresses` to `InboxState.identifiers` and change the type to `Vec<Identifier>`
   - Also rename `InboxState.recovery_address` to `recovery_identifier` and change the type to `Identifier`
-
+- Filter out unknown `MemberIdentifiers` that may come from new associations.
 #### Phase 2: Adding Solana support (non-breaking)
 
 - Add a new `MemberIdentifier::Solana` variant
