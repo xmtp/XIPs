@@ -3,8 +3,7 @@ xip: 50
 title: Multiple remote attachments content type
 description: Content type for multiple remote attachments
 author: Cameron Voell (@cameronvoell)
-discussions-to: https://community.xmtp.org/t/xip-50-multiple-remote-attachments-content-type/864
-status: Draft
+status: Review
 type: Standards
 category: XRC
 created: 2025-01-28
