@@ -31,7 +31,9 @@ This would be the similar to a description of a group, but each app can display 
 
 ## Backward compatibility
 
-This is a breaking change. To use this new `announcement` metadata field, all group members must be using an app that uses an SDK version that supports the metadata.
+- Any group that existed before the `groupAnnouncement` feature was added won't have an entry for `groupAnnouncement` in its mutable metadata. There will also be no predefined permission policy for who is allowed to update the `groupAnnouncement` metadata field.
+- If a user on a newer version of the protocol calls `updateGroupAnnouncement` on a pre-existing group, they're trying to set a value for `groupAnnouncement`, even though no permission policy exists for it yet. In this case, default permission policies will apply to determine whether the update is valid.
+- If a user on an older version of the protocol is invited to a group created by a user on the newer version, then the group will have a permission policy set for `groupAnnouncement`. Even though the older version of the protocol doesn't support setting announcements, it can still read the permission policy because it can be fetched using that string key.
 
 ## Reference implementation
 

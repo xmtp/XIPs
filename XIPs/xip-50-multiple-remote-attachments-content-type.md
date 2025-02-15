@@ -3,8 +3,7 @@ xip: 50
 title: Multiple remote attachments content type
 description: Content type for multiple remote attachments
 author: Cameron Voell (@cameronvoell)
-discussions-to: https://community.xmtp.org/t/xip-50-multiple-remote-attachments-content-type/864
-status: Draft
+status: Review
 type: Standards
 category: XRC
 created: 2025-01-28
@@ -37,37 +36,36 @@ The content of the encoded message will be the following protobuf-encoded `Multi
 
 ```proto
 message MultiRemoteAttachment {
-  // A 32 byte array for decrypting the remote content payload
-  bytes secret = 1;
-  
-  // A byte array for the salt used to encrypt the remote content payload
-  bytes salt = 2;
-  
+ 
   // Array of attachment information
-  repeated RemoteAttachmentInfo attachments = 3;
+  repeated RemoteAttachmentInfo attachments = 1;
 
-   // The number of attachments in the attachments array
-  optional uint32 num_attachments = 4;
-  
-  // The maximum content length of an attachment in the attachments array
-  optional uint32 max_attachment_content_length = 5;
 }
 
 message RemoteAttachmentInfo {
   // The SHA256 hash of the remote content
   string content_digest = 1;
+
+  // A 32 byte array for decrypting the remote content payload
+  bytes secret = 2;
   
   // A byte array for the nonce used to encrypt the remote content payload
-  bytes nonce = 2;
+  bytes nonce = 3;
+
+  // A byte array for the salt used to encrypt the remote content payload
+  bytes salt = 4;
   
   // The scheme of the URL. Must be "https://"
-  string scheme = 3;
+  string scheme = 5;
   
   // The URL of the remote content
-  string url = 4;
-  
+  string url = 6;
+
+  // The size of the encrypted content in bytes (max size of 4GB)
+  optional uint32 content_length = 7; 
+
   // The filename of the remote content
-  string filename = 5;
+  optional string filename = 8;
 }
 ```
 
@@ -77,7 +75,7 @@ By using `EncodedMessage`, we can make it easier for clients to support any mess
 
 The reference implementation uses the `Attachment` type from [XIP-15](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-15-attachment-content-type.md), but if we introduce richer types for things like images or video, those would work here as well, since clients should be able to understand those types once they're settled.
 
-The same secret key and salt are used for encrypting/decrypting all attachments. The SDKs will contain helper functions for ensuring that a different nonce is used for each attachment in the attachments array.
+The SDKs will contain helper functions for ensuring that each attachment is encrypted with a different nonce, salt, and secret key.
 
 ### An example flow of using the SDK to send a `MultiRemoteAttachment` content type
 
@@ -97,43 +95,32 @@ const attachment2: DecryptedLocalAttachment = {
 }
 ```
 
-#### 2. Encrypt the attachments
+#### 2. Encrypt the attachments and upload attachments
 
 ```ts
-const {encryptedAttachmentsPreUpload, secret, salt} = await client.encryptAttachments([attachment1, attachment2])
+const remoteAttachments: RemoteAttachmentInfo[] = []
+  for (const attachment of [attachment1, attachment2]) {
+    // Encrypt the attachment and receive the local URI of the encrypted file
+    const { encryptedLocalFileUri, metadata } = await alix.encryptAttachment(attachment)
+
+    // Upload the attachment to a remote server and receive the URL
+    const url = testUploadAttachmentForUrl(encryptedLocalFileUri)
+
+    // Build the remote attachment info
+    const remoteAttachmentInfo =
+      MultiRemoteAttachmentCodec.buildMultiRemoteAttachmentInfo(url, metadata)
+    remoteAttachments.push(remoteAttachmentInfo)
+  }
 ```
-  
-#### 3. Upload the attachments
+
+#### 3. Send the message
 
 ```ts
-const encryptedAttachmentsPostUpload: RemoteAttachmentInfo[] = await Promise.all(
-  encryptedAttachmentsPreUpload.map(async (attachment) => {
-    // Integrator customizable code for uploading an attachment and retrieving the URL
-    const uploadedUrl = await upload(attachment); 
-    
-    // Merge the uploaded URL back into the original attachment data
-    return {
-      ...attachment,
-      url: uploadedUrl,
-    };
+await convo.send({
+    multiRemoteAttachment: {
+      attachments: remoteAttachments,
+    },
   })
-);
-```
-
-#### 4. Construct `MultiRemoteAttachment` content type
-
-```ts
-const multiRemoteAttachment: MultiRemoteAttachment = {
-  secret,
-  salt,
-  attachments: encryptedAttachmentsPostUpload
-}
-```
-
-#### 5. Send the message
-
-```ts
-const message = await group.sendMessage(multiRemoteAttachment)
 ```
 
 ### Example flow of receiving a `MultiRemoteAttachment` content type
@@ -147,16 +134,28 @@ if (message.contentTypeId == 'xmtp.org/multiRemoteStaticContent:1.0') {
 }
 ```
 
-#### 2. Download the attachments
+#### 2. Download and decrypt the attachments
 
 ```ts
-const encryptedAttachments = downloadAttachments(multiRemoteAttachment)
-```
-
-#### 3. Decrypt the attachments
-
-```ts
-const decryptedAttachments = await client.decryptAttachments(encryptedAttachments)
+const decryptedAttachments: DecryptedLocalAttachment[] = []
+for (const attachment of multiRemoteAttachment.attachments) {
+    // Downloading the encrypted payload from the attachment URL and save the local file
+    const encryptedFileLocalURIAfterDownload: string = downloadFromUrlForLocalUri(
+      attachment.url
+    )
+    // Decrypt the local file
+    const decryptedLocalAttachment = await alix.decryptAttachment({
+      encryptedLocalFileUri: encryptedFileLocalURIAfterDownload,
+      metadata: {
+        secret: attachment.secret,
+        salt: attachment.salt,
+        nonce: attachment.nonce,
+        contentDigest: attachment.contentDigest,
+        filename: attachment.filename,
+      } as RemoteAttachmentContent,
+    })
+    decryptedAttachments.push(decryptedLocalAttachment)
+  }
 ```
 
 #### 4. Use the file URIs in the decrypted attachments objects to display the attachment
@@ -171,7 +170,7 @@ const attachment2 = decryptedAttachments[1]
 
 ## Rationale
 
-Another design option would be to have separate secret keys and salts for each attachment in a remote attachment content type. We decided against this because the array of secrets would still be sent in the same message payload, so it wasn't clear that this would be more secure than the current proposal. To ensure reusing the secret doesn't leak information, we use a unique nonce for each attachment in the attachments array.
+We initially considered re-using secret keys for all attachments, but decided against it because higher level crypto libraries made using new keys for each attachment the simplest solution.
 
 A design option we added was the option to include a filename and content length for each attachment. This allows clients to predict the size of an attachment before downloading it, and potentially reject a message if the attachment size doesn't match the expected size.
 
@@ -183,8 +182,11 @@ The fallback text content will just notify the user that they received a multipl
 
 ## Reference implementation
 
-- Implementation reference: TODO
-- Client Usage reference: TODO
+- Implementation reference:
+  - [React Native](https://github.com/xmtp/xmtp-react-native/pull/602)
+  - [iOS](https://github.com/xmtp/xmtp-ios/pull/469)
+  - [Android](https://github.com/xmtp/xmtp-android/pull/378)
+- Client Usage reference: See [RN Example app code](https://github.com/xmtp/xmtp-react-native/blob/22f139ea37613f909f5fc71689c899f93455b786/example/src/ConversationScreen.tsx) and [related PR](https://github.com/xmtp/xmtp-react-native/pull/602)
 
 ## Security considerations
 
