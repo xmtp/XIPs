@@ -171,7 +171,7 @@ const attachment2 = decryptedAttachments[1]
 
 ## Rationale
 
-We initially considered re-using secret keys for all attachments, but decided against it because higher level crypto libraries made using new keys for each attachment the simplest solution. 
+We initially considered re-using secret keys for all attachments, but decided against it because higher level crypto libraries made using new keys for each attachment the simplest solution.
 
 A design option we added was the option to include a filename and content length for each attachment. This allows clients to predict the size of an attachment before downloading it, and potentially reject a message if the attachment size doesn't match the expected size.
 
@@ -183,11 +183,11 @@ The fallback text content will just notify the user that they received a multipl
 
 ## Reference implementation
 
-- Implementation reference: 
-   - [React Native](https://github.com/xmtp/xmtp-react-native/pull/602)
-   - [iOS](https://github.com/xmtp/xmtp-ios/pull/469)
-   - [Android](https://github.com/xmtp/xmtp-android/pull/378)
-- Client Usage reference: See [RN Example app code](https://github.com/xmtp/xmtp-react-native/blob/22f139ea37613f909f5fc71689c899f93455b786/example/src/ConversationScreen.tsx) and [related PR ](https://github.com/xmtp/xmtp-react-native/pull/602)
+- Implementation reference:
+  - [React Native](https://github.com/xmtp/xmtp-react-native/pull/602)
+  - [iOS](https://github.com/xmtp/xmtp-ios/pull/469)
+  - [Android](https://github.com/xmtp/xmtp-android/pull/378)
+- Client Usage reference: See [RN Example app code](https://github.com/xmtp/xmtp-react-native/blob/22f139ea37613f909f5fc71689c899f93455b786/example/src/ConversationScreen.tsx) and [related PR](https://github.com/xmtp/xmtp-react-native/pull/602)
 
 ## Security considerations
 
