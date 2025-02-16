@@ -17,7 +17,7 @@ This XIP proposes a schema for sharing additional context about a conversation b
 
 The SDK API currently accepts a unique `conversationId` per address pair and allows `metadata` to be set as well. Today, different apps use these parameters in different ways. Therefore an app may not know how to correctly render in its UI `conversationId` and `metadata` for conversations originating from other apps. We propose a schema to standardize the use of conversation `metadata` for the purpose of app brand expression stemming from the `conversationId`. The `metadata` field may include other non-standard (or future standard) properties.
 
-Note that the schema is only applicable when a valid`conversationId` is set. If `conversationId` is null, the SDK does not allow setting `metadata`.
+Note that the schema is only applicable when a valid `conversationId` is set. If `conversationId` is null, the SDK does not allow setting `metadata`.
 
 ## Specification
 
@@ -25,8 +25,8 @@ Proposed `displayInfo` schema in conversation `metadata`
 
 ```json
 {
-    conversationId: "mydomain.xyz/abc/qrs",
-    metadata: { 
+    "conversationId": "mydomain.xyz/abc/qrs",
+    "metadata": { 
         "displayInfo.prettyName": "My company", 
         "displayInfo.profileImage": "mydomain.xyz/assets/myimage.png", 
         "displayInfo.primaryColor": "#ffffff" }
@@ -37,8 +37,8 @@ Example `displayInfo` implementation for a chat app named Galaxy
 
 ```json
 {
-    conversationId: "galaxy.chat/dm/uniqueIdentifier",
-    metadata: { 
+    "conversationId": "galaxy.chat/dm/uniqueIdentifier",
+    "metadata": { 
         "displayInfo.prettyName": "Galaxy", 
         "displayInfo.profileImage": "galaxychat.xyz/brandassets/logo.png", 
         "displayInfo.primaryColor": "#6865B8" }
@@ -64,8 +64,8 @@ Old Lens schema:
 
 ```json
 {
-        conversationId: "lens.dev/dm/${memberA}-${memberB}"
-        metadata: {}
+        "conversationId": "lens.dev/dm/${memberA}-${memberB}",
+        "metadata": {}
 }
 ```
 
@@ -73,8 +73,8 @@ New Lens schema
 
 ```json
 {
-    conversationId: "lens.dev/dm/${memberA}-${memberB}"
-    metadata: { 
+    "conversationId": "lens.dev/dm/${memberA}-${memberB}",
+    "metadata": { 
         "displayInfo.prettyName": "Lens", 
         "displayInfo.profileImage": "lens.xyz/assets/myimage.png", 
         "displayInfo.primaryColor": "#ffffff" }
