@@ -16,14 +16,14 @@ This XIP describes how the decentralized XMTP network intends to meter Payer usa
 - The Payers smart contract is the canonical source for the confirmed balances of each user of the network (typically applications paying on behalf of many users).
 - The Payer Reports contract is an onchain mechanism for reaching consensus on changes to those balances.
 
-XMTP Nodes interact with these two smart contracts to keep track of payer balances and update them as messages are stored. This system is designed to handle total network throughput of tens of thousands of messages per second and makes some trade-offs to reach that kind of capacity. 
+XMTP Nodes interact with these two smart contracts to keep track of payer balances and update them as messages are stored. This system is designed to handle total network throughput of tens of thousands of messages per second and makes some trade-offs to reach that kind of capacity.
 
 ## Motivation
 
-Messaging fees serve two important purposes in the XMTP network: 
+Messaging fees serve two important purposes in the XMTP network:
 
 1. They provide economic sustainability for Node Operators
-2. They protect finite network resources from DOS and abuse. 
+2. They protect finite network resources from DOS and abuse.
 
 Beyond the level to which the network is sustainable, high fees are a bad thing. Our goal is to set fees at the lowest level that achieves sustainability and to continue driving these fees down over time.
 
@@ -70,7 +70,7 @@ Fees would be calculated based on a sliding 5-minute window of messages.
 - Nodes reach consensus on how many messages have been sent by each payer through [Payer Reports](#payer-reports). The funded amount minus any settled usage is the Payer’s available balance.
 - Payer deposits have a minimum size of $10 USDC.
 
-#### Interface
+#### Payers Contract interface
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -219,7 +219,7 @@ interface IPayer {
 
 ### Payer Reports
 
-Payer Reports are how nodes reach consensus on which messages have been sent on the network. Each node in the system is responsible for creating Payer Reports and attesting to valid reports produced by other nodes. 
+Payer Reports are how nodes reach consensus on which messages have been sent on the network. Each node in the system is responsible for creating Payer Reports and attesting to valid reports produced by other nodes.
 
 - Each report is scoped to messages originating from a single node.
 - Before funds can be settled, a majority of active nodes must attest to a report.
@@ -227,14 +227,14 @@ Payer Reports are how nodes reach consensus on which messages have been sent on 
 - Reports contain the lesser of: 1,000,000 messages OR 12 hours of usage.
 - If a node fails to verify another node’s report, it can create a new report based on its own view of the node’s activity. If that report achieves majority consensus, it becomes the canonical statement of the usage from that node.
 
-#### Interface
+#### Payer Reports interface
 
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 interface IPayerReports {
-		/**
+     /**
      * @dev Emitted when a node (originator) publishes a usage report
      *      containing (payer => usageSpent) for the last 12-hour period.
      */
@@ -267,9 +267,9 @@ interface IPayerReports {
         address indexed originatorNode,
         uint256 indexed reportIndex
     );
-		//==============================================================
-	  //                     PAYER REPORT LOGIC                    
-	  //==============================================================
+    //==============================================================
+    //                     PAYER REPORT LOGIC                    
+    //==============================================================
     /**
      * @notice Submits a payer report for the node (`originatorNode`) covering
      *         messages from `startingSequenceID` up to `endingSequenceID`.
@@ -354,7 +354,7 @@ interface IPayerReports {
 
 ### Tracking balances in our nodes
 
-Originators must make decisions on whether to accept or reject a given message in real-time. Rather than force the network to reach consensus on whether a Payer has sufficient balance to send every message - which adds significant latency and cost - we allow for nodes to perform bookkeeping without consensus for recently received messages. 
+Originators must make decisions on whether to accept or reject a given message in real-time. Rather than force the network to reach consensus on whether a Payer has sufficient balance to send every message - which adds significant latency and cost - we allow for nodes to perform bookkeeping without consensus for recently received messages.
 
 We can mitigate the risk of double-spending by forcing Payers to over-provision capacity and by limiting the percentage of available capacity a Payer may spend in a single period.
 
@@ -372,17 +372,17 @@ The following database schema should allow for efficient updates to these balanc
 
 ```sql
 CREATE TABLE unsettled_usage(
-	payer_id INTEGER NOT NULL,
-	originator_id INTEGER NOT NULL,
-	minutes_since_epoch INTEGER NOT NULL,
-	spend BIGINT NOT NULL, -- spend is in microcents with 6 decimal precision to match the USDC contract
-	PRIMARY KEY (payer_id, originator_id, minutes_since_epoch)
+  payer_id INTEGER NOT NULL,
+  originator_id INTEGER NOT NULL,
+  minutes_since_epoch INTEGER NOT NULL,
+  spend BIGINT NOT NULL, -- spend is in microcents with 6 decimal precision to match the USDC contract
+  PRIMARY KEY (payer_id, originator_id, minutes_since_epoch)
 );
 ```
 
 #### Rejecting messages
 
-Originators must reject any message where `SETTLED_BALANCE - UNCONFIRMED_USAGE > SETTLED_BALANCE / NUMBER_OF_ACTIVE_NODES`. With this safety measure in place, even in a total network partition between all nodes, a Payer would not be able to take their total balance into the negative. 
+Originators must reject any message where `SETTLED_BALANCE - UNCONFIRMED_USAGE > SETTLED_BALANCE / NUMBER_OF_ACTIVE_NODES`. With this safety measure in place, even in a total network partition between all nodes, a Payer would not be able to take their total balance into the negative.
 
 ### Generating and verifying Payer Reports
 
