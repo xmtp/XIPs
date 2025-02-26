@@ -3,6 +3,7 @@ xip: 57
 title: Messaging fee collection
 description: The system for collecting fees from Payers and metering their spend across offchain message sending
 author: Borja Aranda (@fbac), Nick Molnar (@neekolas)
+discussions-to: https://community.xmtp.org/t/xip-57-messaging-fee-collection/876
 status: Draft
 type: Standards
 category: Network
@@ -59,7 +60,9 @@ Fees would be calculated based on a sliding 5-minute window of messages.
 - When the message count is at or above the maximum `M`, the fee is 100.
 - Otherwise, we compute a normalized fraction `x` that represents how far above `N` the current count is relative to the gap `M`−`N`. Then, we apply an exponential curve:
 
-    `fee = 100 × (e^x - 1) / (e - 1)`
+$$
+\text{fee} = 100 \times \frac{e^x - 1}{e - 1}
+$$
 
 - The final congestion fee in dollars would be `fee * C`
 
