@@ -77,147 +77,434 @@ $$
 
 ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.28;
 
 /**
  * @title IPayer
- * @notice Interface for a contract that manages payer USDC deposits,
- *         asynchronous usage settlement, and a two-step withdrawal process.
- *
- *         Key features:
- *          - Payers deposit USDC upfront via `deposit`.
- *          - Nodes settle usage periodically by submitting a usage record to `settleUsage`.
- *          - Payers can request withdrawal (`requestWithdraw`), entering a lock period
- *            so no new messages can be sent with this payer's balance.
- *          - After the lock period, `finalizeWithdraw` returns the unspent funds to the payer.
+ * @notice Interface for managing payer USDC deposits, usage settlements,
+ *         and a secure withdrawal process.
  */
 interface IPayer {
+    //==============================================================
+    //                             STRUCTS
+    //==============================================================
+
+    /**
+     * @dev Struct to store payer information.
+     * @param balance The current USDC balance of the payer.
+     * @param isActive Indicates whether the payer is active.
+     * @param creationTimestamp The timestamp when the payer was first registered.
+     * @param latestDepositTimestamp The timestamp of the most recent deposit.
+     * @param debtAmount The amount of fees owed but not yet settled.
+     */
+    struct Payer {
+        uint256 balance;
+        bool isActive;
+        uint256 creationTimestamp;
+        uint256 latestDepositTimestamp;
+        uint256 debtAmount;
+    }
+
+    /**
+     * @dev Struct to store withdrawal request information.
+     * @param requestTimestamp The timestamp when the withdrawal was requested.
+     * @param withdrawableTimestamp The timestamp when the withdrawal can be finalized.
+     * @param amount The amount requested for withdrawal.
+     */
+    struct Withdrawal {
+        uint256 requestTimestamp;
+        uint256 withdrawableTimestamp;
+        uint256 amount;
+    }
 
     //==============================================================
     //                             EVENTS
     //==============================================================
 
-    /// @dev Emitted when a payer deposits USDC.
-    event PayerDeposit(
-        address indexed payer,
-        uint256 amount
-    );
+    /// @dev Emitted when a new payer is registered.
+    event PayerRegistered(address indexed payer, uint256 amount);
+
+    /// @dev Emitted when a payer is deactivated by an owner.
+    event PayerDeactivated(address indexed payer);
+
+    /// @dev Emitted when a payer is permanently deleted from the system.
+    event PayerDeleted(address indexed payer, uint256 timestamp);
+
+    /// @dev Emitted when a deposit is made to a payer's account.
+    event Deposit(address indexed payer, uint256 amount);
+
+    /// @dev Emitted when a user donates to a payer's account.
+    event Donation(address indexed donor, address indexed payer, uint256 amount);
 
     /// @dev Emitted when a payer initiates a withdrawal request.
-    event WithdrawRequested(
-        address indexed payer,
-        uint256 requestTimestamp
-    );
+    event WithdrawalRequest(address indexed payer, uint256 requestTimestamp, uint256 withdrawableTimestamp, uint256 amount);
+
+    /// @dev Emitted when a payer cancels a withdrawal request.
+    event WithdrawalCancelled(address indexed payer);
 
     /// @dev Emitted when a payer's withdrawal is finalized.
-    ///      The remaining balance is returned to them.
-    event WithdrawFinalized(
-        address indexed payer,
-        uint256 amountReturned
-    );
+    event WithdrawalFinalized(address indexed payer, uint256 amountReturned);
 
     /// @dev Emitted when usage is settled and fees are calculated.
-    event UsageSettled(
-        uint256 indexed epochId,
-        bytes32 usageDataHash,
-        uint256 totalFees
-    );
+    event UsageSettled(uint256 fees, address indexed payer, uint256 indexed nodeId, uint256 timestamp);
 
-    /// @dev Emitted when fees are transferred to a rewards or treasury contract
-    ///      for distribution to node operators.
+    /// @dev Emitted when batch usage is settled.
+    event BatchUsageSettled(uint256 totalFees, uint256 indexed nodeId, uint256 timestamp);
+
+    /// @dev Emitted when fees are transferred to the rewards contract.
     event FeesTransferred(uint256 amount);
+
+    /// @dev Emitted when the rewards contract address is updated.
+    event RewardsContractUpdated(address indexed newRewardsContract);
+
+    /// @dev Emitted when the nodes contract address is updated.
+    event NodesContractUpdated(address indexed newNodesContract);
+
+    /// @dev Emitted when the minimum deposit amount is updated.
+    event MinimumDepositUpdated(uint256 newMinimumDeposit);
+
+    /// @dev Emitted when the pause is triggered by `account`.
+    event Paused(address account);
+
+    /// @dev Emitted when the pause is lifted by `account`.
+    event Unpaused(address account);
+
+    //==============================================================
+    //                             ERRORS
+    //==============================================================
+
+    /// @dev Error thrown when caller is not an authorized node operator.
+    error UnauthorizedNodeOperator();
+
+    /// @dev Error thrown when caller is not the rewards contract.
+    error NotRewardsContract();
+
+    /// @dev Error thrown when an address is invalid (usually zero address).
+    error InvalidAddress();
+
+    /// @dev Error thrown when the amount is insufficient.
+    error InsufficientAmount();
+
+    /// @dev Error thrown when a withdrawal is not in the requested state.
+    error WithdrawalNotRequested();
+
+    /// @dev Error thrown when a withdrawal is already in progress.
+    error WithdrawalAlreadyRequested();
+
+    /// @dev Error thrown when a lock period has not yet elapsed.
+    error LockPeriodNotElapsed();
+
+    /// @dev Error thrown when arrays have mismatched lengths.
+    error ArrayLengthMismatch();
+
+    /// @dev Error thrown when trying to backdate settlement too far.
+    error InvalidSettlementTime();
+
+    /// @dev Error thrown when trying to delete a payer with balance or debt.
+    error PayerHasBalanceOrDebt();
+
+    /// @dev Error thrown when trying to delete a payer in withdrawal state.
+    error PayerInWithdrawal();
+
+    //==============================================================
+    //                      PAYER REGISTRATION & MANAGEMENT
+    //==============================================================
+
+    /**
+     * @notice Registers the caller as a new payer upon depositing the minimum required USDC.
+     *         The caller must approve this contract to spend USDC beforehand.
+     * @param amount The amount of USDC to deposit (must be at least the minimum required).
+     *
+     * Emits `PayerRegistered`.
+     */
+    function register(uint256 amount) external;
+
+    /**
+     * @notice Allows the caller to deposit USDC into their own payer account.
+     *         The caller must approve this contract to spend USDC beforehand.
+     * @param amount The amount of USDC to deposit.
+     *
+     * Emits `Deposit`.
+     */
+    function deposit(uint256 amount) external;
+
+    /**
+     * @notice Allows anyone to donate USDC to an existing payer's account.
+     *         The sender must approve this contract to spend USDC beforehand.
+     * @param payer The address of the payer receiving the donation.
+     * @param amount The amount of USDC to donate.
+     *
+     * Emits `Donation`.
+     */
+    function donate(address payer, uint256 amount) external;
+
+    /**
+     * @notice Deactivates a payer, preventing them from initiating new transactions.
+     *         Only callable by authorized node operators.
+     * @param payer The address of the payer to deactivate.
+     *
+     * Emits `PayerDeactivated`.
+     */
+    function deactivatePayer(address payer) external;
+
+    /**
+     * @notice Permanently deletes a payer from the system.
+     * @dev Can only delete payers with zero balance and zero debt who are not in withdrawal.
+     *      Only callable by authorized node operators.
+     * @param payer The address of the payer to delete.
+     *
+     * Emits `PayerDeleted`.
+     */
+    function deletePayer(address payer) external;
+
+    /**
+     * @notice Checks if a given address is an active payer.
+     * @param payer The address to check.
+     * @return isActive True if the address is an active payer, false otherwise.
+     */
+    function getIsActivePayer(address payer) external view returns (bool isActive);
+
+    /**
+     * @notice Retrieves the minimum deposit amount required to register as a payer.
+     * @return minimumDeposit The minimum deposit amount in USDC.
+     */
+    function getMinimumDeposit() external view returns (uint256 minimumDeposit);
+
+    /**
+     * @notice Updates the minimum deposit amount required for registration.
+     * @param newMinimumDeposit The new minimum deposit amount.
+     *
+     * Emits `MinimumDepositUpdated`.
+     */
+    function setMinimumDeposit(uint256 newMinimumDeposit) external;
 
     //==============================================================
     //                      PAYER BALANCE MANAGEMENT
     //==============================================================
 
     /**
-     * @notice Allows a payer to deposit `amount` USDC for future messaging usage.
-     *         The payer must have approved this contract to spend USDC beforehand.
-     * @param amount The amount of USDC to deposit.
-     */
-    function deposit(uint256 amount) external;
-
-    /**
-     * @notice Gets the current total balance of a given payer.
-     * @dev This includes amounts that might still be subject to pending usage reports.
+     * @notice Retrieves the current total balance of a given payer.
      * @param payer The address of the payer.
+     * @return balance The current balance of the payer.
      */
-    function getPayerBalance(address payer) external view returns (uint256);
+    function getPayerBalance(address payer) external view returns (uint256 balance);
 
     /**
      * @notice Initiates a withdrawal request for the caller.
-     *         - Sets the payer into withdrawal mode (no further usage is allowed).
+     *         - Sets the payer into withdrawal mode (no further usage allowed).
      *         - Records a timestamp for the withdrawal lock period.
+     * @param amount The amount to withdraw (can be less than or equal to current balance).
      *
-     * Emits `WithdrawRequested`.
+     * Emits `WithdrawalRequest`.
      */
-    function requestWithdraw() external;
+    function requestWithdrawal(uint256 amount) external;
+
+    /**
+     * @notice Cancels a previously requested withdrawal, removing withdrawal mode.
+     * @dev Only callable by the payer who initiated the withdrawal.
+     *
+     * Emits `WithdrawalCancelled`.
+     */
+    function cancelWithdrawal() external;
 
     /**
      * @notice Finalizes a payer's withdrawal after the lock period has elapsed.
-     *         - Accounts for any pending usage that arrived during the lock.
+     *         - Accounts for any pending usage during the lock.
      *         - Returns the unspent balance to the payer.
      *
-     * Emits `WithdrawFinalized`.
+     * Emits `WithdrawalFinalized`.
      */
-    function finalizeWithdraw() external;
+    function finalizeWithdrawal() external;
 
     /**
-     * @notice Returns whether a payer is currently in the withdrawal mode,
-     *         plus the time at which they initiated withdrawal (if any).
-     * @param payer The address of the payer.
+     * @notice Checks if a payer is currently in withdrawal mode and the timestamp
+     *         when they initiated the withdrawal.
+     * @param payer The address to check.
      * @return inWithdrawal True if in withdrawal mode, false otherwise.
-     * @return requestTimestamp The timestamp when `requestWithdraw()` was called.
+     * @return requestTimestamp The timestamp when `requestWithdrawal()` was called.
+     * @return withdrawableTimestamp When the withdrawal can be finalized.
+     * @return amount The amount requested for withdrawal.
      */
     function getWithdrawalStatus(address payer)
         external
         view
-        returns (bool inWithdrawal, uint256 requestTimestamp);
+        returns (bool inWithdrawal, uint256 requestTimestamp, uint256 withdrawableTimestamp, uint256 amount);
 
     /**
-     * @notice Returns the length of the lock period (e.g., 12 or 24 hours).
-     *         This is how long a payer must wait after `requestWithdraw()`
-     *         before calling `finalizeWithdraw()`.
-     * @dev Could be a constant in the implementation.
+     * @notice Returns the duration of the lock period required before a withdrawal
+     *         can be finalized.
+     * @return The lock period in seconds.
      */
-    function getLockPeriod() external view returns (uint256);
+    function getWithdrawalLockPeriod() external view returns (uint256);
 
     //==============================================================
     //                       USAGE SETTLEMENT
     //==============================================================
 
     /**
-     * @notice Called periodically (e.g. every 12 hours) after off-chain attestations
-     *         to settle usage and calculate how much total fees are owed.
-     * @param epochId       An ID or timestamp representing the usage window being settled.
-     * @param usageDataHash A keccak256 hash referencing the underlying usage data.
-     * @param totalFees     The total USDC fees computed from this usage window.
+     * @notice Called by node operators to settle usage and calculate fees owed.
+     * @dev This function is EIP-2200 optimized by using accumulators for multiple state updates.
+     * @param fees The total USDC fees computed from this usage period.
+     * @param payer The address of the payer being charged.
+     * @param nodeId The ID of the node operator submitting the usage.
+     * @param timestamp The timestamp when the usage occurred (can be backdated).
      *
      * Emits `UsageSettled`.
      */
     function settleUsage(
-        uint256 reportId,
-        bytes32 usageDataHash,
-        uint256 totalFees
+        uint256 fees,
+        address payer,
+        uint256 nodeId,
+        uint256 timestamp
     ) external;
 
     /**
-     * @notice Returns how many fees have been accumulated from usage but not yet
-     *         transferred to the rewards or treasury contract.
-     * @return pending Total pending fees (in USDC) that have not been forwarded yet.
+     * @notice Called by node operators to settle usage for multiple payers in a batch.
+     * @dev Uses EIP-2200 optimizations for storage efficiency.
+     * @param payers Array of payer addresses being charged.
+     * @param fees Array of USDC fees corresponding to each payer.
+     * @param timestamp When this batch of usage occurred (can be backdated).
+     * @param nodeId The ID of the node operator submitting the usage.
+     *
+     * Emits `BatchUsageSettled` and multiple `UsageSettled` events.
      */
-    function pendingFees() external view returns (uint256);
+    function settleUsageBatch(
+        address[] calldata payers,
+        uint256[] calldata fees,
+        uint256 timestamp,
+        uint256 nodeId
+    ) external;
 
     /**
-     * @notice Transfers all pending fees to a designated contract (e.g., a Rewards or Treasury contract),
-     *         which will then distribute them among node operators.
+     * @notice Retrieves the total pending fees that have not yet been transferred
+     *         to the rewards contract.
+     * @return pending The total pending fees in USDC.
+     */
+    function getPendingFees() external view returns (uint256 pending);
+
+    /**
+     * @notice Transfers all pending fees to the designated rewards contract for
+     *         distribution using EIP-2200 optimizations.
+     * @dev Uses a single storage write for updating accumulated fees.
      *
      * Emits `FeesTransferred`.
      */
     function transferFeesToRewards() external;
-}
 
+    /**
+     * @notice Returns the maximum allowed time difference for backdated settlements.
+     * @return The maximum allowed time difference in seconds.
+     */
+    function getMaxBackdatedTime() external view returns (uint256);
+
+    //==============================================================
+    //                       OBSERVABILITY FUNCTIONS
+    //==============================================================
+
+    /**
+     * @notice Returns the total value locked in the contract (all payer balances).
+     * @return tvl The total value locked in USDC.
+     */
+    function getTotalValueLocked() external view returns (uint256 tvl);
+
+    /**
+     * @notice Returns the total outstanding debt amount across all payers.
+     * @return totalDebt The total debt amount in USDC.
+     */
+    function getTotalDebtAmount() external view returns (uint256 totalDebt);
+
+    /**
+     * @notice Returns the total number of registered payers.
+     * @return count The total number of registered payers.
+     */
+    function getTotalPayerCount() external view returns (uint256 count);
+
+    /**
+     * @notice Returns the number of active payers.
+     * @return count The number of active payers.
+     */
+    function getActivePayerCount() external view returns (uint256 count);
+
+     /**
+     * @notice Returns the timestamp of the last fee transfer to the rewards contract.
+     * @return timestamp The last fee transfer timestamp.
+     */
+    function getLastFeeTransferTimestamp() external view returns (uint256 timestamp);
+
+    /**
+     * @notice Returns a paginated list of payers with outstanding debt.
+     * @param offset Number of payers to skip before starting to return results.
+     * @param limit Maximum number of payers to return.
+     * @return debtors Array of payer addresses with debt.
+     * @return debtAmounts Corresponding debt amounts for each payer.
+     * @return totalCount Total number of payers with debt (regardless of pagination).
+     */
+    function getPayersInDebt(uint256 offset, uint256 limit) external view returns (
+        address[] memory debtors,
+        uint256[] memory debtAmounts,
+        uint256 totalCount
+    );
+
+    /**
+     * @notice Returns the actual USDC balance held by the contract.
+     * @dev This can be used to verify the contract's accounting is accurate.
+     * @return balance The USDC token balance of the contract.
+     */
+    function getContractBalance() external view returns (uint256 balance);
+
+    //==============================================================
+    //                       ADMINISTRATIVE FUNCTIONS
+    //==============================================================
+
+    /**
+     * @notice Sets the address of the rewards contract.
+     * @param _rewardsContract The address of the new rewards contract.
+     *
+     * Emits `RewardsContractUpdated`.
+     */
+    function setRewardsContract(address _rewardsContract) external;
+
+    /**
+     * @notice Sets the address of the nodes contract for operator verification.
+     * @param _nodesContract The address of the new nodes contract.
+     *
+     * Emits `NodesContractUpdated`.
+     */
+    function setNodesContract(address _nodesContract) external;
+
+    /**
+     * @notice Retrieves the address of the current rewards contract.
+     * @return The address of the rewards contract.
+     */
+    function getRewardsContract() external view returns (address);
+
+    /**
+     * @notice Retrieves the address of the current nodes contract.
+     * @return The address of the nodes contract.
+     */
+    function getNodesContract() external view returns (address);
+
+    /**
+     * @notice Pauses the contract functions in case of emergency.
+     *
+     * Emits `Paused()`.
+     */
+    function pause() external;
+
+    /**
+     * @notice Unpauses the contract.
+     *
+     * Emits `Unpaused()`.
+     */
+    function unpause() external;
+
+    /**
+     * @notice Checks if a given address is an active node operator.
+     * @param operator The address to check.
+     * @return isActiveNodeOperator True if the address is an active node operator, false otherwise.
+     */
+    function getIsActiveNodeOperator(address operator) external view returns (bool isActiveNodeOperator);
+}
 ```
 
 ### Payer Reports
@@ -271,7 +558,7 @@ interface IPayerReports {
         uint256 indexed reportIndex
     );
     //==============================================================
-    //                     PAYER REPORT LOGIC                    
+    //                     PAYER REPORT LOGIC
     //==============================================================
     /**
      * @notice Submits a payer report for the node (`originatorNode`) covering
