@@ -1,5 +1,5 @@
 ---
-xip: 57
+xip: 58
 title: Disappearing messages
 description: Proposal to support disappearing messages that are intended to be visible to users for only a short period of time.
 author: Mojtaba Chenani (@mchenani)
