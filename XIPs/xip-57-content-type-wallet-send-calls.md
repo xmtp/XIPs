@@ -20,7 +20,7 @@ The goal of the wallet send calls content type is to provide a rich interaction 
 
 ### Content type
 
-```json
+```ts
 {
   authorityId: "xmtp.org",
   typeId: "walletSendCalls",
