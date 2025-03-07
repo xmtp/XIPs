@@ -1,8 +1,9 @@
 ---
-title: Trigger On-chain calls via wallet_sendCalls.
-description: Provides a content-type for triggering on-chain transactions using EIP-5792 wallet_sendCalls specification with additional metadata for display.
-author: @justjkk (J Kishore Kumar)
-status: draft
+title: Trigger on-chain calls via wallet_sendCalls
+description: Provides a content type for triggering on-chain transactions using EIP-5792 wallet_sendCalls specification with additional metadata for display.
+author: J Kishore Kumar (@justjkk)
+discussions-to: https://community.xmtp.org/t/xip-59-trigger-on-chain-calls-via-wallet-sendcalls/889
+status: Draft
 type: Standards
 category: XRC
 created: 2025-03-06
@@ -14,7 +15,7 @@ This content type provides a standard format for triggering on-chain calls typic
 
 ## Motivation
 
-The goal of the wallet send calls content type is to provide a rich interaction between an AI agent and the user and allow for on-chain actions like sending, swapping, lending tokens and any other DeFi protocol that can be represented as a single or a sequence of on-chain transactions. As XMTP natively represents users by their wallet address, implementing this content-type benefits the ecosystem for both the current DeFAI use-case as well as any future use-case that enables on-chain interaction like minting NFT or registering votes on a group for a DAO proposal, etc.
+The goal of the wallet send calls content type is to provide a rich interaction between an AI agent and the user and allow for on-chain actions like sending, swapping, lending tokens and any other DeFi protocol that can be represented as a single or a sequence of on-chain transactions. As XMTP natively represents users by their wallet address, implementing this content type benefits the ecosystem for both the current DeFAI use-case as well as any future use-case that enables on-chain interaction like minting NFT or registering votes on a group for a DAO proposal, etc.
 
 ## Specification
 
@@ -68,26 +69,29 @@ You can find a WIP reference implementation of this wallet-send-calls content ty
 
 ## Security considerations
 
-The following security risks are identified and clients implementing this content-type should take necessary precautions:
+The following security risks are identified and clients implementing this content type should take necessary precautions.
 
-### Content Injection
+### Threat model
+
+#### Content injection
 
 The content type defines parameters that will end up as arguments to functions and since this content type may be coming from an untrustworthy user or agent, care should be taken to sanitize the input before using the parameters in any code. Typescript may provide only an indication about the parameter constraints and does not provide runtime validation. Even if runtime validation is supported, the client implementation still SHOULD sanitize the input based on the context of where the parameter may end up in. Eg: SQL injection, XSS.
 
-### Spoofing
+#### Spoofing
 
 The user visible part of the transaction is typically the description part of the metadata which could be completely different from the actual transaction data if coming from a malicious agent. So, the user may end up performing The client SHOULD mitigate this by doing one or more of the following:
+
 * Maintain an allowlist of users or agents whose messages it trusts.
 * Perform transaction simulation and cross-check it against the metadata or override the metadata that is displayed to the user.
 * Display a warning or disclaimer alerting the user that the metadata description may not be trustworthy and to use their judgement.
 
-### Informed Consent
+#### Informed consent
 
 Because the data could be coming from a confused/malicious agent, the client implementation MUST NOT automatically sign or execute the transaction. The user should always provide their confirmation after reviewing either the metadata or the simulation results. This also protects against any possible confusion or hallucination by the AI agent.
 
-### Privacy considerations
+#### Privacy considerations
 
-The client implementation SHOULD take care not to accidentally expose the IP address of the user to the agent indirectly. Eg: Passing the paymaster url that is provided by the agent to the wallet may expose the user's IP if the wallet queries the paymaster API from the user's device.
+The client implementation SHOULD take care not to accidentally expose the IP address of the user to the agent indirectly. Eg: Passing the paymaster URL that is provided by the agent to the wallet may expose the user's IP if the wallet queries the paymaster API from the user's device.
 
 ## Copyright
 
