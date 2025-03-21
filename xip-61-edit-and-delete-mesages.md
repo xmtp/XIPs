@@ -3,7 +3,7 @@ xip: 61
 title: Edit and delete messages
 description: Proposes a best effort method to delete and edit messages.
 author: Naomi Plasterer (@nplasterer)
-discussions-to: TBD
+discussions-to: https://community.xmtp.org/t/xip-61-edit-and-delete-messages/896
 status: Draft
 type: Standards
 category: XRC
