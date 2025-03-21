@@ -3,7 +3,7 @@ xip: 60
 title: Private contacts
 description: Proposes a way for a client to set a private contact name for an inbox and have the name be interoperable across apps and installations.
 author: Naomi Plasterer (@nplasterer)
-discussions-to: TBD
+discussions-to: https://community.xmtp.org/t/xip-60-private-contacts/895
 status: Draft
 type: Standards
 category: XRC
