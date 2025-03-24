@@ -30,11 +30,11 @@ On message send from the protocol, xMTP will need to expose and send the `messag
 
 ### Notification server
 
-The notification server will need to keep a database of notifications that it has processed in the past with successful `hmacKeys` matches. If the notification was not sent because the `hmacKeys` were true, store the `messageId`. 
+The notification server will need to keep a database of notifications that it has processed in the past with successful `hmacKeys` matches. If the notification was not sent because the `hmacKeys` were true, store the `messageId`.
 
 On receive of a new message, if `shouldPush` is false, check to see if the `referenceMessageId` is in the local database. If there is a match in the local database, then send the notification. If not, do not send the notification.
 
-The notification server should delete these messages on a rolling basis of 3 or 6 months to keep the database small. This means reactions to older messages may not push. 
+The notification server should delete these messages on a rolling basis of 3 or 6 months to keep the database small. This means reactions to older messages may not push.
 
 ## Backward compatibility
 
