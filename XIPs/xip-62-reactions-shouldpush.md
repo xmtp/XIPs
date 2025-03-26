@@ -2,7 +2,7 @@
 xip: 62
 title: More control over push notifications for reactions
 description: Proposes a way to give iOS devs more control over when to send push notifications for reactions.
-author: Naomi Plasterer (@nplastere)
+author: Naomi Plasterer (@nplasterer)
 discussions-to: TBD
 status: Draft
 type: Standards
