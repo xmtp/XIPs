@@ -3,7 +3,7 @@ xip: 62
 title: More control over push notifications for reactions
 description: Proposes a way to give iOS devs more control over when to send push notifications for reactions.
 author: Naomi Plasterer (@nplasterer)
-discussions-to: TBD
+discussions-to: https://community.xmtp.org/t/xip-62-more-control-over-push-notifications-for-reactions/899
 status: Draft
 type: Standards
 category: XRC
