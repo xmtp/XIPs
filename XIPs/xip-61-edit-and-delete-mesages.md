@@ -47,9 +47,9 @@ const messageUpdate: UpdateMessage = {
 };
 ```
 
-These messages will be hidden from the readable messages list, like `ReadReceipts`. And when a new content type is encountered, a worker will ensure the messages are updated.
+These messages will be hidden from the readable messages list, like `ReadReceipts`. And when a new message with the `UpdateMessage` content type is encountered, a worker will ensure the messages are updated.
 
-They will be triggered by a client action that under the hood will perform the update locally for the initiating client and then post a message with a `contentType` to trigger the worker for others in the group. The worker will also set in the local database on edit to signify that a message was edited and store the `inboxId` of the editor.
+The message with the `UpdateMessage` content type will be triggered by a client action. Under the hood, the client action will perform the update locally for the initiating client and then post a message with a `contentType` to trigger the worker for others in the group. The worker will also set in the local database on edit to signify that a message was edited and store the `inboxId` of the editor.
 
 This cannot guarantee a delete or edit from any local database being managed by an application separate from the protocol or that a screenshot was not taken prior to delete or edit.
 
