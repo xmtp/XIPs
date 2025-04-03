@@ -4,6 +4,7 @@ title: MIMI message content format in XMTP
 description: Proposal to integrate the More Instant Messaging Interoperability (MIMI) message content format into XMTP
 author: Mojtaba Chenani (@mchenani)
 status: Draft
+discussions-to: https://community.xmtp.org/t/xip-63-mimi-message-content-format-in-xmtp/905
 type: Standards
 category: XRC
 created: 2025-03-21
