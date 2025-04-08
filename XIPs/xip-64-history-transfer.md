@@ -3,7 +3,7 @@ xip: 64
 title: History transfer
 description: Proposes a new version of history sync called history transfer that requires more explicit user actions to make syncing more apparent.
 author: Naomi Plasterer (@nplasterer)
-discussions-to: TBD
+discussions-to: https://community.xmtp.org/t/xip-64-message-transfer/917
 status: Draft
 type: Standards
 category: XRC
