@@ -13,9 +13,10 @@ supercedes: 31
 
 ## Abstract
 
-The initial version of history sync introduced by [XIP-31: Message History request system](xip-31-message-history.md) has worked well but is causing confusion for many integrators because of a lot of things happening automatically. 
+The initial version of history sync introduced by [XIP-31: Message History request system](xip-31-message-history.md) has worked well but is causing confusion for many integrators because of a lot of things happening automatically.
 
 This version supercedes [XIP-31](xip-31-message-history.md) and:
+
 - Renames the history sync feature to **history transfer**
 - Renames the group sync feature to **preference sync**
 - Requires more explicit actions to make syncing more apparent
