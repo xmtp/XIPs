@@ -7,9 +7,13 @@ status: Review
 type: Standards
 category: Core
 created: 2024-03-19
+superceded by: 64
 ---
 
 ## Abstract
+
+> [!Important]
+> This XIP has been superseded by [XIP-64](xip-64-history-transfer.md). Please refer to the newer proposal for the current design.
 
 This XIP proposes a system for transferring message history between app installations as part of XMTP V3.
 
