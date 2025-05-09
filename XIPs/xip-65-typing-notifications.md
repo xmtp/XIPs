@@ -39,7 +39,7 @@ Conversations will have the ability to stream these specific ephemeral messages 
 
 ```kotlin
     fun streamEphemeral(): Flow<Message> {
-	    // Streams ephemeral message
+          // Streams ephemeral message
     }
 ```
 
