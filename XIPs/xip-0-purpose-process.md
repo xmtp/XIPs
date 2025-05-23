@@ -6,218 +6,263 @@ status: Living
 type: Process
 author: Matt Galligan (@mg0716), et al
 created: 2022-02-22
-updated: 2022-09-21
+updated: 2024-03-19
 ---
 
 ## What is an XIP?
 
-XIP stands for XMTP Improvement Proposal. An XIP is a design document providing information to the XMTP community, or describing a new feature for XMTP or its processes or environment. The XIP should provide a concise technical specification of the feature and a rationale for the feature. The XIP author is responsible for building consensus within the community and documenting dissenting opinions.
+XIP stands for XMTP Improvement Proposal.
 
-## XIP Rationale
+An XIP is a design document that provides information to the XMTP community about:
 
-We intend XIPs to be the primary mechanisms for proposing new features, for collecting community technical input on an issue, and for documenting the design decisions that have gone into XMTP. Because the XIPs are maintained as text files in a versioned repository, their revision history is the historical record of the feature proposal.
+- A new feature for XMTP
 
-For XMTP implementers, XIPs are a convenient way to track the progress of their implementation. Ideally each implementation maintainer would list the XIPs that they have implemented. This will give end users a convenient way to know the current status of a given implementation or library.
+- An improvement to XMTP processes or environment
 
-## XIP Types
+*Environment* may refer to technical infrastructure, standards, software libraries, or network operations.
 
-There are three major categories of XIPs, as well as more specific subcategories:
+The XIP author and editor should ensure an XIP provides a concise technical specification and rationale for its proposed feature or improvement.
 
-- A **Standards XIP** describes any changes affecting most or all XMTP implementations, or the interoperability of applications using XMTP.
-  - **Core**: includes proposals for rules and behavior around message relay by nodes, node incentive strategies, and backwards-incompatible changes that require a consensus fork
-  - **Network**: includes networking specifications and proposals around how nodes communicate and interoperate
-  - **Interface**: includes client API/RPC specifications and improvements to how clients interact with the network
-  - **Storage**: includes specifications and proposals for persistent storage of messages by or on behalf of clients
-  - **XRC** (*XMTP Request for Comment*): includes application-level standards and conventions, including message payload formats and applications
-- A **Process XIP** describes a process surrounding XMTP, or proposes changes to an existing process. They may propose an implementation, but not to XMTP's codebase; they often require community consensus; unlike Informational XIPs, they are more than recommendations, and users are typically not free to ignore them.
-- An **Informational XIP** provides general guidelines or information to the XMTP community, but does not propose a new feature. Informational XIPs do not necessarily represent an XMTP community consensus or recommendation, so users and implementors are free to ignore Informational XMTP or follow their advice.
+## Purpose of XIPs
 
-It is highly recommended that a single XIP contain a single key proposal or new idea. The more focused the XIP, the more successful it tends to be. If in doubt, split your XIP into several well-focused ones. A change to one client doesn’t require an XIP; a change that affects multiple clients, or defines a standard for multiple apps to use, does.
+XIPs address the need for a standardized, transparent process for proposing, discussing, and integrating new features for XMTP.
 
-An XIP must meet certain minimum criteria. It must be a clear and complete description of the proposed enhancement. The enhancement must represent a net improvement. The proposed implementation, if applicable, must be solid and must not complicate the protocol unduly.
+XIPs also offer a structured proposal system that enables permissionless community participation and informed decision-making.
 
-## XIP Workflow
+The XIPs GitHub repository, with its comprehensive revision history, serves as a source for technical exchange and an archival record of XMTP's evolution and the contributors who made it possible.
 
-### Shepherding an XIP
+For XMTP implementers, XIPs are a convenient way to track the progress of their implementations. Ideally, each implementer will list the XIPs they have implemented, providing their users with the current status of a given implementation or library.
 
-Parties involved in the process are you, the champion or *XIP author*, the [*XIP editors*](#XIP-editors), and the *XMTP Core Developers* (currently the XMTP Labs team).
+## XIP types
 
-Before you begin writing a formal XIP, you should vet your idea. Ask the XMTP community first if an idea is original to avoid wasting time on something that will be rejected based on prior research. It is thus recommended to create a new topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips) to do this.
+There are three types of XIPs:
 
-Once the idea has been vetted, your next responsibility will be to present (by means of an XIP) the idea to the reviewers and all interested parties, invite editors, developers, and the community to give feedback on the aforementioned channels. You should try and gauge whether the interest in your XIP is commensurate with both the work involved in implementing it and how many parties will have to conform to it. Negative community feedback will be taken into consideration and may prevent your XIP from moving past the Draft stage.
+- Standards
+- Process
+- Informational
 
-### XIP Process
+### Standards XIP
 
-- **Idea** - An idea that is pre-draft. This is not tracked within the XIP Repository.
-- **Draft** - The first formally tracked stage of an XIP in development. An XIP is merged by an XIP Editor into the XIP repository when properly formatted.
-- **Review** - An XIP Author marks an XIP as ready for and requesting Peer Review.
-- **Last Call** - This is the final review window for an XIP before moving to `Final`. An XIP editor will assign `Last Call` status and set a review end date (`last-call-deadline`), typically 14 days later. If this period results in necessary normative changes it will revert the XIP to `Review`.
-- **Final** - This XIP represents the final standard. A Final XIP exists in a state of finality and should only be updated to correct errata and add non-normative clarifications.
-- **Stagnant** - Any XIP in `Draft` or `Review` or `Last Call` if inactive for a period of 6 months or greater is moved to `Stagnant`. An XIP may be resurrected from this state by Authors or XIP Editors through moving it back to `Draft` or its earlier status. If not resurrected, a proposal may stay forever in this status.
-- **Withdrawn** - The XIP Author(s) have withdrawn the proposed XIP. This state has finality and can no longer be resurrected using this XIP number. If the idea is pursued at a later date it is considered a new proposal.
-- **Living** - A special status for XIPs that are designed to be continually updated and not reach a state of finality. This includes most notably XIP-0.
+Describes any changes that affect most or all XMTP implementations or the interoperability of applications using XMTP.
 
-## What belongs in a successful XIP?
+Within the **Standards** type, XIPs are further categorized as follows:
 
-Each XIP should have the following parts:
+- **Core**: Includes proposals for rules and behavior around message relay by nodes, node incentive strategies, and backward-incompatible changes that require a consensus fork
 
-- Preamble - RFC 822 style headers containing metadata about the XIP, including the XIP number, a short descriptive title (limited to a maximum of 44 characters), a description (limited to a maximum of 140 characters), and the author details. Irrespective of the category, the title and description should not include XIP number. See [below](#xip-header-preamble) for details.
-- Abstract - Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
-- Motivation (*optional) - A motivation section is critical for XIPs that want to change the XMTP protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem that the XIP solves. XIP submissions without sufficient motivation may be rejected outright.
-- Specification - The technical specification should describe the syntax and semantics of any new feature. The specification should be detailed enough to allow competing, interoperable implementations for any of the current XMTP platforms.
-- Rationale - The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion.
-- Backwards Compatibility - All XIPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The XIP must explain how the author proposes to deal with these incompatibilities. XIP submissions without a sufficient backwards compatibility treatise may be rejected outright.
-- Test Cases - Test cases for an implementation are mandatory for XIPs that are affecting consensus changes. Tests should either be inlined in the XIP as data (such as input/expected output pairs, or included in `../assets/XIP-###/<filename>`.
-- Reference Implementation - An optional section that contains a reference/example implementation that people can use to assist in understanding or implementing this specification.
-- Security Considerations - All XIPs must contain a section that discusses the security implications/considerations relevant to the proposed change. Include information that might be important for security discussions, surfaces risks and can be used throughout the life-cycle of the proposal. E.g. include security-relevant design decisions, concerns, important discussions, implementation-specific guidance and pitfalls, an outline of threats and risks and how they are being addressed. XIP submissions missing the "Security Considerations" section will be rejected. An XIP cannot proceed to status "Final" without a Security Considerations discussion deemed sufficient by the reviewers.
-- Copyright Waiver - All XIPs must be in the public domain. See the bottom of this XIP for an example copyright waiver.
+- **Interface**: Includes client API/RPC specifications and improvements for how clients interact with the network
 
-## XIP Formats and Templates
+- **Network**: Includes networking specifications and proposals for how nodes communicate and interoperate
 
-XIPs should be written in [markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) format. There is a [template](../xip-template.md) to follow.
+- **Storage**: Includes specifications and proposals for the persistent storage of messages by or on behalf of clients
 
-## XIP Header Preamble
+- **XRC** (XMTP Request for Comment): Includes application-level standards and conventions, such as message payload formats and applications
 
-Each XIP must begin with an [RFC 822](https://www.ietf.org/rfc/rfc822.txt) style header preamble, formatted as a bulleted list. This header is also termed ["front matter" by Jekyll](https://jekyllrb.com/docs/front-matter/). The headers must appear in the following order.
+### Process XIP
 
-`xip`: *An ID will be added by an editor when the XIP is considered Final.* (The ID will correspond with its pull request number.)
+Describes a new process or changes to an existing XMTP process. These XIPs may propose an implementation but do not modify the XMTP codebase.
 
-`title`: *The XIP title is a few words, not a complete sentence.*
+They often require community consensus and are more than mere recommendations. However, unlike **Informational** XIPs, the community cannot ignore them.
 
-`description`: *Description is one full (short) sentence*
+### Informational XIP
 
-`author`: *The list of the author's or authors' name(s) and/or username(s), or name(s) and email(s). Details are below.*
+Provides general guidelines or information to the XMTP community without proposing a new feature.
 
-`discussions-to`: *The url pointing to the official discussion thread*
+These XIPs do not necessarily reflect an XMTP community consensus or recommendation, allowing users and implementers to disregard or heed their advice.
 
-`status`: *Draft, Review, Last Call, Final, Stagnant, Withdrawn, Living*
+## Start with an idea
 
-`last-call-deadline`: *The date last call period ends on* (Optional field, only needed when status is `Last Call`)
+Gathering feedback from the community before advancing an idea through the XIP process is essential. This early feedback helps validate an idea, assess its originality, and measure community interest. Feedback may also involve reviewing reference implementations or assessing whether the idea is too specific for broad adoption within the XMTP ecosystem.
 
-`type`: *One of `Standards`, `Process`, or `Informational`*
+Starting with an idea also enables gauging whether the level of interest from the community is commensurate with the effort required to implement an idea. While the amount of discussion does not automatically qualify an idea, it can influence its progression beyond the initial stage.
 
-`category`: *One of `Core`, `Network`, `Interface`, `Storage`, or `XRC`* (Optional field, only needed for `Standards` XIPs)
+This preparatory step can help save time and effort by ensuring the idea is original, appropriate, and useful before entering the XIP process.
 
-`created`: *Date the XIP was created on*
+**To get started with an idea:**
 
-`requires`: *XIP number(s)* (Optional field)
+1. Post the idea as a new topic in the [Ideas & Improvements category](https://community.xmtp.org/c/development/ideas/54) in the XMTP Community Forums.
 
-`withdrawal-reason`: *A sentence explaining why the XIP was withdrawn.* (Optional field, only needed when status is `Withdrawn`)
+1. If there is a prototype for the idea, share it in the post. A prototype can clarify the idea and foster discussion.
 
-Headers that permit lists must separate elements with commas.
+1. Include a due date for feedback, typically allowing about two weeks, including two weekends, to ensure adequate response time.
 
-Headers requiring dates will always do so in the format of ISO 8601 (YYYY-MM-DD).
+1. Share the idea with the XMTP community, including developers, reviewers, and editors. Beyond posting to the XMTP Community Forums, consider sharing the idea across networks on other platforms.
 
-### `author` header
+1. Request feedback that will enable validation of, measurement of interest in, and assessment of the originality of the idea, potentially saving time and effort.  
 
-The `author` header lists the names, email addresses or GitHub usernames of the authors/owners of the XIP. Those who prefer anonymity may use a GitHub username only, or a first name and a GitHub username. The format of the `author` header value must be:
+After the idea has received enough feedback expressing interest in the idea, create an XIP draft for it as described in the next section. A good standard for "enough feedback" is at least one comment from an XMTP community member and one from an XMTP core developer (currently the XMTP Labs team).
 
-> Random J. User `<address@dom.ain>`
+## Start the XIP process
 
-or
+Following the validation of an idea, the author can present it as a formal XIP draft. The author is then responsible for shepherding it through the XIP process.
 
-> Random J. User `(@username)`
+Each XIP should focus on a single key proposal or idea. A focused XIP is more likely to succeed. If in doubt, divide the XIP into multiple, well-focused XIPs. A change affecting only one client doesn’t need an XIP, but changes that affect multiple clients or establish a standard for multiple apps do.
 
-if the email address or GitHub username is included.
+An XIP must fulfill certain minimum criteria:
 
-It is not possible to use both an email and a GitHub username at the same time. If important to include both, one could include their name twice, once with the GitHub username, and once with the email.
+- It must provide a clear, complete description of the proposed enhancement.
 
-At least one author must use a GitHub username, in order to get notified on change requests and have the capability to approve or reject them.
+- It must represent a net improvement.
 
-### `discussions-to` header
+- If the XIP includes an implementation, it must be solid and not unduly complicate the protocol.
 
-While an XIP is a draft, a `discussions-to` header will indicate the URL where the XIP is being discussed.
+### XIP template
 
-The preferred discussion URL is a topic in the [XIPs discussion forum](https://github.com/orgs/xmtp/discussions/categories/xips). The URL must not point to GitHub pull requests, any URL which is ephemeral, and any URL which can get locked over time (i.e. Reddit topics).
+XIPs should be written in Markdown format using this [XIP template](../xip-template.md).
 
-### `type` header
+### Draft status
 
-The `type` header specifies the type of XIP: Standards, Process, or Informational. If the type is Standards please include the subcategory (core, network, interface, storage, or ERC).
+This is the first formally tracked status of an XIP.
 
-### `category` header
+1. The XIP author uses the [XIP template](../xip-template.md) to create the XIP draft, adhering to the guidelines in this document, and sets the XIP's **status** to `Draft`.  
 
-The `category` header specifies the XIP's category. This is required for Standards XIPs only.
+   The draft filename should use the format `xip-short-title.md`, where `short-title` is a dash-separated shortened version of the XIP title.
 
-### `created` header
+1. The XIP author opens a pull request in the **XIPs** directory of this repository. The pull request title should include the proposal title.
 
-The `created` header records the date that the XIP was assigned a number. Both headers should be in YYYY-MM-DD format, e.g. 2009-01-12.
+1. The XIP author tags the [XIP editors](#xip-editors-and-responsibilities) for review.
 
-### `requires` header
+1. An XIP editor assigns the draft an XIP number. This is generally the next sequential number, but the decision is up to the editor.
 
-XIPs may have a `requires` header, indicating the XIP numbers that this XIP depends on.
+1. The XIP editor adds the XIP number to the draft filename. When assigning an XIP number, the filename should use the format `xip-n-short-title.md`, where `n` is the XIP number. They also perform the tasks in [XIP editors and responsibilities](#xip-editors-and-responsibilities).
 
-## Linking to other XIPs
+1. The XIP editor creates a topic using the XIP text (except the preamble) in the [XIP draft](https://community.xmtp.org/c/xips/xip-drafts/53) discussion forum and assigns ownership of the topic to the XIP author.
 
-References to other XIPs should follow the format `XIP-N` where `N` is the XIP number you are referring to. Each XIP that is referenced in an XIP **MUST** be accompanied by a relative markdown link the first time it is referenced, and MAY be accompanied by a link on subsequent references. The link MUST always be done via relative paths so that the links work in this GitHub repository, forks of this repository, the main XIPs site, mirrors of the main XIP site, etc. For example, you would link to this XIP with `[XIP-0](./XIPs/xip-0-purpose-process.md))`.
+1. The XIP editor copies the topic URL and sets it as the **discussions-to** value in the XIP draft pull request.
 
-## Auxiliary Files
+1. The XIP editor merges the draft pull request and contacts the XIP author with next steps.
 
-Images, diagrams and auxiliary files should be included in a subdirectory of the assets folder for that XIP as follows: `assets/xip-N` (where `N` is to be replaced with the XIP number). When linking to an image in the XIP, use relative links such as `../assets/xip-0/image.png`.
+The XIP author uses the topic to gather feedback. The XIP author is responsible for building consensus and documenting dissenting opinions.
 
-## Transferring XIP Ownership
+The XIP author may update their XIP in preparation for the review phase.
 
-It occasionally becomes necessary to transfer ownership of XIPs to a new champion. In general, we’d like to retain the original author as a co-author of the transferred XIP, but that’s really up to the original author. A good reason to transfer ownership is because the original author no longer has the time or interest in updating it or following through with the XIP process, or has fallen off the face of the ‘net (i.e. is unreachable or isn’t responding to email). A bad reason to transfer ownership is because you don’t agree with the direction of the XIP. We try to build consensus around an XIP, but if that’s not possible, you can always submit a competing XIP.
+### Review status
 
-If you are interested in assuming ownership of an XIP, send a message asking to take over, addressed to both the original author and the XIP editor. If the original author doesn’t respond to the email in a timely manner, the XIP editor will make a unilateral decision (it’s not like such decisions can’t be reversed :)).
+1. After the XIP in `Draft` status is accurate and complete to the best of the XIP author's knowledge, they open a pull request against the draft XIP to update the **status** to `Review` and tag the XIP editors. This status indicates that the XIP content is ready for review with XMTP core developers.
 
-## XIP Editors
+2. An XIP editor merges the pull request and the XIP review with XMTP core developers can start. During this phase, XMTP core developers perform a final validation of the XIP's technical approach and accuracy.
 
-The current XIP editors are
+During this phase, the only changes made to the XIP are those coordinated between the XIP author and the XMTP core developers.
 
-- Matt Galligan (@mg0716)
+### Last call status
+
+1. After addressing any necessary revisions and coming to a consensus that the XIP is sound and complete, the XMTP core developers notify the XIP author and editors.
+
+1. An XIP editor sets the **status** to `Last call` and the **last-call-deadline** preamble header to a review end date typically 14 days later. If normative changes are necessary during this phase, the XIP reverts to `Review` status.  
+
+   Normative changes are those that affect the standards, rules, or main functionality described in the XIP. These changes do not include typo fixes, example updates, text clarifications, or other alterations that don't change the technical specifications.
+
+### Final status
+
+If no normative changes are necessary during the 14-day last call period, an XIP editor sets the XIP's **status** to `Final`.
+
+An XIP in **Final** status exists in this status permanently and can be updated only to correct errata and add non-normative clarifications.
+
+### Other special statuses
+
+- **Living**: This status applies to an XIP intended to be continually updated. Instead of moving to `Final` status, this XIP moves to `Living` status. Most notably, this includes XIP-0.
+
+- **Stagnant**: This status applies to an XIP in `Draft`, `Review`, or `Last call` status without activity for over six months. An XIP editor will automatically set its status to `Stagnant`. The XIP author or XIP editor may resurrect the XIP by changing its status back to `Draft` or its earlier status. If not resurrected, an XIP can stay in this status permanently.
+
+- **Withdrawn**: An XIP author can withdraw their XIP by setting its status to `Withdrawn`. This state is permanent. No one can resurrect the XIP using the same XIP number. If someone wants to pursue the XIP again, they must create a new proposal with a new XIP number.
+
+## XIP header preamble
+
+Each XIP must begin with an RFC 822-style header preamble, preceded and followed by three hyphens (`---`), as shown in the [XIP template](../xip-template.md).
+
+For headers that permit lists of items, separate items with commas.
+
+For headers that require dates, use the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format `YYYY-MM-DD`. For example: `2024-02-29`.
+
+Headers must appear in the following order in the preamble:
+
+| Header      | Description  |
+|-------------|--------------|
+| xip         | An XIP editor will assign the XIP number. An XIP author should not provide this value. |
+| title       | Provide a short descriptive title for the XIP, limited to 44 characters. It should not include the XIP number. |
+| description | Provide a description of the XIP, limited to 140 characters. It should not include the XIP number.|
+| author      | List the XIP author names and their email addresses, GitHub usernames, or ENS domains. For more requirements, see [author details](#author-details). |
+| discussions-to | While the XIP is in `Draft` status, provide a **discussions-to** header and set the value to the URL where the XIP is being discussed. The preferred URL is a topic in the [XIP Drafts](https://community.xmtp.org/c/xips/xip-drafts/53) discussion forum. The URL must not point to a GitHub pull request, an ephemeral URL, or a lockable URL, such as a Reddit topic. |
+| status | Provide the XIP status: `Draft`, `Review`, `Last call`, `Final`, `Stagnant`, `Withdrawn`, or `Living`. To learn more, see [Start the XIP process](#start-the-xip-process). |
+| last-call-deadline | While the XIP is in `Last call` status, provide a **last-call-deadline** header and set the value to the date the last call review period ends in `YYYY-MM-DD` format. |
+| type | Provide the XIP type: `Standards`, `Process`, or `Informational`. To learn more, see [XIP types](#xip-types). |
+| category | If it is a `Standards` XIP, provide the XIP category: `Core`, `Network`, `Interface`, `Storage`, or `XRC`. To learn more, see [XIP types](#xip-types). |
+| created | Provide the date an XIP editor assigned a number to the XIP, in `YYYY-MM-DD` format. |
+| replaced | If the XIP replaces an XIP, provide the **replaced** header and set its value to a link to the XIP it replaces. |
+| required | If the XIP depends on an XIP, provide the **required** header and set its value to a link to the XIP it depends on. |
+| superseded-by | If the XIP is superseded by an XIP, provide the **superseded-by** header and set its value to a link to the XIP that supersedes it. |
+| updated | If the XIP is in `Living` status and has been updated after its **created** date, provide the **updated** header and set its value to the date the XIP was last updated in `YYYY-MM-DD` format. |
+| withdrawal-reason | If the XIP is in `Withdrawn` status, provide the **withdrawal-reason** header and set its value to a sentence that explains why the XIP was withdrawn. |
+
+### author details
+
+For the **author** header, to include an email address, GitHub username, or ENS domain along with the author name, use one of these formats:
+
+- Alix A. User &lt;alixauser@example.com&gt;
+
+- Bo B. User (@bobusername)
+
+- Caro C. User (carocuser.eth)
+
+Do not use more than one of the following contact methods with a single author name: email address, GitHub username, or ENS domain.
+
+If it is important to include more than one method, list the author's name twice, once with the email and once with the GitHub username, for example.
+
+Authors who prefer anonymity may use only a GitHub username or a first name and GitHub username.
+
+At least one author must use a GitHub username to enable notifications and approvals for change requests.
+
+## XIP numbers and XIP links
+
+When referring to an XIP by number, write it in hyphenated form `XIP-N`, where `N` is the XIP's assigned number.
+
+An XIP referenced in an XIP must link to the XIP upon its first reference. Subsequent references may include the link.
+
+Links to XIPs must use relative paths to enable links to work in this GitHub repository, forks of this repository, the main XIPs site, mirrors of the main XIP site, and so forth. For example, when referencing this XIP in an XIP, use a relative link like this: `[XIP-0](./xip-0-purpose-process.md)`.
+
+## Auxiliary files
+
+Images, diagrams, and auxiliary files should be included in the `../assets` folder subdirectory as follows: `../assets/xip-n`, where `n` is to be replaced with the XIP number. When linking to a file in the XIP, use relative links such as `../assets/xip-0/image.png`.
+
+## Transferring XIP ownership
+
+Occasionally, transferring ownership of XIPs to a new champion is necessary.
+
+A good reason to transfer ownership is that the original author no longer has the time or interest to update the XIP or follow through with the XIP process. It may also be that the author has fallen off the face of the ‘net (i.e., is unreachable or isn’t responding to email).
+
+A bad reason to transfer ownership is because of a disagreement with the direction the XIP has taken. The process is designed to build consensus around an XIP, but if that’s not possible, submitting a competing XIP is always an option.
+
+To assume ownership of an XIP, send a message to the original author and the XIP editor asking to take it over. If the original author doesn’t respond to the email in a timely manner, the XIP editor will make a unilateral decision.
+
+Retaining the original author as a co-author of the transferred XIP is ideal, but that’s up to the original author.
+
+## XIP editors and responsibilities
+
+The current XIP editors are:
+
+- Matt Galligan (@galligan)
 - Saul Carlin (@saulmc)
-- Steven Normore (@snormore)
+- Jennifer Hasegawa (@jhaaaa)
 
-## XIP Editor Responsibilities
+The editors don't pass judgment on XIPs. They merely perform administrative and editorial tasks.
 
-For each new XIP proposal that is submitted as a pull request, an editor does the following:
+For each new XIP proposal submitted as a pull request, an editor does the following:
 
-- Read the XIP to check if it is ready: sound and complete. The ideas must make technical sense, even if they don't seem likely to get to final status.
-- The title should accurately describe the content.
-- Check the XIP for language (spelling, grammar, sentence structure, etc.), markup (GitHub flavored Markdown), code style
+- Reads the XIP to check if it is sound and complete. The proposal must make technical sense.
 
-If the XIP isn't ready, the editor will send it back to the author for revision, with specific instructions.
+- Ensures that the title accurately describes the content.
 
-Once the XIP is ready for the repository, the XIP editor will:
+- Checks the XIP for correct spelling, grammar, sentence structure, markup (GitHub-flavored Markdown), and code style.
 
-- Assign an XIP number (generally the PR number, but the decision is with the editors)
-- Add the XIP number to the filename
-- Merge the corresponding [pull request](https://github.com/xmtp/XIPs/pulls)
-- Send a message back to the XIP author with the next step.
+- Provides specific feedback to the XIP author to help them prepare their XIP for review.
 
-Many XIPs are written and maintained by developers with write access to the XMTP codebase. The XIP editors monitor XIP changes, and correct any structure, grammar, spelling, or markup mistakes we see.
+To learn more about XIP editor tasks, see [Start the XIP process](#start-the-xip-process).
 
-The editors don't pass judgment on XIPs. We merely do the administrative & editorial part.
-
-## Style Guide
-
-### XIP filenames
-
-XIP filenames must adhere to the following pattern:
-
-- Before an XIP number is assigned: `xip-title.md`
-  - Where `title` is a dash-separated shortened version of the XIP title
-- After an XIP number is assigned: `xip-n-short-title.md`
-  - Where `n` is the XIP number
-
-### XIP Pull Request Titles
-
-When assigning a title to a pull request that contains a proposal, it should include the title of said proposal.
-
-### XIP numbers
-
-When referring to an XIP by number, it should be written in the hyphenated form `XIP-N` where `N` is the XIP's assigned number.
-
-### RFC 2119
-
-XIPs are encouraged to follow [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) for terminology and to insert the following at the beginning of the Specification section:
-
-> The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in RFC 2119.
+Many XIPs are written and maintained by developers with write access to the **xmtp** GitHub organization codebase. The XIP editors monitor XIP changes and may regularly correct any structural, grammatical, spelling, and markup mistakes.
 
 ## History
 
-This document was derived heavily from [Ethereum's EIP-1](https://eips.ethereum.org/EIPS/eip-1), which was derived from [Bitcoin's BIP-0001](https://github.com/bitcoin/bips) written by Amir Taaki, which in turn was derived from [Python's PEP-0001](https://www.python.org/dev/peps/). In many places text was simply copied and modified. Although the PEP-0001 text was written by Barry Warsaw, Jeremy Hylton, and David Goodger, they are not responsible for its use in the XMTP Improvement Process, and should not be bothered with technical questions specific to XMTP or the XIP. Please direct all comments to the XIP editors.
+This document was derived heavily from [Ethereum's EIP-1](https://eips.ethereum.org/EIPS/eip-1), which was derived from [Bitcoin's BIP-0001](https://github.com/bitcoin/bips) written by Amir Taaki, which in turn was derived from [Python's PEP-0001](https://www.python.org/dev/peps/). In many places, text was simply copied and modified. Although the PEP-0001 text was written by Barry Warsaw, Jeremy Hylton, and David Goodger, they are not responsible for its use in the XMTP Improvement Process and should not be bothered with technical questions specific to XMTP or the XIP. Please direct all comments to the XIP editors.
 
 ## Copyright
 
-Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/)

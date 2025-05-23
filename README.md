@@ -2,7 +2,7 @@
 
 ![Lint](https://github.com/xmtp/XIPs/actions/workflows/lint.yml/badge.svg)
 
-## XIP Overview
+## XIP overview
 
 XMTP Improvement Proposals are design documents that:
 
@@ -18,17 +18,8 @@ They:
 
 ## Mission
 
-The goal of the XIP project is to document standardized protocols for XMTP clients and applications and to document them in a high quality and implementable way.
+The goal of the XIP project is to document standardized protocols for XMTP clients and apps and to document them in a high quality and implementable way.
 
 ## Index of proposals
 
-### Standards track
-
-| ID | Title | Type | Status |
-| -- | -- | -- | -- |
-| 0 | [XIP Purpose, Process, & Guidelines](./XIPs/xip-0-purpose-process.md) | Process | Living |
-| 5 | [Message content types](./XIPs/xip-5-message-content-types.md) | Interface | Final |
-| 9 | [Composite content type](./XIPs/xip-9-composite-content-type.md) | XRC | Final |
-| 15 | [Attachment content type](./XIPs/xip-15-attachment-content-type.md) | XRC | Review |
-| 17 | [Remote attachment content type](./XIPs/xip-17-remote-attachment-content-type-proposal.md) | XRC | Review |
-| 18 | [Add contentLength and filename to remote attachment content type](./XIPs/xip-18-adding-contentlength-filename-to-remote-attachments.md) | XRC | Draft |
+For a listing of all proposals, see the [XIPs directory](/XIPs/) or the [XMTP Improvement Proposals community forum](https://community.xmtp.org/c/xips/51).
