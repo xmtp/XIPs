@@ -44,6 +44,12 @@ To associate an AT Protocol Identity with an XMTP Inbox ID:
 
 ### Other considerations
 
+### ATProto DID as a Member Identifiers
+
+Due to the [challenges](#challenges) listed above, an ATProto DID as a `MemberIdentifier` will not be allowed to add devices as children. The passkey/wallet that added the ATProto DID would add the device as a sibling to the ATProto identifier. If the ATProto DID public key is rotated, the association would simply appear as invalid for XMTP clients that check, and the association would be hidden. The user will need to update the AT Proto PDS entry using the new public key to resolve this.
+
+Note: This XIP defines a new level of permissions for a `MemberIdentiifier` that is not described in [XIP-46](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-46-multi-wallet-identity.md#key-hierarchy-and-permissions).
+
 #### Looking up the AT Protocol ID
 
 [TBD] Need help filling in the DevX for how to know when to show the AT Protocol ID, and how to look up an ATProto identity to initiate messages to them.
