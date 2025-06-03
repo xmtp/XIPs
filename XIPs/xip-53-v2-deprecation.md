@@ -26,9 +26,9 @@ Now that XMTP V3 is fully featured and developer-ready, it’s the ideal time to
 
 **Developers should upgrade to XMTP V3**, moving off any V2-compatible versions of the XMTP SDK. We recommend always updating your app to the latest SDK version to ensure you benefit from the most recent stable release.
 
-### April 1, 2025
+### May 1, 2025
 
-**The XMTP V2 read-only transition period begins.** On every Tuesday and Thursday in April 2025 (1, 3, 8, 10, 15, 17, 22, 24, and 29), the XMTP V2 network will be in read-only mode during the following times:
+**The XMTP V2 read-only transition period begins.** On every Tuesday and Thursday in May 2025 (1, 6, 8, 13, 15, 20, 22, 27, and 29), the XMTP V2 network will be in read-only mode during the following times:
 
 North America
 
@@ -80,7 +80,7 @@ This read-only transition period will also help developers identify some of the 
 
 - A developer published an agent/bot using a version of the XMTP SDK that includes the `enableV3` flag set to `true`, and forgot about the agent. The agent experience will break when XMTP V2 is in read-only mode.
 
-### May 1, 2025
+### June 23, 2025
 
 **At 07:00 PM PDT, XMTP V2 will be permanently set to read-only mode.** No more writes to the V2 network will be allowed.
 
@@ -102,4 +102,4 @@ To learn more, see [Messaging security properties with XMTP](https://docs.xmtp.o
 
 ## Copyright
 
-Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
