@@ -37,7 +37,7 @@ The reaction MUST include the following parameters:
 ```ts
 {
     // The message ID that this reaction is being added to
-    reactingToID: string
+    reactingToId: string
 }
 ```
 
