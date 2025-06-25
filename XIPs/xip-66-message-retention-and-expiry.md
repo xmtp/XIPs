@@ -92,3 +92,7 @@ An early expiration strategy for key packages could be implemented. Once a new k
 For welcome messages, early expiration is more challenging. It is difficult to confirm whether a welcome message has been processed, especially when the associated key package might not yet have reached the node. Even if the key package has been deleted, the welcome message might still be valid, as it can still reach the installation. Therefore, premature deletion should be avoided. However, payers can mitigate storage costs by configuring a shorter retention window, such as seven days.
 
 Another long-term goal is to unify the payment mechanisms across all message types within XMTPD. Currently, chat messages are paid for using the dedicated payer system, while metadata and identity-related messages require direct gas payments to be submitted on-chain. This bifurcation introduces complexity for developers and payers alike. Unifying these systems would simplify the economic model, streamline message submission and billing workflows, and create a more consistent and developer-friendly interface. Exploring this unification will be a focus of future protocol design iterations.
+
+## Copyright
+
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
