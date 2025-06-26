@@ -1,7 +1,7 @@
 ---
 xip: 69
 title: Message retention and expiry strategy for xmtpd
-discussions-to: https://community.xmtp.org/t/
+discussions-to: https://community.xmtp.org/t/xip-69-message-retention-and-expiry-strategy-for-xmtpd/955
 status: Living
 type: Process
 author: Martin Kysel (@mkysel)
