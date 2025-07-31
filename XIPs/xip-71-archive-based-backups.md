@@ -51,8 +51,8 @@ To enable a user to create an archive:
 2. Specify the archive file path (e.g., iCloud, Google Cloud, or your server).
 3. Generate a 32-byte array encryption key to protect the archive contents. This ensures that  other apps and devices cannot access the contents without the key. Securely store the key in a location that is easily accessible to the user.
 4. Call `createArchive(path, encryptionKey, options?)` with the archive file path and the encryption key. Optionally, you can pass in the following:
-    1. Archive start and end time. If left blank, the archive will include all time.
-    2. Archive contents, which can be Consent or Messages. If left blank, the archive will include Consent and Messages.
+   - Archive start and end time. If left blank, the archive will include all time.
+   - Archive contents, which can be Consent or Messages. If left blank, the archive will include Consent and Messages.
 
     ```tsx
     createArchive(path: string, encryptionKey: string | Uint8Array, options?: {
@@ -64,12 +64,15 @@ To enable a user to create an archive:
 
     This writes the selected content into the empty file and encrypts it using the provided key.
 
-Future improvements to this feature include:
+If the user tries to close the app before `createArchive` is complete, you can do a check to see if the file on the server is empty. If empty, display a warning to the user letting them know that exiting the app will cancel archive creation.
+
+**Future improvements** to this feature include:
 
 - Ability to see the progress of `createArchive` while it’s happening
 - Ability to see the archive file size before proceeding
-
-In the meantime, if the user tries to close the app before `createArchive` is complete, you can do a check to see if the file on the server is empty. If empty, display a warning to the user letting them know that exiting the app will cancel archive creation.
+- Ability to archive only specific groups
+- Ability to archive only specific content types. For example, only archive text messages.
+- Ability to archive only messages without an expiration. For example, don't archive [disappearing messages](https://docs.xmtp.org/inboxes/send-messages#set-disappearing-message-settings-on-conversation-create).
 
 ### 2. Check archive metadata
 
@@ -97,7 +100,7 @@ importArchive(path: string, encryptionKey: string)
 
 This downloads and integrates the archive data into the installation’s local database. The archive import is **additive**, not destructive: existing messages are preserved, and duplicate messages are ignored.
 
-A future improvement for this feature includes the ability to see the progress of the download and import.
+A **future improvement** for this feature includes the ability to see the progress of the download and import.
 
 In the meantime, if the user tries to close the app before `importArchive` is complete, display a warning to the user letting them know that exiting the app will cancel the archive import.
 
@@ -157,6 +160,9 @@ Reference implementation will be included in the alpha release of archive-based 
 
 ## Security considerations
 
+- If a [disappearing message](https://docs.xmtp.org/inboxes/send-messages#set-disappearing-message-settings-on-conversation-create) is present in the local database at the time of archive creation, it will be included in the archive. Upon import, a worker will remove these disappearing messages from the app UI based on their expiration timestamps. However, the disappearing messages will still remain in the underlying archive file. This can be addressed with this **future improvement**:
+  - Ability to archive only messages without an expiration. For example, don't archive [disappearing messages](https://docs.xmtp.org/inboxes/send-messages#set-disappearing-message-settings-on-conversation-create).
+
 ### Threat model
 
 This archive-based backup system assumes a malicious actor might attempt:
@@ -179,4 +185,4 @@ This architecture maintains forward secrecy and privacy guarantees.
 
 ## Copyright
 
-Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
