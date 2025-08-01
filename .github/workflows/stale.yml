@@ -1,0 +1,24 @@
+name: "Mark stale issues and PRs"
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily
+  workflow_dispatch:     # Allows manual run too
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 182            # ~6 months
+          days-before-close: 7
+          stale-pr-message: >
+            There has been no activity on this issue for six months. It will be closed in 7 days if there is no new activity.
+          close-pr-message: >
+            Closed due to inactivity. If still interested, please reopen and continue the discussion.
+          stale-issue-message: ""           # You can leave issues alone
+          close-issue-message: ""
+          only-pr-labels: ""
+          stale-pr-label: stale
+          exempt-pr-labels: keep-open

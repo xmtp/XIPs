@@ -20,7 +20,7 @@ The abstract is a short paragraph that provides a human-readable version of the 
 
 The motivation is critical for XIPs that want to change the XMTP protocol. It should clearly explain why the existing protocol specification is inadequate to address the problem the XIP aims to solve.
 
-The motivation should describe the "why" of the XIP. What problem does it solve? Why should someone want to implement it? What benefit does it provide to the XTMP ecosystem? What use cases does it address?
+The motivation should describe the "why" of the XIP. What problem does it solve? Why should someone want to implement it? What benefit does it provide to the XMTP ecosystem? What use cases does it address?
 
 XIP submissions without sufficient motivation may be rejected outright. *This section is optional if the motivation is evident.
 
