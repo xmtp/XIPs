@@ -4,7 +4,7 @@ title: XMTP network node operator qualification criteria
 description: Criteria and process for selecting XMTP node operators
 authors: J-Ha Hasegawa (@jhaaaa), Nicholas Molnar (@neekolas)
 discussions-to: https://community.xmtp.org/t/xip-54-xmtp-network-node-operator-qualification-criteria/868
-status: Draft
+status: Living
 type: Process
 created: 2025-02-03
 ---
