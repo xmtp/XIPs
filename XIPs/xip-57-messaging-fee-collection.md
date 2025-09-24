@@ -3,7 +3,6 @@ xip: 57
 title: Messaging fee collection
 description: The system for collecting fees from Payers and metering their spend across offchain message sending
 author: Borja Aranda (@fbac), Nick Molnar (@neekolas)
-discussions-to: https://community.xmtp.org/t/xip-57-messaging-fee-collection/876
 status: Final
 type: Standards
 category: Network
