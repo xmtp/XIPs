@@ -1,0 +1,8 @@
+export function fixLegacy(opts) {
+    const { local, ...rest } = opts;
+    if (local && !rest.locale) {
+        rest.locale = local;
+    }
+    return rest;
+}
+//# sourceMappingURL=options.js.map

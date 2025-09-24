@@ -1,0 +1,12 @@
+const formats = {
+    full: true,
+    hide: true,
+    long: true,
+    short: true,
+};
+export function isDictionaryPathFormat(value) {
+    if (!value || typeof value !== 'string')
+        return false;
+    return value in formats;
+}
+//# sourceMappingURL=DictionaryPathFormat.js.map

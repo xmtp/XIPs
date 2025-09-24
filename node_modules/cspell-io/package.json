@@ -1,0 +1,63 @@
+{
+  "name": "cspell-io",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "version": "8.19.4",
+  "description": "A library of useful I/O functions used across various cspell tools.",
+  "type": "module",
+  "sideEffects": false,
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/*.tsbuildInfo",
+    "!**/__mocks__",
+    "!**/*.test.*",
+    "!**/*.spec.*",
+    "!**/*.map"
+  ],
+  "scripts": {
+    "build": "tsup-node",
+    "build:watch": "tsup-node --watch",
+    "watch": "pnpm build:watch",
+    "clean": "shx rm -rf dist temp coverage \"*.tsbuildInfo\"",
+    "clean-build": "pnpm run clean && pnpm run build",
+    "coverage": "vitest run --coverage --pool=forks",
+    "test-watch": "vitest",
+    "test:build": "tsc -p .",
+    "test": "pnpm test:build && vitest run --pool=forks"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streetsidesoftware/cspell.git",
+    "directory": "packages/cspell-io"
+  },
+  "keywords": [
+    "cspell"
+  ],
+  "author": "Jason Dent",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/streetsidesoftware/cspell/labels/cspell-io"
+  },
+  "homepage": "https://github.com/streetsidesoftware/cspell/tree/main/packages/cspell-io#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "lorem-ipsum": "^2.0.8",
+    "typescript": "~5.8.3",
+    "vitest-fetch-mock": "^0.4.5"
+  },
+  "dependencies": {
+    "@cspell/cspell-service-bus": "8.19.4",
+    "@cspell/url": "8.19.4"
+  },
+  "gitHead": "1bee5f5aa4429a1b1ae0e88934b093c5440b44dc"
+}

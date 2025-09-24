@@ -1,0 +1,385 @@
+import assert from 'node:assert';
+import { formatWithOptions } from 'node:util';
+import { toFileDirURL, toFilePathOrHref, toFileURL, urlRelative } from '@cspell/url';
+import { Chalk } from 'chalk';
+import { makeTemplate } from 'chalk-template';
+import { isSpellingDictionaryLoadError } from 'cspell-lib';
+import { console as customConsole } from './console.js';
+import { ApplicationError } from './util/errors.js';
+import { uniqueFilterFnGenerator } from './util/util.js';
+const templateIssue = `{green $filename}:{yellow $row:$col} - $message ({red $text}) $quickFix`;
+const templateIssueNoFix = `{green $filename}:{yellow $row:$col} - $message ({red $text})`;
+const templateIssueWithSuggestions = `{green $filename}:{yellow $row:$col} - $message ({red $text}) Suggestions: {yellow [$suggestions]}`;
+const templateIssueWithContext = `{green $filename}:{yellow $row:$col} $padRowCol- $message ({red $text})$padContext -- {gray $contextLeft}{red {underline $text}}{gray $contextRight}`;
+const templateIssueWithContextWithSuggestions = `{green $filename}:{yellow $row:$col} $padRowCol- $message ({red $text})$padContext -- {gray $contextLeft}{red {underline $text}}{gray $contextRight}\n\t Suggestions: {yellow [$suggestions]}`;
+const templateIssueLegacy = `{green $filename}[$row, $col]: $message: {red $text}`;
+const templateIssueWordsOnly = '$text';
+const console = undefined;
+assert(!console);
+/**
+ *
+ * @param template - The template to use for the issue.
+ * @param uniqueIssues - If true, only unique issues will be reported.
+ * @param reportedIssuesCollection - optional collection to store reported issues.
+ * @returns issueEmitter function
+ */
+function genIssueEmitter(stdIO, errIO, template, uniqueIssues, reportedIssuesCollection) {
+    const uniqueFilter = uniqueIssues ? uniqueFilterFnGenerator((issue) => issue.text) : () => true;
+    const defaultWidth = 10;
+    let maxWidth = defaultWidth;
+    let uri;
+    return function issueEmitter(issue) {
+        if (!uniqueFilter(issue))
+            return;
+        if (uri !== issue.uri) {
+            maxWidth = defaultWidth;
+            uri = issue.uri;
+        }
+        maxWidth = Math.max(maxWidth * 0.999, issue.text.length, 10);
+        const issueText = formatIssue(stdIO, template, issue, Math.ceil(maxWidth));
+        reportedIssuesCollection?.push(formatIssue(errIO, template, issue, Math.ceil(maxWidth)));
+        stdIO.writeLine(issueText);
+    };
+}
+function nullEmitter() {
+    /* empty */
+}
+function relativeUriFilename(uri, rootURL) {
+    const url = toFileURL(uri);
+    const rel = urlRelative(rootURL, url);
+    if (rel.startsWith('..'))
+        return toFilePathOrHref(url);
+    return rel;
+}
+function reportProgress(io, p, cwdURL, options) {
+    if (p.type === 'ProgressFileComplete') {
+        return reportProgressFileComplete(io, p, cwdURL, options);
+    }
+    if (p.type === 'ProgressFileBegin') {
+        return reportProgressFileBegin(io, p, cwdURL);
+    }
+}
+function determineFilename(io, p, cwd) {
+    const fc = '' + p.fileCount;
+    const fn = (' '.repeat(fc.length) + p.fileNum).slice(-fc.length);
+    const idx = fn + '/' + fc;
+    const filename = io.chalk.gray(relativeUriFilename(p.filename, cwd));
+    return { idx, filename };
+}
+function reportProgressFileBegin(io, p, cwdURL) {
+    const { idx, filename } = determineFilename(io, p, cwdURL);
+    if (io.getColorLevel() > 0) {
+        io.clearLine?.(0);
+        io.write(`${idx} ${filename}\r`);
+    }
+}
+function reportProgressFileComplete(io, p, cwd, options) {
+    const { idx, filename } = determineFilename(io, p, cwd);
+    const { verbose, debug } = options;
+    const time = reportTime(io, p.elapsedTimeMs, !!p.cached);
+    const skipped = p.processed === false ? ' skipped' : '';
+    const hasErrors = p.numErrors ? io.chalk.red ` X` : '';
+    const newLine = (skipped && (verbose || debug)) || hasErrors || isSlow(p.elapsedTimeMs) || io.getColorLevel() < 1 ? '\n' : '';
+    const msg = `${idx} ${filename} ${time}${skipped}${hasErrors}${newLine || '\r'}`;
+    io.write(msg);
+}
+function reportTime(io, elapsedTimeMs, cached) {
+    if (cached)
+        return io.chalk.green('cached');
+    if (elapsedTimeMs === undefined)
+        return '-';
+    const slow = isSlow(elapsedTimeMs);
+    const color = !slow ? io.chalk.white : slow === 1 ? io.chalk.yellow : io.chalk.redBright;
+    return color(elapsedTimeMs.toFixed(2) + 'ms');
+}
+function isSlow(elapsedTmeMs) {
+    if (!elapsedTmeMs || elapsedTmeMs < 1000)
+        return 0;
+    if (elapsedTmeMs < 2000)
+        return 1;
+    return 2;
+}
+export function getReporter(options, config) {
+    const perfStats = {
+        filesProcessed: 0,
+        filesSkipped: 0,
+        filesCached: 0,
+        elapsedTimeMs: 0,
+        perf: Object.create(null),
+    };
+    const noColor = options.color === false;
+    const forceColor = options.color === true;
+    const uniqueIssues = config?.unique || false;
+    const defaultIssueTemplate = options.wordsOnly
+        ? templateIssueWordsOnly
+        : options.legacy
+            ? templateIssueLegacy
+            : options.showContext
+                ? options.showSuggestions
+                    ? templateIssueWithContextWithSuggestions
+                    : templateIssueWithContext
+                : options.showSuggestions
+                    ? templateIssueWithSuggestions
+                    : options.showSuggestions === false
+                        ? templateIssueNoFix
+                        : templateIssue;
+    const { fileGlobs, silent, summary, issues, progress: showProgress, verbose, debug } = options;
+    const issueTemplate = config?.issueTemplate || defaultIssueTemplate;
+    assertCheckTemplate(issueTemplate);
+    const console = config?.console || customConsole;
+    const colorLevel = noColor ? 0 : forceColor ? 2 : console.stdoutChannel.getColorLevel();
+    const stdio = {
+        ...console.stdoutChannel,
+        chalk: new Chalk({ level: colorLevel }),
+    };
+    const stderr = {
+        ...console.stderrChannel,
+        chalk: new Chalk({ level: colorLevel }),
+    };
+    const consoleError = (msg) => stderr.writeLine(msg);
+    function createInfoLog(wrap) {
+        return (msg) => console.info(wrap(msg));
+    }
+    const emitters = {
+        Debug: !silent && debug ? createInfoLog(stdio.chalk.cyan) : nullEmitter,
+        Info: !silent && verbose ? createInfoLog(stdio.chalk.yellow) : nullEmitter,
+        Warning: createInfoLog(stdio.chalk.yellow),
+    };
+    function infoEmitter(message, msgType) {
+        emitters[msgType]?.(message);
+    }
+    const rootURL = toFileDirURL(options.root || process.cwd());
+    function relativeIssue(fn) {
+        const fnFilename = options.relative
+            ? (uri) => relativeUriFilename(uri, rootURL)
+            : (uri) => toFilePathOrHref(toFileURL(uri, rootURL));
+        return (i) => {
+            const fullFilename = i.uri ? toFilePathOrHref(toFileURL(i.uri, rootURL)) : '';
+            const filename = i.uri ? fnFilename(i.uri) : '';
+            const r = { ...i, filename, fullFilename };
+            fn(r);
+        };
+    }
+    /*
+     * Turn off repeated issues see https://github.com/streetsidesoftware/cspell/pull/6058
+     * We might want to add a CLI option later to turn this back on.
+     */
+    const repeatIssues = false;
+    const issuesCollection = showProgress && repeatIssues ? [] : undefined;
+    const errorCollection = [];
+    function errorEmitter(message, error) {
+        if (isSpellingDictionaryLoadError(error)) {
+            error = error.cause;
+        }
+        const errorText = formatWithOptions({ colors: stderr.stream.hasColors?.() }, stderr.chalk.red(message), debug ? error : error.toString());
+        errorCollection?.push(errorText);
+        consoleError(errorText);
+    }
+    const resultEmitter = (result) => {
+        if (!fileGlobs.length && !result.files) {
+            return;
+        }
+        const { files, issues, cachedFiles, filesWithIssues, errors } = result;
+        const numFilesWithIssues = filesWithIssues.size;
+        if (stderr.getColorLevel() > 0) {
+            stderr.write('\r');
+            stderr.clearLine(0);
+        }
+        if (issuesCollection?.length || errorCollection?.length) {
+            consoleError('-------------------------------------------');
+        }
+        if (issuesCollection?.length) {
+            consoleError('Issues found:');
+            issuesCollection.forEach((issue) => consoleError(issue));
+        }
+        const cachedFilesText = cachedFiles ? ` (${cachedFiles} from cache)` : '';
+        const withErrorsText = errors ? ` with ${errors} error${errors === 1 ? '' : 's'}` : '';
+        const numFilesWidthIssuesText = numFilesWithIssues === 1 ? '1 file' : `${numFilesWithIssues} files`;
+        const summaryMessage = `CSpell\u003A Files checked: ${files}${cachedFilesText}, Issues found: ${issues} in ${numFilesWidthIssuesText}${withErrorsText}.`;
+        consoleError(summaryMessage);
+        if (errorCollection?.length && issues > 5) {
+            consoleError('-------------------------------------------');
+            consoleError('Errors:');
+            errorCollection.forEach((error) => consoleError(error));
+        }
+        if (options.showPerfSummary) {
+            consoleError('-------------------------------------------');
+            consoleError('Performance Summary:');
+            consoleError(`  Files Processed: ${perfStats.filesProcessed.toString().padStart(6)}`);
+            consoleError(`  Files Skipped  : ${perfStats.filesSkipped.toString().padStart(6)}`);
+            consoleError(`  Files Cached   : ${perfStats.filesCached.toString().padStart(6)}`);
+            consoleError(`  Processing Time: ${perfStats.elapsedTimeMs.toFixed(2).padStart(9)}ms`);
+            consoleError('Stats:');
+            const stats = Object.entries(perfStats.perf)
+                .filter((p) => !!p[1])
+                .map(([key, value]) => [key, value.toFixed(2)]);
+            const padName = Math.max(...stats.map((s) => s[0].length));
+            const padValue = Math.max(...stats.map((s) => s[1].length));
+            stats.sort((a, b) => a[0].localeCompare(b[0]));
+            for (const [key, value] of stats) {
+                value && consoleError(`  ${key.padEnd(padName)}: ${value.padStart(padValue)}ms`);
+            }
+        }
+    };
+    function collectPerfStats(p) {
+        if (p.cached) {
+            perfStats.filesCached++;
+            return;
+        }
+        perfStats.filesProcessed += p.processed ? 1 : 0;
+        perfStats.filesSkipped += !p.processed ? 1 : 0;
+        perfStats.elapsedTimeMs += p.elapsedTimeMs || 0;
+        if (!p.perf)
+            return;
+        for (const [key, value] of Object.entries(p.perf)) {
+            if (typeof value === 'number') {
+                perfStats.perf[key] = (perfStats.perf[key] || 0) + value;
+            }
+        }
+    }
+    function progress(p) {
+        if (!silent && showProgress) {
+            reportProgress(stderr, p, rootURL, options);
+        }
+        if (p.type === 'ProgressFileComplete') {
+            collectPerfStats(p);
+        }
+    }
+    return {
+        issue: relativeIssue(silent || !issues
+            ? nullEmitter
+            : genIssueEmitter(stdio, stderr, issueTemplate, uniqueIssues, issuesCollection)),
+        error: silent ? nullEmitter : errorEmitter,
+        info: infoEmitter,
+        debug: emitters.Debug,
+        progress,
+        result: !silent && summary ? resultEmitter : nullEmitter,
+    };
+}
+function formatIssue(io, templateStr, issue, maxIssueTextWidth) {
+    function clean(t) {
+        return t.replace(/\s+/, ' ');
+    }
+    const { uri = '', filename, row, col, text, context, offset } = issue;
+    const contextLeft = clean(context.text.slice(0, offset - context.offset));
+    const contextRight = clean(context.text.slice(offset + text.length - context.offset));
+    const contextFull = clean(context.text);
+    const padContext = ' '.repeat(Math.max(maxIssueTextWidth - text.length, 0));
+    const rowText = row.toString();
+    const colText = col.toString();
+    const padRowCol = ' '.repeat(Math.max(1, 8 - (rowText.length + colText.length)));
+    const suggestions = formatSuggestions(io, issue);
+    const msg = issue.message || (issue.isFlagged ? 'Forbidden word' : 'Unknown word');
+    const messageColored = issue.isFlagged ? `{yellow ${msg}}` : msg;
+    const substitutions = {
+        $col: colText,
+        $contextFull: contextFull,
+        $contextLeft: contextLeft,
+        $contextRight: contextRight,
+        $filename: filename,
+        $padContext: padContext,
+        $padRowCol: padRowCol,
+        $row: rowText,
+        $suggestions: suggestions,
+        $text: text,
+        $uri: uri,
+        $quickFix: formatQuickFix(io, issue),
+        $message: msg,
+        $messageColored: messageColored,
+    };
+    const t = templateStr.replaceAll('$messageColored', messageColored);
+    const chalkTemplate = makeTemplate(io.chalk);
+    return substitute(chalkTemplate(t), substitutions).trimEnd();
+}
+function formatSuggestions(io, issue) {
+    if (issue.suggestionsEx) {
+        return issue.suggestionsEx
+            .map((sug) => sug.isPreferred
+            ? io.chalk.italic(io.chalk.bold(sug.wordAdjustedToMatchCase || sug.word)) + '*'
+            : sug.wordAdjustedToMatchCase || sug.word)
+            .join(', ');
+    }
+    if (issue.suggestions) {
+        return issue.suggestions.join(', ');
+    }
+    return '';
+}
+function formatQuickFix(io, issue) {
+    if (!issue.suggestionsEx?.length)
+        return '';
+    const preferred = issue.suggestionsEx
+        .filter((sug) => sug.isPreferred)
+        .map((sug) => sug.wordAdjustedToMatchCase || sug.word);
+    if (!preferred.length)
+        return '';
+    const fixes = preferred.map((w) => io.chalk.italic(io.chalk.yellow(w)));
+    return `fix: (${fixes.join(', ')})`;
+}
+function substitute(text, substitutions) {
+    const subs = [];
+    for (const [match, replaceWith] of Object.entries(substitutions)) {
+        const len = match.length;
+        for (let i = text.indexOf(match); i >= 0; i = text.indexOf(match, i)) {
+            const end = i + len;
+            const reg = /\b/y;
+            reg.lastIndex = end;
+            if (reg.test(text)) {
+                subs.push([i, end, replaceWith]);
+            }
+            i = end;
+        }
+    }
+    subs.sort((a, b) => a[0] - b[0]);
+    let i = 0;
+    function sub(r) {
+        const [a, b, t] = r;
+        const prefix = text.slice(i, a);
+        i = b;
+        return prefix + t;
+    }
+    const parts = subs.map(sub);
+    return parts.join('') + text.slice(i);
+}
+function assertCheckTemplate(template) {
+    const r = checkTemplate(template);
+    if (r instanceof Error) {
+        throw r;
+    }
+}
+export function checkTemplate(template) {
+    const chalk = new Chalk();
+    const chalkTemplate = makeTemplate(chalk);
+    const substitutions = {
+        $col: '<col>',
+        $contextFull: '<contextFull>',
+        $contextLeft: '<contextLeft>',
+        $contextRight: '<contextRight>',
+        $filename: '<filename>',
+        $padContext: '<padContext>',
+        $padRowCol: '<padRowCol>',
+        $row: '<row>',
+        $suggestions: '<suggestions>',
+        $text: '<text>',
+        $uri: '<uri>',
+        $quickFix: '<quickFix>',
+        $message: '<message>',
+        $messageColored: '<messageColored>',
+    };
+    try {
+        const t = chalkTemplate(template);
+        const result = substitute(t, substitutions);
+        const problems = [...result.matchAll(/\$[a-z]+/gi)].map((m) => m[0]);
+        if (problems.length) {
+            throw new Error(`Unresolved template variable${problems.length > 1 ? 's' : ''}: ${problems.map((v) => `'${v}'`).join(', ')}`);
+        }
+        return true;
+    }
+    catch (e) {
+        const msg = e instanceof Error ? e.message : `${e}`;
+        return new ApplicationError(msg);
+    }
+}
+export const __testing__ = {
+    formatIssue,
+};
+//# sourceMappingURL=cli-reporter.js.map

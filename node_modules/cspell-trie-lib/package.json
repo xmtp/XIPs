@@ -1,0 +1,76 @@
+{
+  "name": "cspell-trie-lib",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "version": "8.19.4",
+  "description": "Trie Data Structure to support cspell.",
+  "type": "module",
+  "sideEffects": false,
+  "types": "dist/index.d.ts",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/__mocks__",
+    "!**/*.map",
+    "!**/*.perf.*",
+    "!**/*.spec.*",
+    "!**/*.test.*",
+    "!**/*.tsbuildInfo",
+    "!**/perf/**",
+    "!**/test/**"
+  ],
+  "scripts": {
+    "clean": "shx rm -rf dist temp coverage \"*.tsbuildInfo\"",
+    "build": "pnpm run build:lib && pnpm run build:api",
+    "build:lib": "tsup-node",
+    "build:api": "shx cp dist/index.d.ts api/api.d.ts",
+    "clean-build": "pnpm run clean && pnpm run build",
+    "coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:perf": "pnpm test:perf:js --all",
+    "test:perf:ts": "NODE_ENV=production NODE_OPTIONS=--import=@swc-node/register/esm-register insight --file \"**/*.perf.{mts,ts}\" -t 500",
+    "test:perf:js": "NODE_ENV=production insight -t 500",
+    "test:perf:prof": "NODE_ENV=production node --cpu-prof  ../../node_modules/perf-insight/bin.mjs -t 1000",
+    "perf": "pnpm test:perf",
+    "test": "vitest run",
+    "test:update-snapshot": "vitest run -u",
+    "watch": "tsc -p . -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streetsidesoftware/cspell.git",
+    "directory": "packages/cspell-trie-lib"
+  },
+  "keywords": [
+    "trie",
+    "cspell"
+  ],
+  "author": "Jason Dent",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/streetsidesoftware/cspell/labels/cspell-trie"
+  },
+  "homepage": "https://github.com/streetsidesoftware/cspell/tree/main/packages/cspell-trie-lib#readme",
+  "dependencies": {
+    "@cspell/cspell-pipe": "8.19.4",
+    "@cspell/cspell-types": "8.19.4",
+    "gensequence": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@cspell/dict-en_us": "^4.4.3",
+    "@cspell/dict-es-es": "^3.0.3",
+    "@cspell/dict-nl-nl": "^2.4.0",
+    "import-meta-resolve": "^4.1.0"
+  },
+  "gitHead": "1bee5f5aa4429a1b1ae0e88934b093c5440b44dc"
+}

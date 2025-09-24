@@ -1,0 +1,57 @@
+{
+  "name": "@cspell/cspell-service-bus",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "version": "8.19.4",
+  "description": "A Library for connecting requests to services that can fulfill them.",
+  "keywords": [
+    "cspell"
+  ],
+  "author": "Jason Dent <jason@streetsidesoftware.nl>",
+  "homepage": "https://github.com/streetsidesoftware/cspell/tree/main/packages/cspell-service-bus#readme",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/*.tsbuildInfo",
+    "!**/__mocks__",
+    "!**/*.spec.*",
+    "!**/*.test.*",
+    "!**/test/**",
+    "!**/*.map"
+  ],
+  "scripts": {
+    "build": "tsc -b . -f",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:clean": "pnpm run clean && pnpm run build",
+    "watch": "tsc -b . -w -f",
+    "clean": "shx rm -rf dist temp coverage \"*.tsbuildInfo\"",
+    "clean-build": "pnpm build:clean",
+    "coverage": "vitest run --coverage",
+    "test-watch": "vitest --watch",
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streetsidesoftware/cspell.git",
+    "directory": "packages/cspell-service-bus"
+  },
+  "bugs": {
+    "url": "https://github.com/streetsidesoftware/cspell/labels/cspell-service-bus"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "gitHead": "1bee5f5aa4429a1b1ae0e88934b093c5440b44dc"
+}

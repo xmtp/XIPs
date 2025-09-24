@@ -1,0 +1,18 @@
+/**
+ * Dummy cache implementation that should be usd if caching option is disabled.
+ */
+export class DummyCache {
+    getCachedLintResults() {
+        return Promise.resolve(undefined);
+    }
+    setCachedLintResults() {
+        return;
+    }
+    reconcile() {
+        return;
+    }
+    reset() {
+        return;
+    }
+}
+//# sourceMappingURL=DummyCache.js.map

@@ -1,0 +1,91 @@
+import { opMap, opTap, pipeAsync, toAsyncIterable } from '@cspell/cspell-pipe';
+import { checkTextDocument, getDefaultSettings, getGlobalSettingsAsync, mergeSettings, SuggestionError, suggestionsForWords, traceWordsAsync, } from 'cspell-lib';
+import { getReporter } from './cli-reporter.js';
+import { console } from './console.js';
+import { getFeatureFlags, parseFeatureFlags } from './featureFlags/index.js';
+import { LintRequest, runLint } from './lint/index.js';
+import { fixLegacy } from './options.js';
+import { simpleRepl } from './repl/index.js';
+import { readConfig } from './util/configFileHelper.js';
+import { fileInfoToDocument, readFileInfo } from './util/fileHelper.js';
+import { finalizeReporter } from './util/reporters.js';
+import { readStdin } from './util/stdin.js';
+import { getTimeMeasurer } from './util/timer.js';
+import * as util from './util/util.js';
+export { IncludeExcludeFlag } from 'cspell-lib';
+export function lint(fileGlobs, options, reporter) {
+    options = fixLegacy(options);
+    const reporterOptions = { ...options, console };
+    const cfg = new LintRequest(fileGlobs, options, finalizeReporter(reporter) ?? getReporter({ ...options, fileGlobs }, reporterOptions));
+    return runLint(cfg);
+}
+export async function* trace(words, options) {
+    options = fixLegacy(options);
+    const iWords = options.stdin ? toAsyncIterable(words, readStdin()) : words;
+    const { languageId, locale, allowCompoundWords, ignoreCase } = options;
+    const configFile = await readConfig(options.config, undefined);
+    const loadDefault = options.defaultConfiguration ?? configFile.config.loadDefaultConfiguration ?? true;
+    const config = mergeSettings(await getDefaultSettings(loadDefault), await getGlobalSettingsAsync(), configFile.config);
+    yield* traceWordsAsync(iWords, config, util.clean({ languageId, locale, ignoreCase, allowCompoundWords }));
+}
+export async function checkText(filename, options) {
+    options = fixLegacy(options);
+    const fileInfo = await readFileInfo(filename);
+    const { locale, languageId, validateDirectives } = options;
+    const doc = fileInfoToDocument(fileInfo, languageId, locale);
+    const checkOptions = {
+        configFile: options.config,
+        validateDirectives,
+    };
+    const settingsFromCommandLine = util.clean({
+        languageId,
+        language: locale,
+        loadDefaultConfiguration: options.defaultConfiguration,
+    });
+    return checkTextDocument(doc, util.clean({ ...checkOptions }), settingsFromCommandLine);
+}
+export async function* suggestions(words, options) {
+    options = fixLegacy(options);
+    const configFile = await readConfig(options.config, undefined);
+    let timer;
+    function tapStart() {
+        timer = getTimeMeasurer();
+    }
+    function mapStart(v) {
+        tapStart();
+        return v;
+    }
+    function mapEnd(v) {
+        const elapsedTimeMs = timer?.();
+        return elapsedTimeMs ? { ...v, elapsedTimeMs } : v;
+    }
+    const iWords = options.repl
+        ? pipeAsync(toAsyncIterable(words, simpleRepl()), opTap(tapStart))
+        : options.useStdin
+            ? pipeAsync(toAsyncIterable(words, readStdin()), opTap(tapStart))
+            : words.map(mapStart);
+    try {
+        const results = pipeAsync(suggestionsForWords(iWords, util.clean({ ...options }), configFile.config), opMap(mapEnd));
+        yield* results;
+    }
+    catch (e) {
+        if (!(e instanceof SuggestionError))
+            throw e;
+        console.error(e.message);
+        process.exitCode = 1;
+    }
+}
+export function createInit() {
+    return Promise.reject();
+}
+function registerApplicationFeatureFlags() {
+    const ff = getFeatureFlags();
+    const flags = [{ name: 'timer', description: 'Display elapsed time for command.' }];
+    flags.forEach((flag) => ff.register(flag));
+    return ff;
+}
+export function parseApplicationFeatureFlags(flags) {
+    const ff = registerApplicationFeatureFlags();
+    return parseFeatureFlags(flags, ff);
+}
+//# sourceMappingURL=application.mjs.map
