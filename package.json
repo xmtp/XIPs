@@ -1,0 +1,21 @@
+{
+  "name": "xips",
+  "version": "1.0.0",
+  "description": "XMTP Improvement Proposals",
+  "private": true,
+  "scripts": {
+    "spell": "cspell \"**/*.md\" --no-progress --show-suggestions"
+  },
+  "devDependencies": {
+    "cspell": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xmtp/XIPs.git"
+  },
+  "keywords": [
+    "xmtp",
+    "xip",
+    "improvement-proposals"
+  ]
+}
