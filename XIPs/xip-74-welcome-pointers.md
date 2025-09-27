@@ -1,12 +1,12 @@
 ---
-xip:
+xip: 74
 title: Welcome pointers
 description: Implementation of welcome pointers to reduce data sent to and stored by servers
-author: Tyler Hawkes tylerhawkes
-discussions-to: https://community.xmtp.org/c/xips/xip-drafts
+author: Tyler Hawkes (@tylerhawkes)
+discussions-to: https://community.xmtp.org/t/xip-74-welcome-pointers/1211
 status: Draft
-type: TODO
-category: TODO
+type: Standards
+category: Interface
 created: 2025-09-25
 ---
 
@@ -18,13 +18,13 @@ the data is essentially duplicated for every installation.
 
 Welcome pointers introduces a new welcome message that is a pointer that only includes information about where to get the actual welcome data from. The large welcome pointer data can be sent to the server once and each installation can fetch that message. This is done by using symmetric key encryption for the welcome data while each installation receives a message that includes those keys.
 
-## Motivation\*
+## Motivation
 
-Previous conversations at https://github.com/xmtp/libxmtp/issues/2136 and https://github.com/xmtp/proto/pull/290
+See previous conversations at [https://github.com/xmtp/libxmtp/issues/2136](https://github.com/xmtp/libxmtp/issues/2136) and [https://github.com/xmtp/proto/pull/290](https://github.com/xmtp/proto/pull/290).
 
 In XMTP group conversations using OpenMLS, adding multiple installations (devices) to a group requires sending welcome messages to each. These welcomes often contain large amounts of data, such as the group state, member lists, and cryptographic material. Currently, this data is duplicated for each welcome, leading to significant bandwidth usage, increased latency, and higher costs for both clients and the network.
 
-Welcome Pointers optimize this by separating the large, shared welcome data from the per-installation specifics. The shared data is encrypted symmetrically and published once to a dedicated topic. Each installation then receives a lightweight pointer message containing the location of the data and the symmetric key needed to decrypt it. This reduces redundancy, improves efficiency, and scales better for groups with many multi-device users.
+Welcome pointers optimize this by separating the large, shared welcome data from the per-installation specifics. The shared data is encrypted symmetrically and published once to a dedicated topic. Each installation then receives a lightweight pointer message containing the location of the data and the symmetric key needed to decrypt it. This reduces redundancy, improves efficiency, and scales better for groups with many multi-device users.
 
 Benefits include:
 
@@ -35,7 +35,7 @@ Benefits include:
 
 The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
-#### Protobuf Definitions
+### Protobuf definitions
 
 The `WelcomeMessageInput` and `WelcomeMessage` messages will be adding a new variant called `WelcomePointer`
 
@@ -97,7 +97,7 @@ message WelcomePointeeEncryptionAeadTypesExtension {
 
 The `WelcomePointeeEncryptionAeadTypesExtension` will be added to key packages to indicate whether welcome pointers are accepted and what type of encryption can be used (initially only ChaCha20Poly1305 is supported). The extension can add extra fields to indicate the maximum version compatible when new versions are added.
 
-#### Processing Welcome Pointers
+### Processing welcome pointers
 
 ```mermaid
 sequenceDiagram
@@ -121,7 +121,7 @@ sequenceDiagram
     Note over I2: Similar process for I2
 ```
 
-##### High-level architecture for welcome processing with pointers:
+#### High-level architecture for welcome processing with pointers
 
 ```mermaid
 graph TD
@@ -139,55 +139,54 @@ graph TD
     DecryptData --> Process[Process Inner Welcome]
 ```
 
-##### Sending
+#### Sending
 
 Senders of welcome pointers MUST ensure that the the target installation supports receiving welcome pointers through their key package extensions. If it is supported by more than 1 recipient then a welcome pointer message may be generated and sent to a topic that MUST be picked randomly.
 
-##### Receiving
+#### Receiving
 
 Clients receiving a welcome pointer MUST only use the first message from the `destination` topic to ensure that no other client can interfere with the welcome through any kind of attack (like publishing a subsequent message).
 
 ## Rationale
 
 - Deduplication: Publishing shared data once avoids redundancy, especially beneficial for large groups or users with many devices.
-- Symmetric Encryption: Allows secure sharing without per-installation asymmetric encryption of the large data.
-- Pointer Design: Keeps per-installation messages small, containing only essential fetch and decrypt info.
-- Topic-Based Location: Leverages XMTP's topic system for reliable, decentralized fetching.
+- Symmetric encryption: Allows secure sharing without per-installation asymmetric encryption of the large data.
+- Pointer design: Keeps per-installation messages small, containing only essential fetch and decrypt info.
+- Topic-based location: Leverages XMTP's topic system for reliable, decentralized fetching.
 
 Alternatives considered:
 
 - Do nothing: prevents from scaling up group sizes as one of the main bottlenecks is adding new members to large groups
 - Compress data: Welcome data is already encrypted by OpenMLS, so compression is not effective
-- New endpoints for welcome pointers: Requires more work in the current go node and future decentralized nodes along with migration logic. Proposed implementation makes welcome pointers just a pointer to another message using the same apis.
+- New endpoints for welcome pointers: Requires more work in the current Go node and future decentralized nodes along with migration logic. Proposed implementation makes welcome pointers just a pointer to another message using the same APIs.
 
 ## Backward compatibility
 
-This XIP is additive and backwards compatible:
+This XIP is additive and backward compatible:
 
 - Older clients receiving a WelcomePointer may fail to process if not updated, so senders MUST check the recipients key package to ensure that they support receiving welcome pointers.
 - New clients handle both full welcomes and pointers.
 - Proto changes use forward-compatible extensions (new message types).
 
-## Test cases\*
+## Test cases
 
-New client inviting new client via welcome pointer.
-New client inviting old client still uses direct welcomes.
+- New client inviting new client via welcome pointer.
+- New client inviting old client still uses direct welcomes.
 
-## Reference implementation\*
+## Reference implementation
 
-protos: https://github.com/xmtp/proto/tree/tyler/welcome-pointer
-
-xmtp: https://github.com/xmtp/libxmtp/tree/09-15-welcome_pointer_v3_impl
+- [protos](https://github.com/xmtp/proto/tree/tyler/welcome-pointer)
+- [xmtp](https://github.com/xmtp/libxmtp/tree/09-15-welcome_pointer_v3_impl)
 
 ## Security considerations
 
-- Key Security: Symmetric keys are encrypted per installation in the pointer, using post quantum encryption.
-- Data Integrity: Use authenticated encryption (e.g., ChaCha20Poly1305) to prevent tampering.
-- Replay Attacks: Tie message_id to commit hash; clients verify against expected group state.
+- Key security: Symmetric keys are encrypted per installation in the pointer, using post quantum encryption.
+- Data integrity: Use authenticated encryption (e.g., ChaCha20Poly1305) to prevent tampering.
+- Replay attacks: Tie `message_id` to commit hash; clients verify against expected group state.
 - Privacy: Shared data topic is ephemeral and not linkable without the pointer.
-- DoS Risks: Limit topic creation; clients rate-limit fetches.
-- Key Generation: Use cryptographically secure random (ChaCha20) for keys and IVs.
-- Timing: Only accept the first message on a topic as a pointee. Possibly add a hash of the pointee on the individual welcomes for authentication or add aad to encryption for authentication.
+- DoS risks: Limit topic creation; clients rate-limit fetches.
+- Key generation: Use cryptographically secure random (ChaCha20) for keys and IVs.
+- Timing: Only accept the first message on a topic as a pointee. Possibly add a hash of the pointee on the individual welcomes for authentication or add AAD to encryption for authentication.
 
 ### Threat model
 
