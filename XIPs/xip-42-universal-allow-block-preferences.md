@@ -3,11 +3,11 @@ xip: 42
 title: Universal 'allow' and 'block' preferences
 description:
 author: Saul Carlin (@saulmc), Nick Molnar (@neekolas), Naomi Plasterer (@nplasterer), Ry Racherbaumer (@rygine)
-discussions-to: <https://community.xmtp.org/t/xip-42-universal-allow-and-block-preferences/544>
-status: Draft
+status: Final
 type: Standards
 category: XRC
 created: 2024-02-14
+implementation: https://docs.xmtp.org/chat-apps/user-consent/user-consent
 ---
 
 ## Abstract
