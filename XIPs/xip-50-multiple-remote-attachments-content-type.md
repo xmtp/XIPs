@@ -3,10 +3,11 @@ xip: 50
 title: Multiple remote attachments content type
 description: Content type for multiple remote attachments
 author: Cameron Voell (@cameronvoell)
-status: Review
+status: Final
 type: Standards
 category: XRC
 created: 2025-01-28
+implementation: https://docs.xmtp.org/chat-apps/content-types/attachments#support-multiple-remote-attachments-of-any-size
 ---
 
 ## Abstract
