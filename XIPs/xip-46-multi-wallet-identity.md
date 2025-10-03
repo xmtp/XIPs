@@ -3,10 +3,11 @@ xip: 46
 title: Multi-Wallet Identity
 description: Defines a new identity model for XMTP, where users are represented in the protocol by an Inbox ID rather than a wallet address.
 author: Richard Hua (@richardhuaaa), Nicholas Molnar (@neekolas), Tong Wang (@37ng), Andrew Plaza (@insipx), Cameron Voell (@cameronvoell)
-status: Review
+status: Final
 type: Standards
 category: Interface
 created: 2024-04-10
+implementation: https://docs.xmtp.org/protocol/identity
 ---
 
 ## Abstract
