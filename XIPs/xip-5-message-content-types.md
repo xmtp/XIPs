@@ -230,7 +230,7 @@ MIME framework (the underlying standard of email, http and other widely used pro
 
 ## Backwards Compatibility
 
-Since the new EncodedType message is embedded in the Ciphertext.payload bytes, this change doesn't break the protocol, strictly speaking, however any newer client would struggle interpretting the payload as EncodedContent unless it conforms. So this is a breaking change in that sense. Any older messages will be broken once the new protocol is deployed.
+Since the new EncodedType message is embedded in the Ciphertext.payload bytes, this change doesn't break the protocol, strictly speaking, however any newer client would struggle interpreting the payload as EncodedContent unless it conforms. So this is a breaking change in that sense. Any older messages will be broken once the new protocol is deployed.
 
 At the API level the changes are even more pronounced, since the input and output of the API is now potentially any type instead of just `string`. Extracting the content from the `Message` now requires interrogating the resulting value to determine which type of content it is and handling it accordingly. Clients SHOULD also take an appropriate action when encountering content type they do not recognize, and use the `contentFallback` when available. Clients SHOULD register codecs only for those types that they are prepared to handle.
 
