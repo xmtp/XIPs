@@ -3,8 +3,7 @@ xip: 72
 title: Client enforcement of protocol version on specific commits and groups
 description: Tool for protocol developers to protect users on old versions from getting groups in a bad state when releasing breaking changes
 author: Cameron Voell (@cameronvoell)
-discussions-to: https://community.xmtp.org/t/xip-72-client-enforcement-of-protocol-version-on-specific-commits-and-groups/1120
-status: Draft
+status: Final
 type: Standards
 category: XRC
 created: 2025-03-05

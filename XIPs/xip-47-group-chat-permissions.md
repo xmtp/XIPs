@@ -3,10 +3,11 @@ xip: 47
 title: Group Chat Permissions
 description: This proposal describes a simple, flexible, updatable group chat permissions system.
 author: Cameron Voell (@cameronvoell), Eleanor Hofstedt (@eleanorhofstedt)
-status: Review
+status: Final
 type: Standards
 category: Core
 created: 2024-05-07
+implementation: https://docs.xmtp.org/chat-apps/core-messaging/group-permissions
 ---
 
 ## Abstract

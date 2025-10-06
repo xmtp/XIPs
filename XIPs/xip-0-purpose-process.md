@@ -6,7 +6,7 @@ status: Living
 type: Process
 author: Matt Galligan (@mg0716), et al
 created: 2022-02-22
-updated: 2024-03-19
+updated: 2025-10-02
 ---
 
 ## What is an XIP?
@@ -192,6 +192,7 @@ Headers must appear in the following order in the preamble:
 | superseded-by | If the XIP is superseded by an XIP, provide the **superseded-by** header and set its value to a link to the XIP that supersedes it. |
 | updated | If the XIP is in `Living` status and has been updated after its **created** date, provide the **updated** header and set its value to the date the XIP was last updated in `YYYY-MM-DD` format. |
 | withdrawal-reason | If the XIP is in `Withdrawn` status, provide the **withdrawal-reason** header and set its value to a sentence that explains why the XIP was withdrawn. |
+| implementation | If the XIP has been implemented, provide the **implementation** header and set its value to the URL of the documentation that describes the actual implementation. This allows the XIP to serve as a historical record of the original proposal while directing people to current implementation details. |
 
 ### author details
 
