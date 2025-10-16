@@ -159,13 +159,13 @@ flowchart TD
 LeaveRequest Message Content Type:
 
 **V1: Proto:**
-`message LeaveRequest {}`
+`message LeaveRequest {authenticated_note: Option<vec<u8>>}`
 
 **V2(anyone can remove anyone from the group):**
 
  **Proto:**
 
-`message LeaveRequest {leafNodeSignatureKey}`
+`message LeaveRequest {authenticated_note: Option<vec<u8>>}`
 
 **V2 RemoveCommit:**
 
