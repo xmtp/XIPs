@@ -219,7 +219,7 @@ To enable this functionality, the client wishing to leave would:
 
 2. **Another client (not another installation of the same user) commits** the proposal, executing the leave process.
 
-#### Challenges
+#### Challenges - Leave proposal
 
 - **XMTP’s current MLS implementation auto-commits proposals**, meaning proposals are immediately executed without a waiting period.
 
@@ -229,7 +229,7 @@ To enable this functionality, the client wishing to leave would:
 
 This approach assigns **removal keys** to a **Directory Server (DS)** when creating a group. These keys would allow the **DS to commit a removal proposal** initiated by a client.
 
-#### Challenges
+#### Challenges - Removal keys
 
 - This method works well in **centralized** environments where a DS has authority.
 
