@@ -3,7 +3,7 @@ xip: 75
 title: Self-removal support for XMTP/MLS groups
 description: Introduces mechanisms for members to remove themselves from XMTP/MLS groups
 author: Mojtaba Chenani (mchenani)
-discussions-to: 
+discussions-to: https://community.xmtp.org/t/xip-75-self-removal-support-for-xmtp-mls-groups/1659
 status: Draft
 type: Standards
 category: XRC
@@ -22,11 +22,11 @@ To address this, **another member must remove the departing client**. This XIP i
 
 XMTP currently lacks a mechanism for members to manage their participation in **MLS-based** group conversations. Members **cannot remove themselves**, leading to potential issues such as:
 
-•	Receiving **unwanted messages** or notifications.
+- Receiving **unwanted messages** or notifications.
 
-•	**Privacy concerns** for users wishing to leave a group.
+- **Privacy concerns** for users wishing to leave a group.
 
-•	**Administrative burdens** for group moderators managing member departures.
+- **Administrative burdens** for group moderators managing member departures.
 
 Implementing a **self-removal feature** would improve user autonomy and enhance the **overall user experience** within the XMTP ecosystem.
 
@@ -215,9 +215,9 @@ In **MLS**, modifying the group state requires submitting a **proposal**, which 
 
 To enable this functionality, the client wishing to leave would:
 
-1.	**Submit a leave proposal** to the group.
+1. **Submit a leave proposal** to the group.
 
-2.	**Another client (not another installation of the same user) commits** the proposal, executing the leave process.
+2. **Another client (not another installation of the same user) commits** the proposal, executing the leave process.
 
 #### Challenges
 
