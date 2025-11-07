@@ -32,6 +32,7 @@ message DeleteMessage {
 ```
 
 Content type identifier:
+
 - Authority ID: `xmtp.org`
 - Type ID: `deleteMessage`
 - Version: `1.0`
@@ -61,6 +62,7 @@ conversation.delete_message(message_id).await?;
 ```
 
 The SDK:
+
 1. Validates the message exists in the group
 2. Checks authorization (original sender OR super admin)
 3. Creates and sends a `DeleteMessage` with the target `message_id`
@@ -300,6 +302,7 @@ A future version will support message retraction where:
 ### Admin Permissions
 
 Currently, only super admins can delete any message. Future versions will:
+
 - Introduce a `DELETE_MESSAGES` permission
 - Allow super admins to grant this permission to regular admins
 - Enable role-based message moderation
@@ -307,6 +310,7 @@ Currently, only super admins can delete any message. Future versions will:
 ### Smart Conversation Previews
 
 Enhance conversation list to:
+
 - Traverse backwards to find the last non-deleted message
 - Display the most recent visible message as preview
 - Update counts to exclude deleted messages
@@ -314,6 +318,7 @@ Enhance conversation list to:
 ### Bulk Deletion
 
 Enable deletion of multiple messages:
+
 - Batch delete by message ID array
 - Delete by time range
 - Delete by sender
@@ -321,6 +326,7 @@ Enable deletion of multiple messages:
 ## Backward Compatibility
 
 Clients that do not support the `DeleteMessage` content type:
+
 - Will see the delete message as an unknown content type
 - Will NOT have their local messages deleted
 - Will continue to display the original message content
@@ -350,6 +356,7 @@ This is expected behavior as deletion is a best-effort mechanism that requires c
 ### Original Message Preservation
 
 The deletion mechanism does NOT remove the original message from:
+
 - Local databases (the encrypted message bytes remain)
 - Network nodes
 - Backup systems
@@ -359,6 +366,7 @@ It only affects the presentation layer, replacing content with a placeholder in 
 ### Authorization Validation
 
 Super admin status MUST be validated at the time of deletion, not at query time:
+
 - When receiving a `DeleteMessage`, check if sender has super admin privileges
 - Store the `deleted_by_super_admin` flag based on this real-time check
 - This prevents privilege escalation if admin status is later revoked
@@ -366,6 +374,7 @@ Super admin status MUST be validated at the time of deletion, not at query time:
 ### Audit Trail
 
 Implementations SHOULD maintain audit logs of deletions:
+
 - Who deleted the message
 - When it was deleted
 - Whether it was a super admin deletion
@@ -374,6 +383,7 @@ Implementations SHOULD maintain audit logs of deletions:
 ## Privacy Considerations
 
 Users should be informed through UI/UX that:
+
 - Deleted messages show a placeholder indicating deletion
 - The sender or admin who deleted the message may be visible
 - Deletion does not guarantee removal from all recipients
@@ -384,6 +394,7 @@ Users should be informed through UI/UX that:
 ### Enrichment Layer
 
 The message enrichment process (similar to reactions and replies in `enrichment.rs`) should:
+
 1. Load deletion records for the queried message set
 2. Apply deletion filtering during the enrichment phase
 3. Replace message content with `DeletedMessage` placeholders
@@ -434,12 +445,14 @@ sequenceDiagram
 ### Database Indexes
 
 Indexes are already defined in the schema above:
+
 ```sql
 CREATE INDEX idx_message_deletions_deleted_message_id ON message_deletions(deleted_message_id);
 CREATE INDEX idx_message_deletions_group_id ON message_deletions(group_id);
 ```
 
 These indexes enable efficient:
+
 - Lookup of deletions when querying messages
 - Checking if an incoming message has a pending deletion
 - Group-wide deletion queries for pagination
@@ -447,6 +460,7 @@ These indexes enable efficient:
 ### Testing Considerations
 
 Tests MUST cover:
+
 - Original sender can delete their own message
 - Super admin can delete any message
 - Regular members cannot delete others' messages
