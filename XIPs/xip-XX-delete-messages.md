@@ -372,7 +372,7 @@ Super admin status MUST be validated at the time of deletion, not at query time:
 
 - When receiving a `DeleteMessage`, check if sender has super admin privileges
 - Store the `deleted_by_super_admin` flag based on this real-time check
-- This prevents privilege escalation if admin status is later revoked
+- This prevents privilege escalation if super admin status is later revoked
 
 ### Audit trail
 
