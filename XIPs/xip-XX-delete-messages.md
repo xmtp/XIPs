@@ -1,6 +1,6 @@
 ---
-xip: XX
-title: Delete Messages
+xip: 76
+title: Delete messages
 description: Proposes a best-effort method to delete messages in group conversations.
 author: Mojtaba Chenani (@mojtabachenani)
 discussions-to: TBD
@@ -20,9 +20,9 @@ Users need the ability to delete messages they accidentally sent or to remove ha
 
 ## Specification
 
-### Delete Message Content Type
+### Delete message content type
 
-A new application-level content type `DeleteMessage` will be introduced:
+A new app-level content type `DeleteMessage` will be introduced:
 
 ```protobuf
 message DeleteMessage {
@@ -37,18 +37,18 @@ Content type identifier:
 - Type ID: `deleteMessage`
 - Version: `1.0`
 
-### Authorization Rules
+### Authorization rules
 
 A `DeleteMessage` can be sent by:
 
-1. **Original Sender**: The inbox that sent the original message
-2. **Super Admin**: Any super admin of the group
+1. **Original sender**: The inbox that sent the original message
+2. **Super admin**: Any super admin of the group chat
 
 Any other inbox attempting to send a `DeleteMessage` MUST receive an authorization error.
 
-### Message Deletion Workflow
+### Message deletion workflow
 
-#### 1. Sending a Delete Message
+#### 1. Send a delete message
 
 When a user or super admin initiates a delete:
 
@@ -68,13 +68,13 @@ The SDK:
 3. Creates and sends a `DeleteMessage` with the target `message_id`
 4. Locally marks the message as deleted in the database
 
-#### 2. Receiving a Delete Message
+#### 2. Receive a delete message
 
 When a client receives a `DeleteMessage`:
 
 1. **Attempt to locate the original message** by `message_id`
    - If found: Proceed with validation
-   - If NOT found: Still store the deletion (see "Out-of-Order Delivery" below)
+   - If NOT found: Still store the deletion (see "Handle out-of-order delivery" below)
 
 2. **Validate the delete request:**
    - If original message exists AND sender's `inbox_id` matches original message's `sender_inbox_id`: Mark as deleted by sender
@@ -84,9 +84,9 @@ When a client receives a `DeleteMessage`:
 3. **Store the deletion in `message_deletions` table:**
    - The `DeleteMessage` itself is stored in `group_messages` (like any other message)
    - Create a record in `message_deletions`:
-     - `id`: The message_id of the DeleteMessage itself
+     - `id`: The `message_id` of the `DeleteMessage` itself
      - `deleted_message_id`: The target message to be deleted
-     - `deleted_by_inbox_id`: Who sent the DeleteMessage
+     - `deleted_by_inbox_id`: Who sent the `DeleteMessage`
      - `is_super_admin_deletion`: Whether they were a super admin
      - `deleted_at_ns`: When the deletion was processed
 
@@ -95,7 +95,7 @@ When a client receives a `DeleteMessage`:
    - When the original message eventually arrives, queries will automatically filter it
    - This prevents race conditions in decentralized message delivery
 
-#### 3. Database Schema
+#### 3. Database schema
 
 Add a new table to track deletions:
 
@@ -128,14 +128,14 @@ CREATE INDEX idx_message_deletions_deleted_message_id ON message_deletions(delet
 CREATE INDEX idx_message_deletions_group_id ON message_deletions(group_id);
 ```
 
-**Handling Out-of-Order Message Delivery:**
+### Handle out-of-order message delivery
 
-Since XMTP is a decentralized network, messages may arrive in different orders. The implementation MUST handle these scenarios:
+Since XMTP is a decentralized network, messages may arrive in different order. The implementation MUST handle these scenarios:
 
 1. **Delete arrives before original message:**
    - Store the deletion in `message_deletions` table with the `deleted_message_id`
    - When the original message arrives later:
-     - Check if a deletion exists for its message_id
+     - Check if a deletion exists for its `message_id`
      - If found, immediately mark it as deleted in queries
      - The original message is stored normally in `group_messages` but will be filtered at query time
 
@@ -147,9 +147,9 @@ Since XMTP is a decentralized network, messages may arrive in different orders. 
    - Only the first valid deletion (by sender or super admin) should be honored
    - Subsequent deletes from unauthorized users are ignored
 
-### Query-Time Filtering
+### Query-time filtering
 
-#### Message Queries
+#### Message queries
 
 When querying messages (e.g., `conversation.messages()`), the SDK MUST:
 
@@ -188,7 +188,7 @@ pub enum DeletedBy {
 }
 ```
 
-#### Conversation List
+#### Conversation list
 
 The `ConversationListItem` MUST handle deleted messages:
 
@@ -197,7 +197,7 @@ The `ConversationListItem` MUST handle deleted messages:
    - Preserve the message timestamp and count
 2. Future iteration: Find the most recent non-deleted message to display
 
-#### Pagination Considerations
+#### Pagination considerations
 
 When paginating messages, the SDK MUST:
 
@@ -208,17 +208,17 @@ When paginating messages, the SDK MUST:
 
 ### Restrictions
 
-#### Non-Deletable Messages
+#### Non-deletable messages
 
 The following message types CANNOT be deleted:
 
-- **Group Update Messages** (`GroupUpdated` content type)
-- **Membership Change Messages** (transcript messages)
+- **Group update messages** (`GroupUpdated` content type)
+- **Membership change messages** (transcript messages)
 - Any message where `kind == GroupMessageKind::MembershipChange`
 
 Attempting to delete these messages MUST return an error: `CannotDeleteTranscriptMessage`
 
-### Error Types
+### Error types
 
 New error types:
 
@@ -236,7 +236,7 @@ pub enum DeleteMessageError {
 }
 ```
 
-### API Examples
+### API examples
 
 ```rust
 // Delete a message (sender or super admin)
@@ -285,21 +285,21 @@ for item in conversations {
 }
 ```
 
-## Future Iterations
+## Future iterations
 
-### V2: Message Retraction
+### V2: Message retraction
 
 A future version will support message retraction where:
 
 - The `DeleteMessage` is kept in `group_messages` and `message_deletions` tables (same as V1)
 - The original message's encrypted content is retracted (removed) from the database
-- Message metadata is preserved (message ID, sender inbox_id, sender installation_id, timestamp, etc.)
+- Message metadata is preserved (message ID, sender `inbox_id`, sender `installation_id`, timestamp, etc.)
 - The message remains visible in queries but the body is permanently removed
 - A background worker process will retract messages that arrived before the deletion
 - For messages that arrive after a `DeleteMessage`, they are retracted immediately upon arrival
 - This provides stronger deletion semantics while maintaining audit trail and message continuity
 
-### Admin Permissions
+### Admin permissions
 
 Currently, only super admins can delete any message. Future versions will:
 
@@ -307,7 +307,7 @@ Currently, only super admins can delete any message. Future versions will:
 - Allow super admins to grant this permission to regular admins
 - Enable role-based message moderation
 
-### Smart Conversation Previews
+### Smart conversation previews
 
 Enhance conversation list to:
 
@@ -315,7 +315,7 @@ Enhance conversation list to:
 - Display the most recent visible message as preview
 - Update counts to exclude deleted messages
 
-### Bulk Deletion
+### Bulk deletion
 
 Enable deletion of multiple messages:
 
@@ -323,7 +323,7 @@ Enable deletion of multiple messages:
 - Delete by time range
 - Delete by sender
 
-## Backward Compatibility
+## Backward compatibility
 
 Clients that do not support the `DeleteMessage` content type:
 
@@ -333,27 +333,30 @@ Clients that do not support the `DeleteMessage` content type:
 
 This is expected behavior as deletion is a best-effort mechanism that requires client cooperation.
 
-## Security Considerations
+## Security considerations
 
-### Not a Security Feature
+### Not a security feature
 
-**IMPORTANT**: Message deletion is NOT a security or privacy feature. Users MUST be informed that:
+> [!IMPORTANT]
+> Message deletion is NOT a security or privacy feature.
 
-1. **No Guarantee of Deletion**: Once a message is delivered and decrypted by a recipient, there is no technical guarantee that it will be deleted from their device.
+Users MUST be informed that:
 
-2. **Custom Clients**: Recipients using custom or malicious clients may:
+1. **No guarantee of deletion**: Once a message is delivered and decrypted by a recipient, there is no technical guarantee that it will be deleted from their device.
+
+2. **Custom clients**: Recipients using custom or malicious clients may:
    - Ignore `DeleteMessage` requests entirely
    - Cache message content before deletion
    - Export or backup messages externally
 
-3. **Message History**: Recipients may have:
+3. **Message history**: Recipients may have:
    - Taken screenshots before deletion
    - Copied message content
    - Forwarded messages to other conversations
 
-4. **Network Retention**: The original message remains on XMTP network nodes until expiration (currently 6 months) and is not deleted by this mechanism.
+4. **Network retention**: The original message remains on XMTP network nodes until expiration (currently 6 months) and is not deleted by this mechanism.
 
-### Original Message Preservation
+### Original message preservation
 
 The deletion mechanism does NOT remove the original message from:
 
@@ -363,7 +366,7 @@ The deletion mechanism does NOT remove the original message from:
 
 It only affects the presentation layer, replacing content with a placeholder in queries.
 
-### Authorization Validation
+### Authorization validation
 
 Super admin status MUST be validated at the time of deletion, not at query time:
 
@@ -371,7 +374,7 @@ Super admin status MUST be validated at the time of deletion, not at query time:
 - Store the `deleted_by_super_admin` flag based on this real-time check
 - This prevents privilege escalation if admin status is later revoked
 
-### Audit Trail
+### Audit trail
 
 Implementations SHOULD maintain audit logs of deletions:
 
@@ -380,18 +383,18 @@ Implementations SHOULD maintain audit logs of deletions:
 - Whether it was a super admin deletion
 - Original message metadata (sender, timestamp)
 
-## Privacy Considerations
+## Privacy considerations
 
 Users should be informed through UI/UX that:
 
 - Deleted messages show a placeholder indicating deletion
-- The sender or admin who deleted the message may be visible
+- The sender or super admin who deleted the message may be visible
 - Deletion does not guarantee removal from all recipients
 - Message metadata remains accessible
 
-## Implementation Notes
+## Implementation notes
 
-### Enrichment Layer
+### Enrichment layer
 
 The message enrichment process (similar to reactions and replies in `enrichment.rs`) should:
 
@@ -400,7 +403,7 @@ The message enrichment process (similar to reactions and replies in `enrichment.
 3. Replace message content with `DeletedMessage` placeholders
 4. Maintain consistent behavior across all query paths
 
-### Message Processing Flow
+### Message processing flow
 
 The following diagram illustrates how delete messages are processed, including out-of-order delivery scenarios:
 
@@ -442,7 +445,7 @@ sequenceDiagram
     DB-->>Query: Return msg_456 as DeletedMessage
 ```
 
-### Database Indexes
+### Database indexes
 
 Indexes are already defined in the schema above:
 
@@ -457,7 +460,7 @@ These indexes enable efficient:
 - Checking if an incoming message has a pending deletion
 - Group-wide deletion queries for pagination
 
-### Testing Considerations
+## Test cases
 
 Tests MUST cover:
 
@@ -469,10 +472,10 @@ Tests MUST cover:
 - Pagination correctly applies deletions
 - Conversation list handles deleted last message
 - **Out-of-order delivery scenarios:**
-  - DeleteMessage arrives before the original message
-  - Original message arrives after DeleteMessage (must still appear deleted)
-  - Multiple DeleteMessages for the same original message
-  - DeleteMessage references a message that never arrives (orphaned deletion)
+  - `DeleteMessage` arrives before the original message
+  - Original message arrives after `DeleteMessage` (must still appear deleted)
+  - Multiple `DeleteMessage`s for the same original message
+  - `DeleteMessage` references a message that never arrives (orphaned deletion)
 
 ## Copyright
 
