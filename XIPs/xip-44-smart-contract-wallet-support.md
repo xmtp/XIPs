@@ -3,11 +3,11 @@ xip: 44
 title: Smart Contract Wallet Support
 description: Explores a way for developers building with XMTP to allow their users to sign up and log in to XMTP inboxes using Smart Contract Wallets
 author: Richard Hua (@richardhuaaa), Nicholas Molnar (@neekolas), Andrew Plaza (@insipx), Cameron Voell (@cameronvoell), Tong Wang (@37ng)
-discussions-to: https://community.xmtp.org/t/xip-44-smart-contract-wallet-support/627
-status: Draft
+status: Final
 type: Standards
 category: Interface
 created: 2024-03-25
+implementation: https://docs.xmtp.org/chat-apps/core-messaging/create-a-signer#create-a-smart-contract-wallet-signer
 ---
 
 ## Abstract

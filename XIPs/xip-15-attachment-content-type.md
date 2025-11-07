@@ -3,10 +3,11 @@ xip: 15
 title: Attachment Content Type
 description: Content type for basic attachments
 author: Pat Nakajima
-status: Review
-type: Standards Track
+status: Final
+type: Standards
 category: XRC
 created: 2023-02-15
+implementation: https://docs.xmtp.org/chat-apps/content-types/attachments#support-attachments-smaller-than-1mb
 ---
 
 ## Abstract
