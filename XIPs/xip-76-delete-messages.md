@@ -3,11 +3,12 @@ xip: 76
 title: Delete messages
 description: Proposes a best-effort method to delete messages in group conversations.
 author: Mojtaba Chenani (@mchenani)
-discussions-to: TBD
+discussions-to: https://community.xmtp.org/t/xip-76-delete-messages/1923
 status: Draft
 type: Standards
 category: XRC
 created: 2025-11-05
+replaces: "XIP-61: Edit and delete messages"
 ---
 
 ## Abstract
