@@ -286,6 +286,12 @@ for item in conversations {
 }
 ```
 
+## Rationale
+
+### Non-destructive deletion approach
+
+This XIP deliberately avoids modifying or removing original messages from the database. Instead, both the original message and the `DeleteMessage` remain stored, with deletion applied at query time through a separate `message_deletions` table. This approach is necessary because in XMTP's decentralized network, a `DeleteMessage` may arrive before the original message it references—requiring deletion records to exist independently. Additionally, maintaining immutable message records with separate deletion metadata preserves a complete audit trail for moderation purposes while simplifying replication and synchronization across the distributed network.
+
 ## Future iterations
 
 ### V2: Message retraction
