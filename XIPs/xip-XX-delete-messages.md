@@ -393,6 +393,20 @@ Users should be informed through UI/UX that:
 - Deletion does not guarantee removal from all recipients
 - Message metadata remains accessible
 
+## Threat model
+
+**Unauthorized deletion by non-privileged members**: A malicious group member attempts to delete messages sent by other users without having super admin privileges. The system prevents this by validating authorization at deletion time—only the original sender or a current super admin can delete a message.
+
+**Privilege escalation through delayed deletion**: An attacker who was temporarily a super admin attempts to delete messages after their admin privileges have been revoked. The system mitigates this by checking super admin status at the time the `DeleteMessage` is received and storing the `is_super_admin_deletion` flag based on real-time validation, not query-time checks.
+
+**Deletion of critical audit trail messages**: An attacker attempts to delete transcript messages or membership changes to hide evidence or disrupt group history. The system explicitly prohibits deletion of `GroupUpdated` content types and messages with `kind == GroupMessageKind::MembershipChange`, returning `CannotDeleteTranscriptMessage` errors.
+
+**Fabricated deletion records without valid signatures**: A malicious server or client attempts to inject fake deletion records without proper authentication. The system prevents this because all `DeleteMessage`s must be valid, properly signed MLS messages before creating entries in the `message_deletions` table.
+
+**Malicious clients ignoring deletion requests**: Recipients using custom or malicious clients may ignore `DeleteMessage` requests entirely, cache message content before deletion, or export messages externally. This is an acknowledged limitation—message deletion is a best-effort mechanism that requires client cooperation and cannot guarantee removal from all devices.
+
+**Message retention through cached databases**: Recipients may have database backups, cached data, or offline copies that preserve deleted message content. The deletion mechanism only affects the presentation layer in cooperating clients and does not remove the original encrypted message bytes from local databases or network nodes.
+
 ## Implementation notes
 
 ### Enrichment layer
