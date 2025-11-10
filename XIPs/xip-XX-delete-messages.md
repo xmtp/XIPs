@@ -2,7 +2,7 @@
 xip: 76
 title: Delete messages
 description: Proposes a best-effort method to delete messages in group conversations.
-author: Mojtaba Chenani (@mojtabachenani)
+author: Mojtaba Chenani (@mchenani)
 discussions-to: TBD
 status: Draft
 type: Standards
@@ -184,7 +184,7 @@ pub enum MessageBody {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DeletedBy {
     Sender,
-    SuperAdmin(String), // inbox_id of the super admin who deleted the message
+    Admin(String), // inbox_id of the super admin who deleted the message
 }
 ```
 
@@ -195,7 +195,7 @@ The `ConversationListItem` MUST handle deleted messages:
 1. If the last message is deleted:
    - Show placeholder: `DeletedMessage(deletedBy: ...)`
    - Preserve the message timestamp and count
-2. Future iteration: Find the most recent non-deleted message to display
+2. Find the most recent non-deleted message to display
 
 #### Pagination considerations
 
@@ -215,6 +215,7 @@ The following message types CANNOT be deleted:
 - **Group update messages** (`GroupUpdated` content type)
 - **Membership change messages** (transcript messages)
 - Any message where `kind == GroupMessageKind::MembershipChange`
+- Retractions can’t be deleted!
 
 Attempting to delete these messages MUST return an error: `CannotDeleteTranscriptMessage`
 
@@ -263,7 +264,7 @@ for message in messages {
         MessageBody::DeletedMessage { deleted_by } => {
             match deleted_by {
                 DeletedBy::Sender => show_placeholder("Message deleted"),
-                DeletedBy::SuperAdmin(admin_inbox_id) => {
+                DeletedBy::Admin(admin_inbox_id) => {
                     show_placeholder(&format!("Message deleted by admin: {}", admin_inbox_id))
                 }
             }
