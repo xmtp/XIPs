@@ -290,7 +290,7 @@ for item in conversations {
 
 ### Non-destructive deletion approach
 
-This XIP deliberately avoids modifying or removing original messages from the database. Instead, both the original message and the `DeleteMessage` remain stored, with deletion applied at query time through a separate `message_deletions` table. This approach is necessary because in XMTP's decentralized network, a `DeleteMessage` may arrive before the original message it references—requiring deletion records to exist independently. Additionally, maintaining immutable message records with separate deletion metadata preserves a complete audit trail for moderation purposes while simplifying replication and synchronization across the distributed network.
+This XIP deliberately avoids modifying or removing original messages from the database. Instead, both the original message and the `DeleteMessage` remain stored, with deletion applied at query time through a separate `message_deletions` table. This approach is necessary because in the decentralized XMTP network, a `DeleteMessage` may arrive before the original message it references—requiring deletion records to exist independently. Additionally, maintaining immutable message records with separate deletion metadata preserves a complete audit trail for moderation purposes while simplifying replication and synchronization across the distributed network.
 
 ## Future iterations
 
@@ -390,16 +390,7 @@ Implementations SHOULD maintain audit logs of deletions:
 - Whether it was a super admin deletion
 - Original message metadata (sender, timestamp)
 
-## Privacy considerations
-
-Users should be informed through UI/UX that:
-
-- Deleted messages show a placeholder indicating deletion
-- The sender or super admin who deleted the message may be visible
-- Deletion does not guarantee removal from all recipients
-- Message metadata remains accessible
-
-## Threat model
+### Threat model
 
 **Unauthorized deletion by non-privileged members**: A malicious group member attempts to delete messages sent by other users without having super admin privileges. The system prevents this by validating authorization at deletion time—only the original sender or a current super admin can delete a message.
 
@@ -412,6 +403,15 @@ Users should be informed through UI/UX that:
 **Malicious clients ignoring deletion requests**: Recipients using custom or malicious clients may ignore `DeleteMessage` requests entirely, cache message content before deletion, or export messages externally. This is an acknowledged limitation—message deletion is a best-effort mechanism that requires client cooperation and cannot guarantee removal from all devices.
 
 **Message retention through cached databases**: Recipients may have database backups, cached data, or offline copies that preserve deleted message content. The deletion mechanism only affects the presentation layer in cooperating clients and does not remove the original encrypted message bytes from local databases or network nodes.
+
+## Privacy considerations
+
+Users should be informed through UI/UX that:
+
+- Deleted messages show a placeholder indicating deletion
+- The sender or super admin who deleted the message may be visible
+- Deletion does not guarantee removal from all recipients
+- Message metadata remains accessible
 
 ## Implementation notes
 
