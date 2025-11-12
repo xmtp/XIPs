@@ -4,7 +4,7 @@ title: Welcome pointers
 description: Implementation of welcome pointers to reduce data sent to and stored by servers
 author: Tyler Hawkes (@tylerhawkes)
 discussions-to: https://community.xmtp.org/t/xip-74-welcome-pointers/1211
-status: Draft
+status: Review
 type: Standards
 category: Interface
 created: 2025-09-25
@@ -136,6 +136,8 @@ graph TD
     Receive --> DecryptPointer[Decrypt Pointer]
     DecryptPointer --> Fetch[Fetch from Destination Topic]
     Fetch --> DecryptData[Decrypt with Symmetric Key]
+    Fetch --> OnError[On error: <br> save for later processing]
+    OnError --> Fetch
     DecryptData --> Process[Process Inner Welcome]
 ```
 
@@ -146,6 +148,8 @@ Senders of welcome pointers MUST ensure that the the target installation support
 #### Receiving
 
 Clients receiving a welcome pointer MUST only use the first message from the `destination` topic to ensure that no other client can interfere with the welcome through any kind of attack (like publishing a subsequent message).
+
+If a client cannot get the pointee from the server (either through local network or server availability issues) the client should save the welcome pointer to try re-fetching at a later point in time. This can be done on some time interval and SHOULD stop after a reasonable amount of time to avoid a malicious sender from executing a DDoS attack with welcome pointers that will never resolve.
 
 ## Rationale
 
@@ -185,6 +189,7 @@ This XIP is additive and backward compatible:
 - Replay attacks: Tie `message_id` to commit hash; clients verify against expected group state.
 - Privacy: Shared data topic is ephemeral and not linkable without the pointer.
 - DoS risks: Limit topic creation; clients rate-limit fetches.
+- DDoS: Welcome pointers to nowhere can cause clients to execute many fetches. This is mitigated by making the cost to send a message more than the total cost of a client trying to fetch nothing and by having clients use a minimal retry duration of several minutes with a maximum retry time that quits trying to resolve the welcome pointer.
 - Key generation: Use cryptographically secure random (ChaCha20) for keys and IVs.
 - Timing: Only accept the first message on a topic as a pointee. Possibly add a hash of the pointee on the individual welcomes for authentication or add AAD to encryption for authentication.
 
