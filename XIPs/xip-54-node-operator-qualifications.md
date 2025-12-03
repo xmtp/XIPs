@@ -7,7 +7,7 @@ discussions-to: https://community.xmtp.org/t/xip-54-xmtp-network-node-operator-q
 status: Living
 type: Process
 created: 2025-02-03
-updated: 2025-11-07
+updated: 2025-12-03
 ---
 
 ## Abstract
@@ -49,17 +49,16 @@ XMTP node operators must be able to demonstrate:
   - Active engagement with the XMTP community and willingness to contribute to protocol development and governance.
 - **Technical and operational excellence**
   - **Infrastructure ownership**: Own hardware or maintain control over infrastructure for maximum censorship resistance. Operators are ranked by resilience:
-    1. **Own bare metal in friendly jurisdiction** (most resistant)
+    1. **Own bare metal in censorship-resistant jurisdiction** (most resistant)
     2. **Bare metal in multiple jurisdictions**
     3. **Hybrid bare metal + cloud**
     4. **Multi-cloud providers**
     5. **Single cloud provider** (least resistant)
   - **Performance**: Capability to run an XMTP node with reliable uptime and sufficient network and hardware resources to handle messaging throughput at scale.
-  - **Security focus**: Implementation of robust security protocols and slashing protection.
+  - **Security focus**: Implementation of robust security protocols.
   - **Geographic distribution**: Nodes run across multiple regions for redundancy.
   - **Technical teams**: In-house engineering teams managing the infrastructure.
   - **24/7 operations**: Dedicated teams monitoring and maintaining infrastructure around the clock.
-  - **Multi-client capability**: Ability to run different client implementations for network diversity.
 
 - **Diversity contributions**
   - **Geographical diversity:** Operators should be distributed across continents and major Internet Exchange Points (IXPs).
