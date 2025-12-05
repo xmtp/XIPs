@@ -7,7 +7,7 @@ discussions-to: https://community.xmtp.org/t/xip-54-xmtp-network-node-operator-q
 status: Living
 type: Process
 created: 2025-02-03
-updated: 2025-12-03
+updated: 2025-12-04
 ---
 
 ## Abstract
@@ -55,7 +55,7 @@ XMTP node operators must be able to demonstrate:
     4. **Multi-cloud providers**
     5. **Single cloud provider** (least resistant)
   - **Performance**: Capability to run an XMTP node with reliable uptime and sufficient network and hardware resources to handle messaging throughput at scale.
-  - **Security focus**: Implementation of robust security protocols.
+  - **Security focus**: Implementation of robust security protocols. To learn more, see [Security protocols](https://github.com/xmtp/xmtpd-infrastructure?tab=readme-ov-file#security-protocols).
   - **Geographic distribution**: Nodes run across multiple regions for redundancy.
   - **Technical teams**: In-house engineering teams managing the infrastructure.
   - **24/7 operations**: Dedicated teams monitoring and maintaining infrastructure around the clock.
