@@ -131,12 +131,12 @@ Just like `ReplyCodec` uses parameters (`reference`, `referenceInboxId`, `conten
 6. Original message must be an editable type
 
 **Pros**:
-- ✅ No new content type needed (use existing Text, Attachment, etc.)
-- ✅ Follows established pattern (Reply already uses this approach)
-- ✅ Less protocol overhead
-- ✅ Simpler bindings (no new types)
-- ✅ Backward compatible (old clients ignore parameter)
-- ✅ Minimal protocol changes
+- No new content type needed (use existing Text, Attachment, etc.)
+- Follows established pattern (Reply already uses this approach)
+- Less protocol overhead
+- Simpler bindings (no new types)
+- Backward compatible (old clients ignore parameter)
+- Minimal protocol changes
 
 **Cons**:
 - Less explicit than dedicated EditMessage type
