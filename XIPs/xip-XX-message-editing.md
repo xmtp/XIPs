@@ -217,7 +217,7 @@ async fn get_latest_message_version(
 
 ### Message flow
 
-#### Edit a text message:
+#### Edit a text message
 
 1. **User calls** `edit_message(message_id, "New text")`
 2. **Validate**:
@@ -226,14 +226,17 @@ async fn get_latest_message_version(
    - Check same group
    - Check message is editable type (Text)
 3. **Create edit message**:
+
    ```rust
    let edit_content = TextCodec::encode_edit(
        "New text".to_string(),
        hex::encode(&message_id)
    )?;
    ```
+
 4. **Send as MLS message** (just like normal text message)
 5. **Store edit record immediately** (optimistic UI):
+
    ```rust
    StoredMessageEdit {
        message_id: new_message_id,
@@ -245,9 +248,10 @@ async fn get_latest_message_version(
        created_at_ns: now(),
    }.store(conn)?;
    ```
+
 6. **Sync propagates** edit to other members
 
-#### Process received edit (sync):
+#### Process received edit (sync)
 
 ```rust
 // In process_message() during sync
@@ -500,7 +504,7 @@ Comparison on alternative approaches considered:
 | Content type validation | Automatic | Manual | Manual but simple |
 | Semantic clarity | Medium | High | Medium |
 
-#### Rationale for approach 3
+### Rationale for approach 3
 
 - Minimal protocol changes
 - Follows established Reply pattern
