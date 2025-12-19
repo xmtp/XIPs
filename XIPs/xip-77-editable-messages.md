@@ -3,7 +3,7 @@ xip: 77
 title: Editable messages
 description: Proposes a message editing feature that allows a user to edit their own messages.
 author: Mojtaba Chenani (@mchenani)
-discussions-to: TBD
+discussions-to: https://improve.xmtp.org/t/xip-77-editable-messages/2038
 status: Draft
 type: Standards
 category: XRC
