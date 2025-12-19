@@ -16,6 +16,8 @@ This XIP proposes a message editing feature for XMTP that allows users to edit t
 
 Users frequently need to correct typos, update information, or clarify their messages after sending. Currently, XMTP does not support message editing, forcing users to either send correction messages or delete and resend. Message editing is a fundamental feature in modern messaging applications that improves user experience and communication clarity.
 
+> **Note**: This XIP is designed for human-to-human messaging applications where users need to see edit history and indicators (e.g., "edited" badges, timestamps of original vs edited messages). For agent/bot use cases that require seamless, invisible message updates (where the edited content silently replaces the original without any indication), a separate XIP will address that workflow.
+
 ## Specification
 
 ### Core Requirements
@@ -318,20 +320,50 @@ fn validate_edit_content_type(
 
 ### Message Enrichment & Display
 
+**Core Principle**: When a message is edited, SDK users receive the **edited content** in place of the original message, but with **metadata about both** the original and the edit. This allows UIs to:
+- Display the latest content to users
+- Show "edited" indicators
+- Preserve original message ordering (by original timestamp)
+- Optionally show edit history
+
 **Enrichment Logic**:
 1. After loading messages, apply edit relations
 2. For each message with edits, replace content with latest edit
-3. Add metadata: `edited: true`, `edit_count: N`, `last_edit_timestamp`
+3. Add metadata exposing both original and edit information
 4. If editing chain incomplete (missing parent), mark as `pending_edit`
 
 **Enhanced DecodedMessage**:
 ```rust
 pub struct DecodedMessage {
-    // ... existing fields
-    pub edited: bool,
-    pub edit_count: u32,
-    pub last_edit_timestamp_ns: Option<i64>,
+    // Original message identifiers (preserved for ordering and references)
+    pub id: Vec<u8>,                         // Original message ID
+    pub sent_at_ns: i64,                     // Original sent timestamp (for ordering)
+
+    // Content (replaced with latest edit if edited)
+    pub content: MessageBody,                // Latest content (original or edited)
+
+    // Edit metadata (only present if message was edited)
+    pub edited: bool,                        // True if message has been edited
+    pub edit_count: u32,                     // Number of times edited
+    pub original_sent_at_ns: Option<i64>,    // Same as sent_at_ns (for clarity)
+    pub last_edit_sent_at_ns: Option<i64>,   // When the latest edit was sent
+    pub last_edit_message_id: Option<Vec<u8>>, // ID of the edit message
 }
+```
+
+**Display Behavior**:
+- `id` and `sent_at_ns` always refer to the **original** message (for stable ordering and reply references)
+- `content` contains the **latest version** (edited content if edited, original otherwise)
+- `edited: true` indicates the content has been modified
+- `last_edit_sent_at_ns` can be used to show "Edited at [time]" in UI
+- Edit history can be fetched separately via `get_message_edit_history()`
+
+**Example UI Rendering**:
+
+```text
+[Alice] Hello world!              <- content (latest)
+        Sent 10:00 AM            <- sent_at_ns (original)
+        Edited at 10:05 AM       <- last_edit_sent_at_ns
 ```
 
 **Pending Edit Handling**:
@@ -436,24 +468,65 @@ if self.is_message_deleted(&message_id)? {
 
 ### Bindings Support
 
+All bindings expose messages with the enriched edit metadata. The message retains its original `id` and `sent_at_ns` for ordering, while `content` reflects the latest version.
+
 **WASM Bindings**:
-```rust
-pub struct DecodedMessageContent {
-    pub content: MessageBody,
-    pub edited: bool,
-    pub edit_count: u32,
-    pub last_edit_timestamp_ns: Option<i64>,
+
+```typescript
+interface DecodedMessage {
+    // Original message identifiers (preserved)
+    id: Uint8Array;
+    senderInboxId: string;
+    sentAtNs: bigint;              // Original timestamp for ordering
+
+    // Content (latest version)
+    content: DecodedMessageContent;
+
+    // Edit metadata
+    edited: boolean;
+    editCount: number;
+    lastEditSentAtNs?: bigint;     // When the latest edit was sent
+    lastEditMessageId?: Uint8Array; // ID of the edit message
 }
 ```
 
 **Node.js Bindings**:
-```rust
-pub struct DecodedMessageBody {
-    // ... existing
-    pub text: Option<String>,
-    pub edited: Option<bool>,
-    pub edit_count: Option<u32>,
-    pub last_edit_timestamp_ns: Option<i64>,
+
+```typescript
+interface DecodedMessage {
+    // Original message identifiers (preserved)
+    id: Uint8Array;
+    senderInboxId: string;
+    sentAtNs: bigint;              // Original timestamp for ordering
+
+    // Content (latest version)
+    content: DecodedMessageContent;
+
+    // Edit metadata
+    edited: boolean;
+    editCount: number;
+    lastEditSentAtNs?: bigint;     // When the latest edit was sent
+    lastEditMessageId?: Uint8Array; // ID of the edit message
+}
+```
+
+**FFI Bindings (Swift/Kotlin)**:
+
+```swift
+struct FfiDecodedMessage {
+    // Original message identifiers (preserved)
+    let id: Data
+    let senderInboxId: String
+    let sentAtNs: Int64            // Original timestamp for ordering
+
+    // Content (latest version)
+    let content: FfiDecodedMessageContent
+
+    // Edit metadata
+    let edited: Bool
+    let editCount: UInt32
+    let lastEditSentAtNs: Int64?   // When the latest edit was sent
+    let lastEditMessageId: Data?   // ID of the edit message
 }
 ```
 
