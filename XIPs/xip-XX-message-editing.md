@@ -1,52 +1,56 @@
-# XIP-XX: Message Editing
-
-## Status
-
-Draft
-
-## Authors
-
-- Mojtaba Chenani
+---
+xip: 77
+title: Editable messages
+description: Proposes a message editing feature that allows a user to edit their own messages.
+author: Mojtaba Chenani (@mchenani)
+discussions-to: TBD
+status: Draft
+type: Standards
+category: XRC
+created: 2025-12-12
+---
 
 ## Abstract
 
-This XIP proposes a message editing feature for XMTP that allows users to edit their own messages. The implementation maintains edit history while displaying only the latest version to users. The design follows the existing pattern established by the Reply content type, using reference parameters to indicate edits without requiring new content types.
+This XIP proposes a message editing feature for XMTP that allows a user to edit their own messages. The implementation maintains edit history while displaying only the latest version to users. The design follows the existing pattern established by the [Reply content type](https://docs.xmtp.org/chat-apps/content-types/replies), using reference parameters to indicate edits without requiring new content types.
 
 ## Motivation
 
-Users frequently need to correct typos, update information, or clarify their messages after sending. Currently, XMTP does not support message editing, forcing users to either send correction messages or delete and resend. Message editing is a fundamental feature in modern messaging applications that improves user experience and communication clarity.
+Users frequently need to correct typos, update information, or clarify their messages after sending. Currently, XMTP does not support message editing, forcing users to either send correction messages or delete and resend. Message editing is a fundamental feature in modern messaging apps that improves user experience and communication clarity.
 
 > **Note**: This XIP is designed for human-to-human messaging applications where users need to see edit history and indicators (e.g., "edited" badges, timestamps of original vs edited messages). For agent/bot use cases that require seamless, invisible message updates (where the edited content silently replaces the original without any indication), a separate XIP will address that workflow.
 
 ## Specification
 
-### Core Requirements
+### Core requirements
 
-**Authorization**:
+#### Authorization
+
 - Only the original message sender can edit their message
 - Editor's `inbox_id` must match original sender's `inbox_id`
 - Original message's `group_id` must match
 
+#### Edit chain management
 
-**Edit Chain Management**:
 - First edit references the original message
 - Later edits reference the previous edit (forming a chain)
 - Each edit is a new MLS message with the same content type as the original
 - Database stores the full edit chain for each message
 
-**Content Restrictions (v1)**:
-- Text messages - full content editable
-- Attachments - only caption/description text editable
-- Reply messages - only reply text editable (preserve reply reference)
-- Reactions - NOT editable (doesn't make sense)
-- Delete messages - NOT editable (final action)
-- Group updates - NOT editable (system messages)
+#### Content restrictions (v1)
 
-### Protocol Design
+- Text messages: Full content editable
+- Attachments: Only caption/description text editable
+- Reply messages: Only reply text editable (preserve reply reference)
+- Reactions: NOT editable (doesn't make sense)
+- Delete messages: NOT editable (final action)
+- Group updates: NOT editable (system messages)
 
-This XIP evaluates three alternative approaches for implementing message editing at the protocol level:
+### Protocol design
 
-#### Approach 1: Dedicated EditMessage Content Type (Separate Content + Command)
+This XIP evaluates three alternative approaches for implementing message editing at the protocol level.
+
+#### Approach 1: Dedicated EditMessage content type (Separate content + command)
 
 Send the new message content separately, then send an edit command message:
 
@@ -61,16 +65,18 @@ message EditMessage {
 ```
 
 **Pros**:
+
 - Clean separation between content and command
 - New content already exists as a proper message
 - Could reuse existing message infrastructure
 
 **Cons**:
+
 - Requires two messages per edit (overhead)
 - Draft message storage and cleanup complexity
 - More complex sync logic
 
-#### Approach 2: Dedicated EditMessage Content Type with Embedded Content
+#### Approach 2: Dedicated EditMessage content type with embedded content
 
 Create a new content type specifically for edits:
 
@@ -81,7 +87,8 @@ message EditMessage {
 }
 ```
 
-**Validation Rules**:
+**Validation rules**:
+
 1. Editor's `inbox_id` must match original sender's `inbox_id`
 2. `edited_message_id` must belong to the same group
 3. `new_content.type` must match original message's content type
@@ -89,20 +96,23 @@ message EditMessage {
 5. Original message must be an editable type
 
 **Pros**:
+
 - Single message per edit (efficient)
 - Clear semantic meaning
 - Dedicated validation logic
 - Similar pattern to DeleteMessage (consistency)
 
 **Cons**:
+
 - New content type to implement
 - Additional bindings work
 
-#### Approach 3: Reuse Existing Content Types with Reference Parameter (RECOMMENDED)
+#### Approach 3: Reuse existing content types with reference parameter (RECOMMENDED)
 
-Add an `editedMessageId` parameter to existing content types (Text, Attachment, etc.) to indicate this is an edit. This follows the exact pattern established by the Reply content type.
+Add an `editedMessageId` parameter to existing content types (Text, Attachment, etc.) to indicate this is an edit. This follows the exact pattern established by the [Reply content type](https://docs.xmtp.org/chat-apps/content-types/replies).
 
-**Example for Text Message**:
+**Example for text message**:
+
 ```rust
 // Normal text message
 EncodedContent {
@@ -121,10 +131,12 @@ EncodedContent {
 }
 ```
 
-**Similar to Reply Pattern**:
+**Similar to reply pattern**:
+
 Just like `ReplyCodec` uses parameters (`reference`, `referenceInboxId`, `contentType`) to store metadata while embedding content, we use the same pattern for edits.
 
-**Validation Rules**:
+**Validation rules**:
+
 1. If `editedMessageId` parameter present → treat as edit message
 2. Editor's `inbox_id` must match original sender's `inbox_id`
 3. Edited message must belong to the same group
@@ -133,6 +145,7 @@ Just like `ReplyCodec` uses parameters (`reference`, `referenceInboxId`, `conten
 6. Original message must be an editable type
 
 **Pros**:
+
 - No new content type needed (use existing Text, Attachment, etc.)
 - Follows established pattern (Reply already uses this approach)
 - Less protocol overhead
@@ -141,13 +154,14 @@ Just like `ReplyCodec` uses parameters (`reference`, `referenceInboxId`, `conten
 - Minimal protocol changes
 
 **Cons**:
+
 - Less explicit than dedicated EditMessage type
 - Requires discipline to validate content type matching
 - Parameters parsed from every message (slight overhead)
 
-### Recommended Approach
+### Recommended approach
 
-**This XIP recommends Approach 3** (Reference Parameter) for the following reasons:
+**This XIP recommends Approach 3** (reference parameter) for the following reasons:
 
 1. **Follows existing patterns**: Reply content type already uses this exact pattern
 2. **Minimal protocol changes**: No new protobuf definitions needed
@@ -155,9 +169,10 @@ Just like `ReplyCodec` uses parameters (`reference`, `referenceInboxId`, `conten
 4. **Backward compatibility**: Old clients can display as normal messages
 5. **Flexibility**: Can add more metadata via parameters without protocol changes
 
-### Database Schema
+### Database schema
 
-**New Table: `message_edits`**
+**New table: `message_edits`**
+
 ```sql
 CREATE TABLE message_edits (
     id INTEGER PRIMARY KEY,
@@ -176,7 +191,7 @@ CREATE INDEX idx_edits_edited ON message_edits(edited_message_id);
 CREATE INDEX idx_edits_group ON message_edits(group_id, original_message_id);
 ```
 
-### API Design
+### API design
 
 ```rust
 /// Core edit function
@@ -202,9 +217,9 @@ async fn get_latest_message_version(
 ) -> Result<Option<StoredGroupMessage>, GroupError>
 ```
 
-### Message Flow
+### Message flow
 
-#### Editing a Text Message:
+#### Edit a text message
 
 1. **User calls** `edit_message(message_id, "New text")`
 2. **Validate**:
@@ -213,14 +228,17 @@ async fn get_latest_message_version(
    - Check same group
    - Check message is editable type (Text)
 3. **Create edit message**:
+
    ```rust
    let edit_content = TextCodec::encode_edit(
        "New text".to_string(),
        hex::encode(&message_id)
    )?;
    ```
+
 4. **Send as MLS message** (just like normal text message)
 5. **Store edit record immediately** (optimistic UI):
+
    ```rust
    StoredMessageEdit {
        message_id: new_message_id,
@@ -232,9 +250,10 @@ async fn get_latest_message_version(
        created_at_ns: now(),
    }.store(conn)?;
    ```
+
 6. **Sync propagates** edit to other members
 
-#### Processing Received Edit (Sync):
+#### Process received edit (sync)
 
 ```rust
 // In process_message() during sync
@@ -293,9 +312,9 @@ fn process_message(message: DecryptedMessage) -> Result<()> {
 }
 ```
 
-### Content Type Matching Validation
+### Content type matching validation
 
-Critical for Approach 3 - ensures edit messages have the same content type as the original:
+This is critical for Approach 3. Ensures edit messages have the same content type as the original.
 
 ```rust
 fn validate_edit_content_type(
@@ -318,21 +337,23 @@ fn validate_edit_content_type(
 }
 ```
 
-### Message Enrichment & Display
-
-**Core Principle**: When a message is edited, SDK users receive the **edited content** in place of the original message, but with **metadata about both** the original and the edit. This allows UIs to:
+### Message enrichment and display
+#### Core Principle
+When a message is edited, SDK users receive the **edited content** in place of the original message, but with **metadata about both** the original and the edit. This allows UIs to:
 - Display the latest content to users
 - Show "edited" indicators
 - Preserve original message ordering (by original timestamp)
 - Optionally show edit history
 
-**Enrichment Logic**:
+#### Enrichment logic
+
 1. After loading messages, apply edit relations
 2. For each message with edits, replace content with latest edit
 3. Add metadata exposing both original and edit information
 4. If editing chain incomplete (missing parent), mark as `pending_edit`
 
-**Enhanced DecodedMessage**:
+#### Enhanced DecodedMessage
+
 ```rust
 pub struct DecodedMessage {
     // Original message identifiers (preserved for ordering and references)
@@ -366,17 +387,19 @@ pub struct DecodedMessage {
         Edited at 10:05 AM       <- last_edit_sent_at_ns
 ```
 
-**Pending Edit Handling**:
+#### Pending edit handling
+
 - If edit message arrives before original: store edit record but mark as "pending"
 - Don't show edited content until original message arrives
 - On original arrival, apply pending edits in chronological order
 - During sync, check for pending edits after processing messages
 
-### Conflict Resolution
+### Conflict resolution
 
-**Multiple Edits for Same Message**:
+**Multiple edits for same message**:
+
 - Use `edit_timestamp_ns` as tiebreaker (latest wins)
-- If timestamps identical, use message_id lexicographic order
+- If timestamps identical, use `message_id` lexicographic order
 - Database query returns latest edit per original message
 
 ```sql
@@ -387,29 +410,31 @@ ORDER BY edit_timestamp_ns DESC, message_id DESC
 LIMIT 1;
 ```
 
-### Pagination Considerations
+### Pagination considerations
 
-**Query Behavior**:
+#### Query behavior
+
 - `messages()` query returns original messages (not edit messages)
 - Edit messages are metadata, not shown as separate entries
 - Pagination cursor based on original message timestamps
 - Edit metadata attached during enrichment phase
 
-**Performance**:
+#### Performance
+
 - Index on `(original_message_id, edit_timestamp_ns)`
 - Batch edit lookup during enrichment (single query for page)
 - Cache latest edit per message in memory during pagination
 
-### Security Validations
+### Security validations
 
 Critical validation checklist:
 
-1. **Cross-group Prevention**: Validate original message and edit in same group
-2. **Ownership Check**: Verify editor_inbox_id matches original sender
-3. **Content Type Matching**: Ensure edit content type matches original
-4. **Content Type Validation**: Reject edits for non-editable message types
-5. **Deletion Check**: Cannot edit deleted messages
-6. **Chain Integrity**: When editing an edit, validate the chain links back to original
+1. **Cross-group prevention**: Validate original message and edit in same group
+2. **Ownership check**: Verify `editor_inbox_id` matches original sender
+3. **Content type matching**: Ensure edit content type matches original
+4. **Content type validation**: Reject edits for non-editable message types
+5. **Deletion check**: Cannot edit deleted messages
+6. **Chain integrity**: When editing an edit, validate the chain links back to original
 
 ```rust
 // Validation in edit_message()
@@ -438,39 +463,44 @@ if self.is_message_deleted(&message_id)? {
 }
 ```
 
-### Edge Cases
+### Edge cases
 
-**Deleted Messages**:
+#### Deleted messages
+
 - Cannot edit deleted messages
 - Check deletion table before allowing edit
 - If message edited then deleted, show deleted state (not edit)
 
-**Reply References**:
+#### Reply references
+
 - If editing a message that has replies, preserve original ID
-- Replies continue referencing original message_id
+- Replies continue referencing original `message_id`
 - UI shows "(edited)" next to referenced message content
 
-**Reactions**:
-- Reactions remain on original message_id
+#### Reactions
+
+- Reactions remain on original `message_id`
 - Editing doesn't affect reactions
 - All reactions preserved across edits or we can discard them
 
-**Message Ordering**:
+#### Message ordering
+
 - Edit messages have their own timestamps for MLS ordering
 - Display uses original message timestamp for chronological order
 - "Last modified" metadata shows latest edit timestamp
 
-**Edit Messages in Query Results**:
+#### Edit messages in query results
+
 - Edit messages should NOT appear in `messages()` results
 - Only original messages appear
 - Filter during query or enrichment phase
 - Fetch edit messages separately to apply edits
 
-### Bindings Support
+### Bindings support
 
 All bindings expose messages with the enriched edit metadata. The message retains its original `id` and `sent_at_ns` for ordering, while `content` reflects the latest version.
 
-**WASM Bindings**:
+#### WASM Bindings
 
 ```typescript
 interface DecodedMessage {
@@ -490,7 +520,8 @@ interface DecodedMessage {
 }
 ```
 
-**Node.js Bindings**:
+#### Node.js bindings
+
 
 ```typescript
 interface DecodedMessage {
@@ -530,80 +561,96 @@ struct FfiDecodedMessage {
 }
 ```
 
-## Backward Compatibility
+## Rationale
 
-**Using Approach 3 (Recommended)**:
-- Old clients that don't support editing will display edit messages as normal messages
-- The `editedMessageId` parameter is ignored by old clients
-- This provides graceful degradation
-- No protocol version bump required
-
-**Migration Strategy**:
-- Feature can be rolled out without coordinated upgrade
-- Clients can opt-in to edit support at their own pace
-- Edit functionality works between supporting clients
-- Non-supporting clients see the latest message content (but without "edited" indicator)
-
-## Implementation Phases
-
-**Phase 1 (v1 - MVP)**:
-- Text message editing only
-- Single edit per message (no chain)
-- Basic UI indicator ("edited")
-- Use Approach 3 (reference parameter)
-
-**Phase 2 (Edit Chains)**:
-- Edit chains (edit the edit)
-- Attachment caption editing
-- Conflict resolution improvements
-- Edit history tracking
-
-**Phase 3 (Advanced Features)**:
-- Edit history UI
-- Rich content editing (formatting preservation)
-- Edit notifications/events
-- Configurable edit time limits
-
-## Security Considerations
-
-1. **Authorization**: Only original sender can edit their messages
-2. **Cross-group Protection**: Edits validated to be in same group as original
-3. **Content Type Enforcement**: Edit must match original message's content type
-4. **Deletion Precedence**: Deleted messages cannot be edited
-5. **Idempotent Processing**: Edit records use `store_or_ignore()` to handle duplicates
-6. **Chain Validation**: Edit chains must link back to valid original message
-
-## Open Questions
-
-1. **Edit Time Limit**: Should there be a time window after which messages cannot be edited (e.g., 24 hours)?
-2. **Edit Count Limit**: Maximum number of edits per message (prevent abuse)?
-3. **Edit History Privacy**: Should edit history be visible to all members or just sender?
-4. **Notification Strategy**: Should edits trigger notifications like new messages? No?
-5. **Search Indexing**: Should search include edit history or only latest version?
-
-## Alternatives Considered
-
-### Comparison of Approaches
+Comparison on alternative approaches considered:
 
 | Aspect | Approach 1 (Separate) | Approach 2 (Dedicated) | Approach 3 (Reference) ✅ |
 |--------|---------------------|----------------------|--------------------------|
-| Protocol Overhead | 2 messages per edit | 1 message per edit | 1 message per edit |
-| New Content Type | Yes | Yes | No |
-| Bindings Work | High | Medium | Low |
-| Backward Compatibility | Poor | Poor | Excellent |
-| Implementation Complexity | High | Medium | Low |
-| Follows Existing Pattern | No | No (like Delete) | Yes (like Reply) |
-| Content Type Validation | Automatic | Manual | Manual but simple |
-| Semantic Clarity | Medium | High | Medium |
+| Protocol overhead | 2 messages per edit | 1 message per edit | 1 message per edit |
+| New content type | Yes | Yes | No |
+| Bindings work | High | Medium | Low |
+| Backward compatibility | Poor | Poor | Excellent |
+| Implementation complexity | High | Medium | Low |
+| Follows existing pattern | No | No (like Delete) | Yes (like Reply) |
+| Content type validation | Automatic | Manual | Manual but simple |
+| Semantic clarity | Medium | High | Medium |
 
-**Rationale for Approach 3**:
+### Rationale for approach 3
+
 - Minimal protocol changes
 - Follows established Reply pattern
 - Backward compatible
 - Simple implementation
 - Flexible (add metadata via parameters)
 
-The key insight is that Reply already demonstrates this pattern works well in production - we're applying the same principle to edits.
+The key insight is that Reply already demonstrates this pattern and it works well in production. We're applying the same principle to edits.
+
+## Backward compatibility
+
+### Using approach 3 (RECOMMENDED)
+
+- Old clients that don't support editing will display edit messages as normal messages
+- The `editedMessageId` parameter is ignored by old clients
+- This provides graceful degradation
+- No protocol version bump required
+
+#### Migration strategy
+
+- Feature can be rolled out without coordinated upgrade
+- Clients can opt-in to edit support at their own pace
+- Edit functionality works between supporting clients
+- Non-supporting clients see the latest message content (but without "edited" indicator)
+
+## Test cases
+
+TBD
+
+## Reference implementation
+
+Here are the proposed implementation phases:
+
+### Phase 1 (v1 - MVP)
+
+- Text message editing only
+- Single edit per message (no chain)
+- Basic UI indicator ("edited")
+- Use approach 3 (reference parameter)
+
+### Phase 2 (edit chains)
+
+- Edit chains (edit the edit)
+- Attachment caption editing
+- Conflict resolution improvements
+- Edit history tracking
+
+### Phase 3 (advanced features)
+
+- Edit history UI
+- Rich content editing (formatting preservation)
+- Edit notifications/events
+- Configurable edit time limits
+
+## Security considerations
+
+1. **Authorization**: Only original sender can edit their messages
+2. **Cross-group protection**: Edits validated to be in same group as original
+3. **Content type enforcement**: Edit must match original message's content type
+4. **Deletion precedence**: Deleted messages cannot be edited
+5. **Idempotent processing**: Edit records use `store_or_ignore()` to handle duplicates
+6. **Chain validation**: Edit chains must link back to valid original message
+
+### Threat model
+
+TBD
+
+## Open questions
+
+1. **Edit time limit**: Should there be a time window after which messages cannot be edited (e.g., 24 hours)?
+2. **Edit count limit**: Maximum number of edits per message (prevent abuse)?
+3. **Edit history privacy**: Should edit history be visible to all members or just sender?
+4. **Notification strategy**: Should edits trigger notifications like new messages? No?
+5. **Search indexing**: Should search include edit history or only latest version?
 
 ## Copyright
 
