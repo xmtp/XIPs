@@ -18,7 +18,8 @@ This XIP proposes a message editing feature for XMTP that allows a user to edit 
 
 Users frequently need to correct typos, update information, or clarify their messages after sending. Currently, XMTP does not support message editing, forcing users to either send correction messages or delete and resend. Message editing is a fundamental feature in modern messaging apps that improves user experience and communication clarity.
 
-> **Note**: This XIP is designed for human-to-human messaging applications where users need to see edit history and indicators (e.g., "edited" badges, timestamps of original vs edited messages). For agent/bot use cases that require seamless, invisible message updates (where the edited content silently replaces the original without any indication), a separate XIP will address that workflow.
+> [!NOTE]
+> This XIP is designed for human-to-human messaging applications where users need to see edit history and indicators (e.g., "edited" badges, timestamps of original vs edited messages). For agent/bot use cases that require seamless, invisible message updates (where the edited content silently replaces the original without any indication), a separate XIP will address that workflow.
 
 ## Specification
 
@@ -338,8 +339,11 @@ fn validate_edit_content_type(
 ```
 
 ### Message enrichment and display
-#### Core Principle
+
+#### Core principle
+
 When a message is edited, SDK users receive the **edited content** in place of the original message, but with **metadata about both** the original and the edit. This allows UIs to:
+
 - Display the latest content to users
 - Show "edited" indicators
 - Preserve original message ordering (by original timestamp)
@@ -372,14 +376,15 @@ pub struct DecodedMessage {
 }
 ```
 
-**Display Behavior**:
+**Display behavior**:
+
 - `id` and `sent_at_ns` always refer to the **original** message (for stable ordering and reply references)
 - `content` contains the **latest version** (edited content if edited, original otherwise)
 - `edited: true` indicates the content has been modified
 - `last_edit_sent_at_ns` can be used to show "Edited at [time]" in UI
 - Edit history can be fetched separately via `get_message_edit_history()`
 
-**Example UI Rendering**:
+**Example UI rendering**:
 
 ```text
 [Alice] Hello world!              <- content (latest)
@@ -522,7 +527,6 @@ interface DecodedMessage {
 
 #### Node.js bindings
 
-
 ```typescript
 interface DecodedMessage {
     // Original message identifiers (preserved)
@@ -541,7 +545,7 @@ interface DecodedMessage {
 }
 ```
 
-**FFI Bindings (Swift/Kotlin)**:
+#### FFI bindings (Swift/Kotlin)
 
 ```swift
 struct FfiDecodedMessage {
