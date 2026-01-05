@@ -4,7 +4,7 @@ title: Welcome pointers
 description: Implementation of welcome pointers to reduce data sent to and stored by servers
 author: Tyler Hawkes (@tylerhawkes)
 discussions-to: https://community.xmtp.org/t/xip-74-welcome-pointers/1211
-status: Review
+status: Last Call
 type: Standards
 category: Interface
 created: 2025-09-25
