@@ -3,7 +3,7 @@ xip: 78
 title: Fraud proof bounties
 description: Proposes a mechanism to allow independent actors to permissionlessly detect and report cryptographically provable correctness violations in the XMTP Broadcast Network
 author: Martin Kysel (@mkysel)
-discussions-to: TBD
+discussions-to: https://improve.xmtp.org/t/xip-78-fraud-proof-bounties/2058
 status: Draft
 type: Standards
 category: Core
