@@ -3,7 +3,7 @@ xip: 79
 title: Alternative node selection strategies
 description: Configurable node selection strategies for XMTP Gateway routing: stable, manual, ordered, random, and closest.
 author(s): Isaac Hartford (api-Hypernova), Martin Kysel (mkysel)
-discussions-to: 
+discussions-to: https://improve.xmtp.org/t/xip-79-alternative-node-selection-strategies/2059
 status: Draft
 type: Standards
 category: Network
