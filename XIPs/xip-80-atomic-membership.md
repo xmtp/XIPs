@@ -26,7 +26,7 @@ Here’s what the extension data will look like. It’ll be serialized into a pr
 
 ```rust
 struct AtomicMembershipExtension {
-	flags: u8
+    flags: u8
 }
 ```
 
@@ -85,7 +85,7 @@ When other inboxes search for which installation to add, they will only randomly
 
     Effectively, if your inbox is flagged as atomic, others will ensure at least one of your active installations is in the group. Otherwise you manage your own installations in the groups you are a participant of. This is done to keep other members from having to frequently download your key-packages to check if you’re still atomic/balanced.
 
-4. Bo (an atomic inbox) joins a new group
+1. Bo (an atomic inbox) joins a new group
 
     When an atomic installation joins a new group, if the number of Bo’s installations in that group exceed the configured installation limit for that client, that installation will immediately remove other installations until the limit is satisfied. This allows for other “over-capacity” installations to effectively remove themselves from groups by adding other installations that are “under-capacity”. This can only be done by adding extra installations at limit+1 to prevent race conditions with removal.
 
@@ -96,10 +96,10 @@ A new sync group message type will be present. This will set the installation li
 ```protobuf
 message InstallationLimit {
   // set to None to disable atomic inbox
-	optional int32 installation_limit = 1;
-	// installation_ids in this list will not be added
-	// to new groups.
-	repeated bytes frozen_installations = 2;
+    optional int32 installation_limit = 1;
+    // installation_ids in this list will not be added
+    // to new groups.
+    repeated bytes frozen_installations = 2;
 }
 ```
 
@@ -150,15 +150,15 @@ This will flag your inbox as an atomic inbox, and now you will only have one ins
 The benefit of this is this solution is less complex on the surface, but also comes with some hidden costs.
 
 - It does not reduce commit size at all.
-    - If an agent has 10 bots, those 9 bots that do not stream the group will still occupy the leaf nodes of every group they’re not participating in.
-    - If that agent is a part of 10k DMs, that’s 9k leaf node slots that are effectively doing nothing. Every DM that would have had a ratchet tree depth of 2 (assuming the other only has 1 installation), now has a depth of 5. Going from 3 nodes to 31.
+  - If an agent has 10 bots, those 9 bots that do not stream the group will still occupy the leaf nodes of every group they’re not participating in.
+  - If that agent is a part of 10k DMs, that’s 9k leaf node slots that are effectively doing nothing. Every DM that would have had a ratchet tree depth of 2 (assuming the other only has 1 installation), now has a depth of 5. Going from 3 nodes to 31.
 - Not only does it not reduce commit sizes, it actually increases their size.
-    - Inactive installations in groups still need to update their leaf nodes.
-    - Stale leaf nodes increase commit sizes, because they need to be encrypted to outside of the current tree.
+  - Inactive installations in groups still need to update their leaf nodes.
+  - Stale leaf nodes increase commit sizes, because they need to be encrypted to outside of the current tree.
 - There’s the deceptively complex issue of figuring out which installation is going to stream a new group when it arrives.
 - When a dev removes an installation, they have to redistribute those groups it was a part of to the other installations. Those installations will have to “catch up”.
-    - This will mean that XMTP has to keep commits around forever, which is something that is currently planned, but it would be nice to not design ourselves into that corner.
-    - XMTP sync cursors are global per-originator. When we omit groups, and then later un-omit them, that will complicate the sync logic.
+  - This will mean that XMTP has to keep commits around forever, which is something that is currently planned, but it would be nice to not design ourselves into that corner.
+  - XMTP sync cursors are global per-originator. When we omit groups, and then later un-omit them, that will complicate the sync logic.
 - A well-tuned sqlite3 database can handle tens of gigabytes of data, probably more. But it would still be nice to proactively do things that don’t push XMTP toward that limit.
 
 The core of this proposal is effectively a flag in the node that tells other installations not to add missing installations for this inbox and that the atomic inbox will manage itself. By reducing the number of installations, we reduce the size of group ratchet trees, prevent stale nodes, and don’t have to worry about managing group_ids for streaming subsets of the group pool by leveraging existing membership logic to keep things as simple as possible.
