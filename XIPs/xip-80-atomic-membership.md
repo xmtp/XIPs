@@ -123,7 +123,7 @@ An over-capacity installation can add an installation that is under-capacity. Th
 
 ## Backward compatibility
 
-This is a breaking change. Old installations that don’t have this extension will ignore the atomic flag and add the missing installations.
+This is a breaking change. Old installations that don’t have this extension will ignore the atomic flag and add the missing installations. This will also cause invalid commits on installations without the extension, because they will expect all of the installations to be present.
 
 ## Security considerations
 
