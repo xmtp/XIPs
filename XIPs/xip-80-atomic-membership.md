@@ -3,7 +3,7 @@ xip: 80
 title: Atomic membership
 description: A scaling proposal to limit the number of installations in a group for an inbox
 author: Dakota Brink (@codabrink)
-discussions-to: TBD
+discussions-to: https://improve.xmtp.org/t/xip-80-atomic-membership/2072
 status: Draft
 type: Standards
 category: XRC
