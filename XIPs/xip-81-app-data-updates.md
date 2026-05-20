@@ -180,6 +180,8 @@ Applications using the application range (`0xC000-0xFEFF`) need a mechanism to a
 
 The shipped path is per-group runtime registration: applications call into the SDK to register a component (id, type, permission policy) on a specific group; the SDK encodes that registration into the group's `COMPONENT_REGISTRY` (`0x8000`) on bootstrap or subsequent updates. Collision risk is per-group, and the registry itself rejects duplicate ids.
 
+**Candidate refinement: 32-byte stable identifier per component.** A direction worth exploring for cross-group allocation: each application-range component carries a stable 32-byte identifier (e.g., a hash of the app domain or an explicit per-component handle) stored in the registry alongside the policy. Apps reference components by the 32-byte identifier in their write/read APIs; the SDK resolves it to the per-group 16-bit ComponentId via a registry lookup. Different groups can independently assign different 16-bit slots without affecting application code, and multiple apps can ship components without coordinating on the 16-bit namespace at all. See Open Questions for status.
+
 See Rationale for alternative registration approaches considered.
 
 ### 2.3 Well-Known Component IDs
@@ -689,7 +691,7 @@ The `AppDataUpdate` and `AppDataDictionary` APIs are available in OpenMLS behind
 2. **KeyValue API (Section 5)**: shape and timing for the delta-mutation client API. v1 still exposes a single opaque `app_data` string at `0x8009`.
 3. **KeyValueDelta Upsert**: Should `KeyValueDelta` support an `Upsert` operation (insert-or-update) in addition to separate `Insert` and `Update`? Upsert simplifies client code but weakens conflict detection.
 4. **Component data size limit**: Should there be a maximum byte size per ComponentId value? Large components could bloat the GroupContext and degrade performance.
-5. **Cross-group component allocation**: Section 2.2.2 ships as per-group runtime registration. A global allocator (on-chain or otherwise) is deferred — does the per-group form hold up in practice, or does it need a global namespace before broad application adoption?
+5. **Cross-group component allocation**: Section 2.2.2 ships as per-group runtime registration. A global allocator (on-chain or otherwise) is deferred — does the per-group form hold up in practice, or does it need a global namespace before broad application adoption? The 32-byte stable-identifier approach sketched in Section 2.2.2 is one candidate: it lets apps reference components by a 32-byte handle and lets the SDK resolve to the per-group 16-bit ComponentId, so multi-app groups don't need to coordinate on 16-bit slots.
 6. **`BatchProposal` (Section 4)**: deferred from v1. Open whether the lazy-batching shape covers the use cases or whether the explicit batch wrapper is still worth shipping.
 
 ## Copyright
@@ -704,7 +706,7 @@ Landed on `main`:
 - `ComponentRegistry` permission architecture at `0x8000` (replaces the original range + override-map split).
 - Immutable component handling (counting down from `0xBFFF`).
 - AppData handler implementations for all well-known mutable components.
-- Two-step bootstrap migration (legacy GCE version bump → proposal-then-commit cutover).
+- Two-step bootstrap migration (legacy GCE version bump → proposal-then-commit cutover). Makes pre-d14n migrations safe: lower-version peers pause on the Step A floor bump and never see Step B strip the legacy extensions.
 - Proposal, commit, and welcome validation on both pre- and post-migration paths.
 - Post-migration intent handlers (Section 3.4) — `MetadataUpdate`, `UpdateAdminList`, `UpdatePermission`, `UpdateGroupMembership`, plus steady-state `MinimumSupportedProtocolVersion` bumps via AppDataUpdate.
 - `EnableProposalsOptions { force, min_version }` API surface, exposed through mobile / WASM / node bindings.
@@ -721,6 +723,5 @@ Deferred:
 
 Optional future work:
 
-- Pre-d14n migrations for select groups.
 - User sub-maps (maps nested inside inbox-id-keyed maps).
 - Leaf-node updates for commit-size optimization.
