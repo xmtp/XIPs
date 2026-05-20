@@ -159,18 +159,20 @@ The contiguous-range / counting-down-immutables shape replaces the earlier propo
 
 #### 2.2.1 Component Registry (`0x8000`)
 
-A single super-admin-only component at `ComponentId::COMPONENT_REGISTRY` (`0x8000`) stores the per-component permission policy for every other well-known and runtime-registered component. The registry replaces both the range-default scheme and the separate `PermissionOverrideMap` originally proposed at `0x8801`.
+A single super-admin-only component at `ComponentId::COMPONENT_REGISTRY` (`0x8000`) holds per-component permission policies. The registry replaces both the range-default scheme and the separate `PermissionOverrideMap` originally proposed at `0x8801`.
 
 Conceptually the registry is `Map<ComponentId, ComponentMetadata>`. `ComponentMetadata` carries the proto-level base policy (`AllowIfAdmin`, `AllowIfSuperAdmin`, etc.) and per-component flags.
 
-Two ComponentIds are **hardcoded** — their permissions are enforced in code rather than read from the registry, because the registry itself depends on them:
+Two ComponentIds have their permissions **enforced in code** rather than resolved through the registry — they're the ones the registry itself depends on to bootstrap:
 
 - `0x8000` `COMPONENT_REGISTRY` — super-admin-only.
 - `0x8001` `SUPER_ADMIN_LIST` — super-admin-only.
 
 A third, `0x8002` `ADMIN_LIST`, is "constrained": its registry entry MAY only encode `AllowIfAdmin` or `AllowIfSuperAdmin` — narrower stored policies are rejected by `ComponentRegistry::validate_entry`.
 
-For every other ComponentId, the registry entry is the source of truth. There is no range-based default — a ComponentId with no registry entry is denied by default. This means applications adding a new well-known or runtime component MUST add a corresponding registry entry as part of the same commit.
+For every other ComponentId, the registry entry is the source of truth. There is no range-based default — a ComponentId with no registry entry is denied by default.
+
+Combined with the pre-commit evaluation rule (Section 2.4), this means a new component MUST be registered in a commit that **precedes** any commit that writes to it. The two operations cannot share a commit; if they did, the dependent write would be evaluated against the pre-commit registry (which lacks the entry) and rejected. Bootstrap is the only path that registers and writes in the same commit, and it uses a dedicated validator (Section 3.2 Step B).
 
 #### 2.2.2 Application ComponentId Registration
 
@@ -552,7 +554,7 @@ A custom MLS proposal works within the existing MLS framing and network transpor
 
 ### Why one-time migration over dual-write
 
-Dual-write (writing to both old extensions and AppDataDictionary during a transition period) doubles the bandwidth cost and requires maintaining both code paths indefinitely. A one-time migration is a clean cutover: once migrated, the old code paths can be removed. The migration is safe because it only happens when all members support the new mechanism.
+Dual-write (writing to both old extensions and AppDataDictionary during a transition period) doubles the bandwidth cost and requires maintaining both code paths indefinitely. A one-time migration is a clean cutover: once migrated, the old code paths can be removed. Mixed-version safety comes from the version-floor pause described in Section 3.2 — peers that don't support `AppDataUpdate` pause the group rather than fork, so the migration can be initiated by any single supporting member without waiting for unanimous adoption.
 
 ### Atomic batching alternatives
 
@@ -586,7 +588,7 @@ The **custom BatchProposal** is the form preserved in Section 4 as future work. 
 
 **First-write-wins** uses no global registration — the first `AppDataUpdate` to a ComponentId in a group implicitly claims it. Simplest to implement but fragile in multi-app scenarios since two apps can independently choose the same ComponentId in different groups.
 
-The **on-chain registry** is recommended because it eliminates collision risk entirely and provides permanent, decentralized allocation.
+The **on-chain registry** is preserved as the target end state but is deferred from v1. v1 ships with **per-group explicit registration**: applications register a component (id, type, policy) into the per-group `COMPONENT_REGISTRY` (`0x8000`) before writing to it. Duplicate ids are rejected at registration time, so the collision surface is bounded to a single group. The shape is closer to "first-register-wins-per-group" than first-write-wins; cross-group coordination is left as an open question (Open Questions §5).
 
 ## Backward Compatibility
 
@@ -670,7 +672,7 @@ The `AppDataUpdate` and `AppDataDictionary` APIs are available in OpenMLS behind
 5. **AppDataUpdate rejected for immutable component** — A super admin sends an `AppDataUpdate` targeting `ConversationType` (`0xBFFF`) which already has a value. The proposal is rejected because immutable components cannot be modified.
 6. **AppDataUpdate rejected for reserved range** — Any member sends an `AppDataUpdate` targeting `0xFF50` (reserved). The proposal is rejected unconditionally.
 7. **AppDataUpdate rejected for unregistered id** — A member sends an `AppDataUpdate` targeting an id in the application range (`0xC000-0xFEFF`) with no entry in `COMPONENT_REGISTRY`. The proposal is rejected (deny-by-default).
-8. **Pre-commit permission evaluation** — A single commit contains both (a) an `AppDataUpdate` to `COMPONENT_REGISTRY` (`0x8000`) that would relax the policy for some id `X`, and (b) an `AppDataUpdate` to `X` from a proposer who only has permission under the *new* policy. The commit is rejected: `X`'s authorization is evaluated against the pre-commit registry, not the post-commit one.
+8. **Pre-commit permission evaluation** — Super-admin Alice proposes an `AppDataUpdate` to `COMPONENT_REGISTRY` (`0x8000`) that relaxes the policy for some application id `X` from super-admin-only to any-member. Regular member Bob proposes an `AppDataUpdate` to `X`. Both proposals are pending; a commit consumes both. The commit MUST be rejected: Bob's write is evaluated against the pre-commit registry (still super-admin-only for `X`), so Bob lacks permission. Alice's registry change in the same commit does not unlock Bob's write — the policy change only takes effect for *subsequent* commits.
 9. **Unknown-component tolerance** — A commit contains an `AppDataUpdate(Update)` for an id in `0x8000-0xFEFF` that the receiver has no `Component` impl for. The receiver stores the payload verbatim and does not reject the commit.
 10. **Migration preserves state** — A group migrates from GCE to `AppDataDictionary` via the two-step bootstrap. All state (membership, metadata, permissions) is readable from the new ComponentIds and matches the pre-migration values.
 11. **Old clients pause on Step A version bump** — Step A bumps `minimum_supported_protocol_version` to `PROPOSALS_MIN_PROTOCOL_VERSION` (`"1.11.0"`). A pre-1.11 client pauses *before* observing Step B's legacy-extension-stripping commit. After upgrading, the client resumes and processes both Step A and Step B.
