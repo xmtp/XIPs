@@ -234,8 +234,7 @@ a stale subscription into a reconnect from the persisted cursor — is implement
 independently of this RPC and already protects the existing server-streaming subscriptions. The
 protocol changes this XIP standardizes are the remaining work: a `Subscribe`-based client that
 decodes the status-aware response, and an `xmtp-node-go` `Subscribe` handler with a mutable
-per-connection topic set and an idle heartbeat ticker. See the companion engineering design for the
-staged rollout and the multi-tenant gateway that motivates it.
+per-connection topic set and an idle heartbeat ticker.
 
 ## Security considerations
 
