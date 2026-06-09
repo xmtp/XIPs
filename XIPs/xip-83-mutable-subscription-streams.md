@@ -100,19 +100,25 @@ sequenceDiagram
     participant N as node
 
     C->>N: open bidi stream Subscribe()
-    C->>N: SubscribeRequest.Mutate (add_groups g1, g2)
-    N-->>C: StatusUpdate STARTED
+    C->>N: SubscribeRequest.Mutate (adds g1, g2 @cursors, mutate_id=1)
+    N-->>C: Started
     Note right of N: immediate, keeps proxied connections open
     N-->>C: Messages (catch-up)
-    N-->>C: StatusUpdate CATCHUP_COMPLETE
-    C->>N: SubscribeRequest.Mutate (add_groups g3)
+    N-->>C: TopicsLive (g1, g2)
+    Note right of N: these topics are now live tail
+    N-->>C: CatchupComplete (mutate_id=1)
+    C->>N: SubscribeRequest.Mutate (adds g3, mutate_id=2)
     Note over C: joined a new group, no reconnect
-    N-->>C: Messages (g3 catch-up + live)
+    N-->>C: Messages (g3 catch-up)
+    N-->>C: TopicsLive (g3)
+    N-->>C: CatchupComplete (mutate_id=2)
+    Note right of N: one per Mutate that adds, after its wave's last TopicsLive
+    N-->>C: Messages (g3 live)
     N-->>C: Ping (nonce=k)
     Note right of N: idle liveness challenge, every 30s or less
     C->>N: Pong (nonce=k)
     Note right of N: no Pong within the deadline → node closes & reaps
-    C->>N: SubscribeRequest.Mutate (remove_groups g1)
+    C->>N: SubscribeRequest.Mutate (removes g1)
     C->>N: Ping (nonce=j)
     Note over C: e.g. just resumed from background — probe the link
     N-->>C: Pong (nonce=j)
@@ -123,8 +129,8 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> Opening: open Subscribe()
-    Opening --> CatchingUp: STARTED + Mutate(add)
-    CatchingUp --> Live: CATCHUP_COMPLETE
+    Opening --> CatchingUp: Started + Mutate(add)
+    CatchingUp --> Live: CatchupComplete
     Live --> Live: Messages / Mutate(add, remove)
     Live --> Live: Ping and Pong (either direction)
     Live --> Stale: no frame for N x interval
@@ -164,17 +170,19 @@ message SubscribeRequest {
       Pong   pong   = 3; // answer to a server Ping
     }
 
-    // Add and/or remove group and welcome subscriptions in place (atomic per frame).
-    // The node derives the topic from the id exactly as it does for the existing
-    // Subscribe{Group,Welcome}Messages RPCs, so the client never builds topic strings.
+    // Add and/or remove subscriptions in place (atomic per frame). Topics use the
+    // kind-prefixed binary representation shared with the decentralized backend
+    // (XIP-49 §3.3.2): first byte = topic kind, remainder = identifier. This RPC
+    // initially serves kind 0x00 (group messages; identifier = group_id) and kind
+    // 0x01 (welcomes; identifier = installation_key); an unsupported kind fails the
+    // stream with INVALID_ARGUMENT. Future kinds arrive via Started.capabilities.
     message Mutate {
-      repeated Group   add_groups      = 1; // begin delivering these group-message topics
-      repeated Welcome add_welcomes    = 2; // begin delivering these welcome topics
-      repeated bytes   remove_groups   = 3; // group_ids to stop delivering
-      repeated bytes   remove_welcomes = 4; // installation_keys to stop delivering
+      repeated Subscription adds      = 1; // begin delivering these topics
+      repeated bytes        removes   = 2; // stop delivering; clears the floor so a re-add replays
+      bool             history_only   = 3; // catch the adds up, but do not deliver live (see req 9)
+      uint64           mutate_id      = 4; // echoed on this wave's CatchupComplete; 0 = none
 
-      message Group   { bytes group_id = 1;         uint64 id_cursor = 2; } // 0 = live edge
-      message Welcome { bytes installation_key = 1; uint64 id_cursor = 2; } // 0 = live edge
+      message Subscription { bytes topic = 1; uint64 id_cursor = 2; } // cursor 0 = from the beginning
     }
   }
 }
@@ -185,10 +193,12 @@ message SubscribeResponse {
 
   message V1 {
     oneof response {
-      Messages     messages      = 1;
-      StatusUpdate status_update = 2;
-      Ping         ping          = 3; // idle liveness challenge; receiver MUST answer with Pong
-      Pong         pong          = 4; // answer to a client Ping
+      Messages        messages         = 1;
+      Started         started          = 2; // sent once, immediately on open
+      Ping            ping             = 3; // idle liveness challenge; receiver MUST answer with Pong
+      Pong            pong             = 4; // answer to a client Ping
+      TopicsLive      topics_live      = 5; // these topics just crossed from catch-up to live
+      CatchupComplete catchup_complete = 6; // a Mutate's adds are fully delivered; echoes mutate_id
     }
 
     message Messages {
@@ -196,15 +206,28 @@ message SubscribeResponse {
       repeated WelcomeMessage welcome_messages = 2;
     }
 
-    message StatusUpdate {
-      SubscriptionStatus status = 1;
-      uint32 keepalive_interval_ms = 2; // advertised with STARTED: ping cadence + reap-deadline basis
+    // Emitted when topics finish catch-up, AFTER their last history frame — including any
+    // live messages that queued up behind the catch-up, which were equally historical from
+    // the client's perspective — so every later frame for a listed topic is live tail.
+    message TopicsLive {
+      repeated bytes topics = 1; // kind-prefixed topics now tailing live
     }
 
-    enum SubscriptionStatus {
-      SUBSCRIPTION_STATUS_UNSPECIFIED      = 0;
-      SUBSCRIPTION_STATUS_STARTED          = 1; // sent once, immediately on open
-      SUBSCRIPTION_STATUS_CATCHUP_COMPLETE = 2; // initial catch-up for the current set is done
+    message Started {
+      uint32 keepalive_interval_ms = 1; // ping cadence + reap-deadline basis
+      repeated Capability capabilities = 2; // optional features this node speaks
+    }
+
+    // Sent once per Mutate that adds subscriptions, after the wave's last TopicsLive.
+    message CatchupComplete {
+      uint64 mutate_id = 1; // echoes the Mutate that started this wave (0 if none given)
+    }
+
+    // Optional per-stream protocol features (none defined yet; future revisions add
+    // values, e.g. fetch-over-stream lookups answered from the stream's own read view,
+    // or new streamable topic kinds).
+    enum Capability {
+      CAPABILITY_UNSPECIFIED = 0;
     }
   }
 }
@@ -216,35 +239,54 @@ message Ping { uint64 nonce = 1; }
 message Pong { uint64 nonce = 1; } // echoes the nonce of the Ping it answers
 ```
 
-Subscriptions are expressed as `group_id` / `installation_key` (not raw topics), so the **node stays
-the single source of topic derivation** and the client never reconstructs topic strings. A single
-stream MAY carry both group and welcome subscriptions, and subscriptions belonging to many
-identities. `SubscribeRequest` and `SubscribeResponse` wrap their payload in `oneof version` so a
+Subscriptions are expressed as **kind-prefixed binary topics** — the representation the
+decentralized backend already uses (XIP-49 §3.3.2) and that clients already build for their cursor
+stores: one kind byte plus the raw identifier, with no string formatting. The node validates the
+kind and stays the authority over which kinds this RPC serves; the same shape extends to future
+streamable objects (key packages, identity updates) without protocol changes. A single stream MAY
+carry both group and welcome subscriptions, and subscriptions belonging to many identities. `SubscribeRequest` and `SubscribeResponse` wrap their payload in `oneof version` so a
 future revision can restructure them while old peers keep speaking `V1`; `Ping`/`Pong` are
-version-independent.
+version-independent. The version is **pinned per stream**: a stream whose requests are `V1` receives
+only `V1` responses, so a client never has to handle a response version it did not speak first (see
+server requirement 8).
 
 ### Server requirements
 
-1. The node MUST send a `StatusUpdate{ STARTED }` frame immediately upon accepting the stream, before
-   any catch-up, so that proxied/buffered transports keep the connection open. It SHOULD advertise its
-   ping cadence in `keepalive_interval_ms` on that frame.
-2. For each `Group` in `add_groups` and each `Welcome` in `add_welcomes`, the node MUST derive the
-   topic from the `group_id` / `installation_key`, deliver messages with id greater than `id_cursor`
-   (or from the live edge if `id_cursor == 0`), performing catch-up from history then transitioning to
-   live delivery, and MUST NOT deliver an id at or below a cursor it has already advanced past for that
-   subscription on this stream (no duplicates across catch-up/live).
+1. The node MUST send a `Started` frame immediately upon accepting the stream, before any catch-up,
+   so that proxied/buffered transports keep the connection open. It MUST advertise its ping cadence
+   in `keepalive_interval_ms` whenever it sends `Ping`s, so clients derive an accurate watchdog
+   threshold, and MUST list the optional protocol features it supports in `capabilities`. Because a node silently ignores request types it does not
+   understand, a client MUST NOT send an optional request type whose capability the node did not
+   advertise — it would hang waiting on a response that will never come. (No capabilities are defined
+   by this revision; the field is the feature-detection hook for future ones.)
+2. For each `Subscription` in `adds`, the node MUST validate the kind-prefixed topic (failing the
+   stream with `INVALID_ARGUMENT` for a kind this RPC does not serve), deliver messages with id
+   greater than `id_cursor` (`0` meaning from the beginning, matching the existing server-streaming
+   RPCs), performing catch-up from history then transitioning to live delivery, and MUST NOT deliver
+   an id at or below a cursor it has already advanced past for that subscription **while continuously
+   subscribed** on this stream (no duplicates across catch-up/live; removing and re-adding a topic
+   resets this floor — see requirement 3).
 3. The node MUST process `Mutate` deltas that arrive **after** the initial request, mutating the live
-   subscription **without** terminating or reopening the stream. Subscriptions named in
-   `remove_groups` / `remove_welcomes` MUST stop being delivered; additions MUST follow rule (2).
+   subscription **without** terminating or reopening the stream. Within a single `Mutate`, `removes`
+   are applied before `adds`, so a topic present in both is reset — removed, then re-added with a
+   fresh catch-up — and duplicate topics within `adds` are coalesced, the lowest `id_cursor` winning.
+   Topics named in `removes` MUST stop being delivered promptly; messages already serialized to the
+   response channel before the node processed the removal MAY still arrive, and the client discards
+   them. Removing a topic clears its per-stream cursor floor (requirement 2), so a later `add` — even
+   one carrying a lower `id_cursor` — starts a fresh catch-up and replays that history; re-adding a
+   topic that is still actively subscribed is a no-op unless its `id_cursor` is below the current
+   floor, which restarts that topic's catch-up from the lower cursor. Additions otherwise follow
+   rule (2).
 4. **Liveness (ping/pong).** Whenever no frame has been sent down the response channel for a bounded
    idle interval (server-controlled, RECOMMENDED **≤ 30 seconds**), the node MUST send a `Ping` with a
    fresh nonce. The idle timer MUST reset whenever any frame is delivered, so the heartbeat adds **no
    per-message overhead** and imposes **no per-topic broadcast** — it is a property of the connection,
-   not of any conversation. The node MUST close the stream if the client does not return a matching
-   `Pong` (or any other frame) within a bounded deadline (RECOMMENDED ≤ the ping interval), so that a
-   client that has gone away — including one suspended by a mobile OS behind a proxy that still ACKs
-   the transport — is reaped promptly. The node MUST also answer any client `Ping` with a `Pong`
-   echoing its nonce.
+   not of any conversation. The node MUST close the stream if the client does not return the matching
+   `Pong` echoing the ping's nonce within a bounded deadline (RECOMMENDED ≤ the ping interval); other
+   client frames do **not** satisfy the deadline, so a client whose receive path has died — it never
+   sees the `Ping` — is reaped even while it keeps sending. This reaps a client that has gone away,
+   including one suspended by a mobile OS behind a proxy that still ACKs the transport. The node MUST
+   also answer any client `Ping` with a `Pong` echoing its nonce.
 5. The node MUST apply the same authorization to subscriptions added mid-stream as it would to those
    in the opening request. Mutating a subscription MUST NOT be a privilege-escalation path. Any
    authorization the node enforces MUST be evaluated **per subscription**, independent of the
@@ -252,10 +294,49 @@ version-independent.
    identities or installations**, and the node MUST NOT require that all subscriptions on one
    connection share a single identity. This is what lets one process multiplex many local clients onto
    a handful of upstream connections (the gateway use case in *Motivation*) without an intermediary.
+   Because each topic is itself the resource identifier — the kind-prefixed `group_id` /
+   `installation_key` — per-subscription authorization keys on the topic; no separate identity field
+   on `Subscription` is needed. (v3's read path is topic-keyed and enforces no per-identity read
+   authorization; this requirement binds any node that does.)
 6. The node SHOULD bound per-stream resources: a maximum number of subscriptions per stream, a maximum
    mutation rate, and a maximum client-`Ping` rate. Requests exceeding these limits SHOULD be rejected
    with a gRPC error rather than silently truncated. Because the server-initiated heartbeat cadence is
    server-controlled, a client cannot force an expensive ping rate.
+7. **Live-boundary signals.** When subscriptions finish catch-up, the node MUST emit a `TopicsLive`
+   frame listing their topics, **after** the last history frame for those topics — including any
+   live messages that queued up behind the catch-up, which were equally historical from the client's
+   perspective — so that every later frame for a listed topic is live tail. In addition, each
+   `Mutate` that adds subscriptions starts a catch-up **wave**, and once all of a wave's
+   subscriptions have crossed to live the node MUST emit `CatchupComplete` echoing the Mutate's
+   `mutate_id`, after the wave's last `TopicsLive`. A `Mutate` that adds nothing yields no wave and
+   no `CatchupComplete` — except a stream's **first** `Mutate`, which always yields one, so a client
+   that subscribed nothing still learns it is live. Waves from overlapping `Mutate`s MAY complete in
+   any order; the echoed `mutate_id` keeps completions attributable, and `TopicsLive` provides
+   per-topic attribution. These signals are what let a client distinguish backfill from live (e.g. suppress
+   notifications for history) and let a multiplexing client signal per-consumer readiness. Both are
+   **informational only**: delivery correctness (no duplicates, no gaps — rule 2) never depends on
+   them, a client MUST NOT rely on them for duplicate suppression, and re-adding a subscription
+   re-runs catch-up and re-emits them, so receivers treat them idempotently.
+8. **Version pinning.** The node MUST respond on the same `version` arm the client's requests use: a
+   stream whose requests are `V1` receives only `V1` responses. A future revision is adopted only by
+   a client electing to speak it, never imposed mid-stream by the node. A node that receives a
+   `SubscribeRequest` whose `version` arm it does not recognize MUST fail the stream with
+   `INVALID_ARGUMENT` rather than silently ignore it, so a forward-version client is never wedged
+   waiting on a response that will never come. The sole exception to pinning is the initial `Started`,
+   which the node sends in the base version before it has read any request; a client targeting a
+   future version MUST accept a base-version `Started`.
+9. **Bounded catch-up and graceful shutdown.** A `Mutate` with `history_only = true` catches its adds
+   up exactly as rule 2 — history, `TopicsLive` markers (which then mean "you have everything as of
+   now"), and the wave's `CatchupComplete` — but the node MUST NOT register those topics for live
+   delivery (removals in the same `Mutate` apply normally). When the client **half-closes** its
+   request stream, the node MUST stop sending `Ping`s (a half-closed peer cannot answer; the client
+   suspends its watchdog for the bounded drain and relies on gRPC transport timeouts — see client
+   requirement 4), MUST finish all in-flight catch-up waves, and MUST then close the stream with `OK`;
+   if no waves are in flight, it closes immediately. Together these give the
+   bounded catch-up ("sync") flow with no extra protocol: open → `Mutate{ history_only }` →
+   half-close → read until the server hangs up. A client that needs to stop **immediately** cancels
+   the RPC instead — no dedicated stop frame exists because HTTP/2 cancellation already propagates
+   in one round trip and fails the node's pending sends.
 
 ### Client requirements
 
@@ -268,9 +349,19 @@ version-independent.
 3. On reconnect, a client MUST resume each subscription from its last **durably-persisted** cursor
    (`id_cursor`) so that messages delivered into the dead window are replayed. Because an environment
    may terminate the process with no clean shutdown (see *Process suspension* below), cursors MUST be
-   persisted as messages are durably processed — not only on a graceful close.
+   persisted as messages are durably processed — not only on a graceful close. For a newly joined
+   group, the initial cursor SHOULD be seeded from the welcome's encrypted
+   `WelcomeMetadata.message_cursor`, so a new member neither misses the gap between welcome creation
+   and its first subscribe nor backfills pre-join history it cannot decrypt; `0` (from the beginning)
+   remains the fallback when no seed is available, with duplicates discarded locally.
 4. A client SHOULD prefer adding/removing subscriptions via `Mutate` deltas over opening additional
-   streams.
+   streams. For scheduled background windows where a long-lived stream cannot run (e.g. Android
+   WorkManager jobs or Doze maintenance windows), a client SHOULD use the bounded catch-up flow
+   (server requirement 9) rather than per-topic queries: one `Mutate{ history_only }` from durable
+   cursors, half-close, drain to the server's `OK`. While draining a bounded catch-up it has
+   half-closed, a client MUST NOT apply its liveness watchdog (client requirement 2) to that stream:
+   the node has stopped sending `Ping`s, the drain is bounded, and gRPC's transport-level timeouts
+   cover a genuinely dead connection — it simply reads until the node closes with `OK`.
 
 #### Process suspension and mobile lifecycle
 
@@ -279,18 +370,18 @@ backgrounds, and browser tabs the engine throttles or freezes. While suspended, 
 its watchdog or answer `Ping`s, and the OS may tear down the underlying socket; on resume the client
 typically holds a dead stream. Clients in such environments:
 
-5. SHOULD treat the stream as a **foreground / online-presence** mechanism. Delivery while the process
+1. SHOULD treat the stream as a **foreground / online-presence** mechanism. Delivery while the process
    is suspended is out of scope for this RPC and is expected to be handled out of band (e.g. push
    notifications that wake the app for a catch-up sync); this XIP standardizes only the foreground
    subscription protocol.
-6. SHOULD, on resume, **reconnect-and-resume from persisted cursors immediately** rather than waiting
+2. SHOULD, on resume, **reconnect-and-resume from persisted cursors immediately** rather than waiting
    for the watchdog threshold to elapse — driven by a host-supplied lifecycle signal (e.g. an
    app-foreground or `visibilitychange` callback the SDK forwards to the client). The exact API the
    client exposes for this signal is an implementation concern and is **not** standardized here.
-7. SHOULD, on resume, **actively probe** the link before trusting it: send a client `Ping` and treat a
+3. SHOULD, on resume, **actively probe** the link before trusting it: send a client `Ping` and treat a
    missing `Pong` (or a failed write) as a dead stream and reconnect. This fast path is exactly what
    the request channel makes possible; a unidirectional server-stream can only wait for missing data.
-8. SHOULD debounce rapid background→foreground transitions (a brief grace period plus a minimum
+4. SHOULD debounce rapid background→foreground transitions (a brief grace period plus a minimum
    reconnect interval) to avoid connection thrash, and SHOULD measure staleness against a clock that
    advances across suspension (wall-clock), so a resumed process correctly observes the elapsed gap.
 
@@ -325,24 +416,26 @@ durable long-term primitive for in-browser full-duplex once its server/client to
   transport produces no `Pong`, so the node closes the stream instead of leaking it. Because either
   side MAY initiate, a client that has just resumed can probe the link immediately instead of waiting
   for the next scheduled server ping.
-- **Id-based subscriptions reuse v3 prior art and avoid duplicated logic.** `add_groups` /
-  `add_welcomes` carry the same `{group_id | installation_key, id_cursor}` shape as the existing
-  `Subscribe{Group,Welcome}MessagesRequest.Filter`. Sending ids (not opaque topics) keeps the node as
-  the single source of topic derivation, so the client never reconstructs topic strings and the two
-  cannot drift; it is also a bonus for the gateway multiplexer, whose inbound `GroupMessage` /
-  `WelcomeMessage` already carry those ids, so routing back to the owning client is by-id on both
-  directions. Mutate-in-place is "stream the filters instead of sending them once." A bidirectional
-  subscribe precedent also exists in the legacy API (`Subscribe2`).
-- **Response status lifecycle echoes the decentralized API.** The `SubscriptionStatus` lifecycle
-  (`STARTED` / `CATCHUP_COMPLETE`) deliberately echoes the decentralized backend's `SubscribeTopics`
-  response (XIP-49 lineage), so the client-side decode is shared; the request, by contrast, uses v3's
-  id-based filters because v3 is the deployment target.
+- **Kind-prefixed topics reuse the decentralized backend's representation.** Subscriptions carry
+  the XIP-49 binary topic (one kind byte + raw identifier) with v3's single `id_cursor` — the same
+  topics clients already build as cursor-store keys, so nothing new is derived client-side and the
+  v3 and decentralized vocabularies converge. One repeated `{topic, id_cursor}` shape extends to
+  future streamable kinds (key packages, identity updates) without protocol changes, gated by
+  `Started.capabilities`; an earlier draft used per-kind typed fields, replaced during review.
+  Mutate-in-place is "stream the filters instead of sending them once." A bidirectional subscribe
+  precedent also exists in the legacy API (`Subscribe2`).
+- **Lifecycle frames echo the decentralized API.** `Started` / `CatchupComplete` deliberately echo
+  the decentralized backend's `SubscribeTopics` response lifecycle (XIP-49 lineage); they are
+  dedicated response arms (not an enum with side fields) so frame metadata like
+  `keepalive_interval_ms` and the echoed `mutate_id` is unambiguous by construction.
 - **Versioned messages.** `SubscribeRequest` / `SubscribeResponse` wrap their payload in
   `oneof version { V1 v1 = 1; }`, matching `GroupMessage` / `WelcomeMessage`, so a future revision can
   restructure the protocol while old peers continue to speak `V1` (and a node can detect a peer's
   version by the populated arm). `Ping` / `Pong` are trivial and version-independent.
-- **Rejected alternatives:** (a) opaque `topic` bytes in the request (the d14n model) — would force
-  the client to reconstruct `g-<hex>` / `w-<hex>` topics, duplicating node logic that could drift;
+- **Rejected alternatives:** (a) unstructured opaque `topic` bytes — or legacy `g-<hex>` / `w-<hex>`
+  string topics the client formats itself — that the node cannot introspect; the adopted kind-prefixed
+  binary form is still a single `bytes` field, but its leading kind byte lets the node validate and
+  route by kind, with no client-side string formatting;
   (b) a per-message sentinel on the existing server-stream gated by a request header — a backward-compat
   hack that does not fix churn; (c) resending the last message as a keepalive — history-dependent and
   stateful on the server; (d) a separate application-level ping RPC — proves a different connection is
@@ -365,8 +458,8 @@ the meantime.
 
 ## Test cases
 
-1. **Immediate STARTED.** Open `Subscribe`, send `Mutate{ add_groups:[{ group_id: g1 }] }`. The first
-   frame received MUST be `StatusUpdate{ STARTED }`, before any `Messages`.
+1. **Immediate Started.** Open `Subscribe`, send `Mutate{ adds:[{ topic: g1 }] }`. The first frame
+   received MUST be `Started`, before any `Messages`.
 2. **Idle ping.** With a subscription open and no new messages, the client MUST receive a `Ping`
    within the advertised interval (≤30s), and again each interval while idle.
 3. **Ping resets on traffic.** Publish a message at T; the next `Ping` MUST be no earlier than
@@ -376,17 +469,36 @@ the meantime.
 5. **Client-initiated ping.** The client sends `Ping{ nonce=k }`; the node MUST reply
    `Pong{ nonce=k }`.
 6. **Mutate-add catch-up, no reconnect.** With the stream open, send
-   `Mutate{ add_groups:[{ group_id: g3, id_cursor: C }] }`. The client MUST receive `g3` messages with
+   `Mutate{ adds:[{ topic: g3, id_cursor: C }] }`. The client MUST receive `g3` messages with
    id > C, with no duplicates, and the stream MUST NOT be torn down.
-7. **Mutate-remove.** Send `Mutate{ remove_groups:[g1] }`; the client MUST stop receiving `g1`
+7. **Mutate-remove.** Send `Mutate{ removes:[g1] }`; the client MUST stop receiving `g1`
    messages.
 8. **Watchdog.** Black-hole the connection (transport pings still answered by a proxy). With no frame
    for N× interval, the client MUST close and reconnect, and on reconnect from persisted cursors MUST
    receive any message published during the dead window.
-9. **Resume after suspension.** Freeze the client past the ping interval (simulating OS suspension),
+9. **TopicsLive and per-wave CatchupComplete mark the live boundary.** Subscribe `g1` (with
+   history) from cursor 0. The client MUST receive a `TopicsLive` containing `g1` after the last
+   `g1` history frame and before any `g1` frame published after the marker, then that wave's
+   `CatchupComplete` echoing its `mutate_id`. Then `Mutate{ adds:[g2], mutate_id: m }` (with
+   history): the client MUST receive `g2`'s history, a `TopicsLive` containing `g2`, and a
+   `CatchupComplete` echoing `m` after that marker.
+10. **Bounded catch-up.** Subscribe with `Mutate{ adds:[g1@0], history_only: true }` (g1 has
+    history) and immediately half-close. The client MUST receive g1's history, a `TopicsLive`
+    containing `g1`, and the wave's `CatchupComplete`, after which the node MUST close the stream
+    with `OK`. Messages published to `g1` after the marker MUST NOT be delivered.
+11. **Resume after suspension.** Freeze the client past the ping interval (simulating OS suspension),
    then resume. The client MUST detect the dead stream (via its resume probe or the watchdog) and
    reconnect from persisted cursors, replaying anything published during suspension; the node MUST
    have reaped the original stream.
+12. **Replay after remove.** Subscribe `g1` from cursor 0 and catch up its history. Send
+   `Mutate{ removes:[g1] }`, then `Mutate{ adds:[{ topic: g1, id_cursor: 0 }] }`. The client MUST
+   receive `g1`'s history a second time — the remove cleared the cursor floor — each occurrence a
+   complete catch-up ending in its wave's `CatchupComplete`.
+13. **Duplicate adds coalesced.** A single `Mutate` whose `adds` lists the same topic twice MUST be
+   treated as one subscription: the topic's history is delivered once, it appears in exactly one
+   `TopicsLive`, and the wave emits one `CatchupComplete`.
+14. **Unknown version rejected.** A `SubscribeRequest` with no recognized `version` arm populated MUST
+   fail the stream with `INVALID_ARGUMENT`, not be silently ignored.
 
 ## Reference implementation
 
@@ -428,7 +540,10 @@ plaintext, because decryption still requires per-installation MLS state the node
   end-to-end encrypted, a compromised relay/gateway sees ciphertext and topic metadata only — the
   same exposure any relay already has — and cannot read messages without each identity's MLS keys.
   Operators concentrating identities SHOULD treat the per-identity key material (held outside this
-  protocol) as the security boundary.
+  protocol) as the security boundary. Relatedly, a multiplexer that broadcasts `TopicsLive` frames to
+  all of its local consumers reveals co-subscription (that another consumer in the same process is
+  subscribed to the same topic); this stays within the process's existing trust boundary, and a
+  multiplexer MAY instead route markers only to the consumers that subscribed the topic.
 
 ## Copyright
 
