@@ -86,9 +86,9 @@ When receiving proposals, the following validation rules apply:
 | **ReInit** | MUST be rejected (`UnsupportedProposalType`). |
 | **ExternalInit** | MUST be rejected (`UnsupportedProposalType`). |
 | **SelfRemove** | MUST be rejected (`UnsupportedProposalType`). |
-| **AppDataUpdate** | See Section 2.4 for proposed validation. |
+| **AppDataUpdate** | See Section 2.4 for validation. |
 | **AppEphemeral** | MUST be rejected (`UnsupportedProposalType`). |
-| **Custom** | MUST be rejected (`UnsupportedProposalType`), except for `BatchProposal` (`0xff00`) defined in Section 4.2. |
+| **Custom** | MUST be rejected (`UnsupportedProposalType`). The `BatchProposal` (`0xff00`) carve-out described in Section 4 is deferred from v1. |
 
 ### 1.5 Membership Commit Flows
 
@@ -136,161 +136,119 @@ The `AppDataDictionary` is a group context extension (ExtensionType 6) defined i
 
 All mutable group state that is currently stored in custom `Extension::Unknown` variants MUST be migrated into the `AppDataDictionary` as individual components. Each component stores its own serialized payload (see Section 2.6 for serialization requirements).
 
-### 2.2 ComponentId Permission Ranges
+### 2.2 ComponentId Ranges
 
-The permission levels below (super admin, admin, any member) map to the role-based permission system defined in [XIP-47](https://github.com/xmtp/XIPs/blob/main/XIPs/xip-47-group-chat-permissions.md). ComponentId values in the private range (`0x8000-0xffff`) are split equally between XMTP protocol use and application-defined components:
+ComponentIds occupy the top half of the `u16` space and are split into three contiguous ranges:
 
-**XMTP Protocol Range (`0x8000-0xbfff`):**
+| Range | Purpose |
+| --- | --- |
+| `0x8000-0xBFFF` | XMTP-allocated well-known components (this XIP) |
+| `0xC000-0xFEFF` | Application-defined components, registered at runtime |
+| `0xFF00-0xFFFF` | Reserved — hard-rejected, no graceful degradation |
 
-| Range | Permission Level | Description |
-| --- | --- | --- |
-| `0x8000-0x87ff` | Immutable | Set once at group creation, cannot be modified (conversation type, creator) |
-| `0x8800-0x8fff` | Super Admin | Protected configuration: permission policies, super admin lists |
-| `0x9000-0x97ff` | Admin or Super Admin | Administrative state: admin lists |
-| `0x9800-0x9fff` | Any Member | User-facing metadata: group name, description, image, app data, membership |
-| `0xa000-0xa7ff` | Inbox Id | Inbox owned metadata: Display name, avatar link, etc. |
-| `0xa800-0xafff` | Installation Id | Installation owned metadata: ??? |
-| `0xb000-0xbfff` | Reserved | Reserved for future XMTP protocol use |
+Within each of the XMTP and application ranges, **immutable** components live at the *end* of the range, counting down. The shipped layout is:
 
-**Application Range (`0xc000-0xfeff`):**
+- XMTP mutable: `0x8000` up.
+- XMTP immutable: `0xBE00-0xBFFF` (the last 512 ids in the XMTP range, counting down).
+- Application mutable: `0xC000` up.
+- Application immutable: `0xFD00-0xFEFF` (the last 512 ids in the application range, counting down).
 
-| Range | Permission Level | Description |
-| --- | --- | --- |
-| `0xc000-0xc7ff` | Immutable | Application components set once at creation, cannot be modified |
-| `0xc800-0xcfff` | Super Admin | Application components requiring super admin writes |
-| `0xd000-0xd7ff` | Admin or Super Admin | Application components requiring admin writes |
-| `0xd800-0xdfff` | Any Member | Application components writable by any member |
-| `0xe000-0xe7ff` | Inbox Id | Inbox owned metadata |
-| `0xe800-0xefff` | Installation Id | Installation owned metadata |
-| `0xf000-0xfeff` | Reserved | Reserved for future application permission levels |
+The contiguous-range / counting-down-immutables shape replaces the earlier proposal of permission-banded sub-ranges (super-admin / admin / any-member / inbox-id / installation-id). Per-component permissions are stored explicitly in a **component registry** (Section 2.2.1) rather than derived from the ComponentId itself, so a finer-grained range scheme is unnecessary.
 
-**Reserved (`0xff00-0xffff`):** Protocol-level reserved IDs.
+**Immutable semantics:** Components in an immutable range MAY only be written when the ComponentId does not yet exist in the `AppDataDictionary`. Any `AppDataUpdate` proposal targeting an immutable ComponentId that already has a value MUST be rejected. `Remove` operations on immutable components MUST also be rejected.
 
-**Immutable semantics:** Components in an immutable range MAY only be written when the ComponentId does not yet exist in the `AppDataDictionary`. Any `AppDataUpdate` proposal targeting an immutable ComponentId that already has a value MUST be rejected. `Remove` operations on immutable components MUST also be rejected. This ensures that once set (typically at group creation), these values can never be changed or deleted.
+#### 2.2.1 Component Registry (`0x8000`)
 
-**Inbox Id semantics:** any installation that is part of the inbox can edit this data, but the protocol will enforce that it goes into a map that is keyed by the InboxId.
+A single super-admin-only component at `ComponentId::COMPONENT_REGISTRY` (`0x8000`) holds per-component permission policies. The registry replaces both the range-default scheme and the separate `PermissionOverrideMap` originally proposed at `0x8801`.
 
-Permission validation is derived from the ComponentId range as a default:
+Conceptually the registry is `Map<ComponentId, ComponentMetadata>`. `ComponentMetadata` carries the proto-level base policy (`AllowIfAdmin`, `AllowIfSuperAdmin`, etc.) and per-component flags.
 
-```rust
-fn default_permission_for_component(id: ComponentId) -> PermissionLevel {
-    match id {
-        // XMTP protocol ranges
-        0x8000..=0x87ff => PermissionLevel::Immutable,
-        0x8800..=0x8fff => PermissionLevel::SuperAdmin,
-        0x9000..=0x97ff => PermissionLevel::AdminOrSuperAdmin,
-        0x9800..=0x9fff => PermissionLevel::AnyMember,
-        // Application ranges (mirror protocol permission structure)
-        0xc000..=0xc7ff => PermissionLevel::Immutable,
-        0xc800..=0xcfff => PermissionLevel::SuperAdmin,
-        0xd000..=0xdfff => PermissionLevel::AdminOrSuperAdmin,
-        0xe000..=0xefff => PermissionLevel::AnyMember,
-        // Reserved and unknown — reject unconditionally
-        _ => PermissionLevel::Deny,
-    }
-}
-```
+Two ComponentIds have their permissions **enforced in code** rather than resolved through the registry — they're the ones the registry itself depends on to bootstrap:
 
-#### 2.2.1 Permission Override Map
+- `0x8000` `COMPONENT_REGISTRY` — super-admin-only.
+- `0x8001` `SUPER_ADMIN_LIST` — super-admin-only.
 
-Groups MAY override the default permission level for any ComponentId using a **permission override map** stored at a well-known super-admin-only ComponentId (`0x8801`). The override map is a sorted list of `(ComponentId, PermissionLevel)` entries, serialized deterministically (Section 2.6).
+A third, `0x8002` `ADMIN_LIST`, is "constrained": its registry entry MAY only encode `AllowIfAdmin` or `AllowIfSuperAdmin` — narrower stored policies are rejected by `ComponentRegistry::validate_entry`.
 
-```rust
-struct PermissionOverrideMap {
-  overrides: Vec<PermissionOverride>,  // sorted by component_id, no duplicates
-}
+For every other ComponentId, the registry entry is the source of truth. There is no range-based default — a ComponentId with no registry entry is denied by default.
 
-struct PermissionOverride {
-  component_id: ComponentId,
-  permission_level: PermissionLevel,
-}
-```
-
-**Resolution order:**
-
-```rust
-fn permission_for_component(id: ComponentId, overrides: &PermissionOverrideMap) -> PermissionLevel {
-    if let Some(override) = overrides.get(id) {
-        return override.permission_level;
-    }
-    default_permission_for_component(id)
-}
-```
-
-Overrides can adjust permissions in either direction — a ComponentId in the AnyMember range can be restricted to AdminOrSuperAdmin, and a ComponentId in the SuperAdmin range can be opened to AnyMember. This allows groups to customize access policies without being constrained by the range a ComponentId falls in.
-
-**Constraints:**
-
-- The override map itself (`0x8801`) MUST remain super-admin-only. It cannot override its own permission level.
-- Overrides MUST NOT target ComponentIds in the `Deny` range (`0xa000-0xbfff`, `0xf000-0xfeff`, `0xff00-0xffff`). Reserved ranges are unconditionally denied regardless of overrides.
-- Overrides MUST NOT change `Immutable` semantics — they can change *who* can set an immutable component initially, but once set, immutable components still cannot be modified or removed.
-- The override map is itself a delta-based component and MUST use deterministic serialization (Section 2.6).
+Combined with the pre-commit evaluation rule (Section 2.4), this means a new component MUST be registered in a commit that **precedes** any commit that writes to it. The two operations cannot share a commit; if they did, the dependent write would be evaluated against the pre-commit registry (which lacks the entry) and rejected. Bootstrap is the only path that registers and writes in the same commit, and it uses a dedicated validator (Section 3.2 Step B).
 
 #### 2.2.2 Application ComponentId Registration
 
-Applications using the application range (`0xc000-0xfeff`) need a mechanism to avoid ComponentId conflicts when multiple applications interact with the same XMTP group.
+Applications using the application range (`0xC000-0xFEFF`) need a mechanism to avoid ComponentId conflicts when multiple applications interact with the same XMTP group. The originally proposed on-chain registry is **deferred** — v1 ships without a global allocator.
 
-The recommended approach is an **on-chain registry** — a smart contract where applications claim ComponentId sub-ranges:
+The shipped path is per-group runtime registration: applications call into the SDK to register a component (id, type, permission policy) on a specific group; the SDK encodes that registration into the group's `COMPONENT_REGISTRY` (`0x8000`) on bootstrap or subsequent updates. Collision risk is per-group, and the registry itself rejects duplicate ids.
 
-- Applications call `register(app_identifier)` to claim the next available sub-range, using an app domain or ENS name as the identifier.
-- The registry maps `app_identifier -> (start_id, end_id)` on-chain.
-- Clients query the registry to resolve an application's ComponentId range.
-- Immutable and decentralized — no single point of failure.
-- A registered range is permanent; applications cannot lose their allocation.
+**Candidate refinement: 32-byte stable identifier per component.** A direction worth exploring for cross-group allocation: each application-range component carries a stable 32-byte identifier (e.g., a hash of the app domain or an explicit per-component handle) stored in the registry alongside the policy. Apps reference components by the 32-byte identifier in their write/read APIs; the SDK resolves it to the per-group 16-bit ComponentId via a registry lookup. Different groups can independently assign different 16-bit slots without affecting application code, and multiple apps can ship components without coordinating on the 16-bit namespace at all. See Open Questions for status.
 
 See Rationale for alternative registration approaches considered.
 
 ### 2.3 Well-Known Component IDs
 
-The following ComponentIds are defined for XMTP group state:
+The shipped layout numbers well-known mutable components counting up from `0x8000` and immutable components counting down from `0xBFFF`. There are no permission-banded sub-ranges — permissions for each id live in the registry described in Section 2.2.1.
 
-**Immutable range (`0x8000-0x87ff`):**
+**Hardcoded (`0x8000-0x8002`, permissions enforced in code):**
 
-| ComponentId | Name | Proto Type | Description |
+| ComponentId | Name | Type | Description |
 | --- | --- | --- | --- |
-| `0x8000` | ConversationType | `GroupMetadata` | Conversation type (Group, DM, Sync) |
-| `0x8001` | CreatorInboxId | `MetadataFieldValue` | Inbox ID of the group creator |
+| `0x8000` | ComponentRegistry | `TlsMap<bytes, bytes>` | Per-component permission metadata (Section 2.2.1) |
+| `0x8001` | SuperAdminList | `TlsSet<InboxId>` | Super admin inbox IDs |
+| `0x8002` | AdminList | `TlsSet<InboxId>` | Admin inbox IDs (constrained policy) |
 
-**Super Admin range (`0x8800-0x8fff`):**
+**Well-known mutable (`0x8003+`, permissions read from the registry):**
 
-| ComponentId | Name | Proto Type | Description |
+| ComponentId | Name | Type | Description |
 | --- | --- | --- | --- |
-| `0x8800` | PermissionPolicies | `PolicySet` | Group permission policies |
-| `0x8801` | PermissionOverrideMap | `PermissionOverrideMap` | Per-component permission overrides (Section 2.2.1) |
-| `0x8002` | SuperAdminList | `SuperAdminListUpdate` | List of super admin inbox IDs |
+| `0x8003` | GroupMembership | `TlsMap<InboxId, bytes>` | Inbox IDs → sequence IDs / failed installations |
+| `0x8004` | GroupName | `String` | Human-readable group name |
+| `0x8005` | GroupDescription | `String` | Group description |
+| `0x8006` | GroupImageUrl | `String` | Group image URL |
+| `0x8007` | MessageDisappearFromNs | `Bytes` | Disappearing-message start (ns) |
+| `0x8008` | MessageDisappearInNs | `Bytes` | Disappearing-message TTL (ns) |
+| `0x8009` | AppData | `String` | Application-specific data string |
+| `0x800A` | MinimumSupportedProtocolVersion | `String` | XIP-72 protocol-version floor |
+| `0x800B` | CommitLogSigner | `Bytes` | Per-group commit-log signing key |
 
-**Admin range (`0x9000-0x97ff`):**
+**Well-known immutable (`0xBFFC-0xBFFF`, counting down):**
 
-| ComponentId | Name | Proto Type | Description |
+| ComponentId | Name | Type | Description |
 | --- | --- | --- | --- |
-| `0x9000` | AdminList | `AdminListUpdate` | List of admin inbox IDs |
+| `0xBFFF` | ConversationType | (seed bytes) | Conversation type (Group, DM, Sync) |
+| `0xBFFE` | CreatorInboxId | `InboxId` (TLS-encoded) | Inbox ID of the group creator |
+| `0xBFFD` | DmMembers | `TlsSet<InboxId>` | DM participant inbox IDs |
+| `0xBFFC` | OneshotMessage | (seed bytes) | Initial oneshot payload |
 
-**Any Member range (`0x9800-0x9fff`):**
-
-| ComponentId | Name | Proto Type | Description |
-| --- | --- | --- | --- |
-| `0x9800` | GroupName | `MetadataFieldValue` | Human-readable group name |
-| `0x9801` | GroupDescription | `MetadataFieldValue` | Group description text |
-| `0x9802` | GroupImageUrl | `MetadataFieldValue` | Group image URL |
-| `0x9803` | PinnedFrameUrl | `MetadataFieldValue` | Pinned frame URL |
-| `0x9804` | AppData | `MetadataFieldValue` | Application-specific data string |
-| `0x9810` | GroupMembership | `GroupMembershipUpdate` | Inbox IDs, sequence IDs, failed installations |
+`PinnedFrameUrl` from the original draft is not present in the v1 shipped set; if added later, it slots into the well-known mutable range alongside the other URL-bearing components.
 
 ### 2.4 AppDataUpdate Proposal Validation
 
 When receiving an `AppDataUpdate` proposal:
 
-1. Verify the proposer is a current member of the group. All `AppDataUpdate` proposals MUST be rejected with `ActorNotMember` if the proposer is not a member, regardless of the target ComponentId or permission level.
+1. Verify the proposer is a current member of the group. All `AppDataUpdate` proposals MUST be rejected with `ActorNotMember` if the proposer is not a member, regardless of the target ComponentId.
 2. Extract the `ComponentId` from the proposal.
-3. Determine the required permission level from the ComponentId range (Section 2.2).
-4. Build a `CommitParticipant` for the proposer from the MLS sender leaf index.
-5. Validate the proposer has the required permission level:
-    - `Deny`: reject unconditionally — the ComponentId is in a reserved range.
-    - `Immutable`: if the ComponentId already exists in the `AppDataDictionary`, reject (immutable components cannot be modified or removed). If it does not exist, the proposer MUST be a super admin to set it initially.
-    - `SuperAdmin`: proposer MUST be a super admin.
-    - `AdminOrSuperAdmin`: proposer MUST be an admin or super admin.
-    - `AnyMember`: any group member (membership already verified in step 1).
-6. Reject the proposal with `InsufficientPermissions` if validation fails.
+3. If the id is in the reserved range (`0xFF00-0xFFFF`), reject unconditionally.
+4. If the id is hardcoded (`COMPONENT_REGISTRY`, `SUPER_ADMIN_LIST`), apply the in-code policy (super-admin-only).
+5. Otherwise, read the registry entry for the id from `COMPONENT_REGISTRY` (`0x8000`). If no entry exists, reject (deny-by-default for unregistered ids).
+6. Apply the registry entry's policy against the proposer's role (membership / admin / super-admin).
+7. If the id is immutable and already present in the `AppDataDictionary`, reject (immutable components cannot be modified or removed).
+8. Reject with `InsufficientPermissions` if validation fails.
+
+#### Pre-commit permission evaluation
+
+All permission checks above MUST be evaluated against the **state of the group at the start of the commit**, never against state produced by proposals inside the same commit. Specifically:
+
+- The `COMPONENT_REGISTRY` (`0x8000`) value used in step 5 MUST be the pre-commit registry.
+- The `SUPER_ADMIN_LIST` (`0x8001`) and `AdminList` (`0x8002`) values used in step 6 MUST be the pre-commit lists.
+- The "already present" check in step 7 MUST be against the pre-commit dictionary.
+
+This is the property that prevents privilege-escalation within a commit. A commit that, in its proposal set, *both* mutates `COMPONENT_REGISTRY` (or `SUPER_ADMIN_LIST` / `ADMIN_LIST`) *and* writes a component whose authorization depends on that mutation MUST be rejected — the dependent write is evaluated against the *old* registry/admin state and fails. As an operational consequence: any change that grants permission and any write that exercises that permission MUST land in **separate commits**.
+
+The single exception is the bootstrap commit (Section 3.2 Step B), which legitimately needs to "register a component and write its initial value in the same commit." Bootstrap commits route through a dedicated validator that authorizes the initial registry-plus-write atomically; ordinary post-migration commits do not.
+
+#### Unknown-component tolerance
+
+Receivers MUST accept opaque `Update` / `Remove` payloads for unknown ComponentIds in the XMTP and application ranges (`0x8000-0xFEFF`) — registry-policy validation still applies, but the per-component decode hook is skipped. This is what lets older clients survive seeing a newer well-known component without forking the dictionary. The reserved range (`0xFF00-0xFFFF`) is still hard-rejected.
 
 ### 2.5 AppDataUpdate Processing
 
@@ -307,19 +265,14 @@ When processing a commit containing `AppDataUpdate` proposals, the receiver MUST
 
 The `AppDataDictionary` is a GroupContext extension. The serialized GroupContext is an input to the MLS key schedule (epoch secret derivation), transcript hash, and tree hash. All group members MUST produce byte-identical GroupContext serializations after processing a commit, or their derived keys will diverge and they will be unable to decrypt messages.
 
-For components where an `AppDataUpdate` proposal carries the **complete replacement value** (e.g., group name, description, image URL), this is not a concern — the proposer's serialized bytes are stored as-is in the `ComponentData` and all members receive identical bytes from the proposal.
+The shipped wire format is **TLS codec** throughout — both for delta-based components (sorted, length-prefixed vectors) and for simple value components. Protobuf is not used for `ComponentData`. This avoids a second serialization choice per component and ensures byte-identical reconstruction across implementations.
 
-For components where the proposal carries a **delta** and members independently reconstruct the full state (e.g., GroupMembership — "add inbox X with sequence ID Y"), all members must serialize the reconstructed state identically. This is problematic with protobuf, which does not guarantee deterministic serialization: map field ordering is unspecified, and different implementations may produce different byte sequences for semantically identical messages.
+Two implementation-level details that are part of the wire format:
 
-To address this, delta-based components MUST use a serialization format that guarantees deterministic output. The following options are considered:
+1. **`ComponentId` uses QUIC variable-length integer encoding** (RFC 9000 §16) rather than a fixed `u16`. Current ids (`0x8000-0xFFFF`) take 4 bytes. The variable-length form is forward-compatible — the underlying type can grow beyond `u16` without breaking the wire format.
+2. **Inbox IDs use the versioned `InboxId` TLS encoding** (`varint(version) || 32-byte payload`), never raw UTF-8 hex bytes. Every component whose payload contains one or more inbox ids (`SuperAdminList`, `AdminList`, `GroupMembership`, `DmMembers`, `CreatorInboxId`) routes through this encoding. The 33-byte versioned form is the source of truth on the wire and is decoded back to a hex string only at the legacy-host-API boundary.
 
-1. **TLS Codec serialization.** Use the TLS presentation language encoding (RFC 8446 Section 3) instead of protobuf for delta-based components. TLS codec is inherently deterministic: fixed field ordering, fixed-width integers, length-prefixed variable-length fields, no optional fields. The MLS protocol and OpenMLS already use TLS codec extensively. Delta-based components SHOULD define TLS codec structs with sorted, length-prefixed vectors rather than maps.
-2. **Canonical protobuf encoding.** If protobuf is used, the schema MUST avoid `map` fields entirely. Use sorted `repeated` message fields instead (e.g., `repeated MemberEntry members = 1` where entries are sorted by inbox ID). All implementations MUST sort entries identically before serialization. This approach is more fragile than TLS codec since it relies on convention rather than format guarantees.
-3. **Bincode.** A compact binary format with deterministic output when using fixed-int encoding and sorted collections. Widely used in the Rust ecosystem. Determinism depends on configuration — `bincode::config::standard()` with fixed-length integer encoding produces consistent output. However, bincode is Rust-centric and lacks mature implementations in other languages (Swift, Kotlin, TypeScript), which is a concern for cross-platform XMTP clients.
-4. **rkyv (zero-copy deserialization).** Produces a deterministic archive format that can be read without deserialization. Extremely fast for reads. However, rkyv's format is tied to Rust struct layout and alignment, making cross-language compatibility difficult. The archived format also includes alignment padding that may differ across architectures, breaking byte-identical guarantees unless care is taken.
-5. **ASN.1 DER (Distinguished Encoding Rules).** A canonical encoding standardized in X.690. Guarantees exactly one encoding for each value. Mature cross-language support. However, DER is verbose and complex compared to TLS codec, and is not used elsewhere in the MLS ecosystem.
-
-**Recommendation:** Delta-based components (GroupMembership, AdminList, SuperAdminList) SHOULD use TLS codec serialization. It is already the serialization format of MLS itself, has determinism guarantees by design, is well-supported by OpenMLS, and avoids introducing new serialization dependencies. Simple value components (GroupName, GroupDescription, AppData) MAY use protobuf since they are always replaced wholesale and do not require deterministic re-serialization.
+The discussion of alternatives (canonical protobuf, bincode, rkyv, ASN.1 DER) is preserved for context but is no longer load-bearing — TLS codec is the only format used in the shipped implementation.
 
 ### 3. Eliminating GroupContextExtensions
 
@@ -386,25 +339,25 @@ The preferred migration mechanism uses the existing min group version functional
 
 This avoids the risk of forking that capability-based negotiation introduces, and does not require checking every member's key packages before transitioning.
 
-**Migration flow:**
+**Migration flow (two-step bootstrap):**
 
-1. A new libxmtp release ships with AppDataUpdate support and declares a new protocol version (e.g., `2.0.0`).
-2. Any member running the new version MAY initiate the migration by:
-    1. Reading all current group state from the existing custom extensions:
-        - `GroupMembership` from `GROUP_MEMBERSHIP_EXTENSION_ID`
-        - `MutableMetadata` from `MUTABLE_METADATA_EXTENSION_ID`
-        - `GroupPermissions` from `GROUP_PERMISSIONS_EXTENSION_ID`
-    2. Constructing an `AppDataDictionary` containing each state component at its well-known ComponentId (Section 2.3).
-    3. Creating a GCE proposal that:
-        - Adds the `AppDataDictionary` extension with all migrated state.
-        - Removes the old custom `Extension::Unknown` variants.
-        - Sets the minimum required protocol version to `2.0.0`.
-        - Updates `RequiredCapabilities` to require `AppDataUpdate` proposal type.
-    4. Committing the GCE proposal.
-3. Old clients see the version bump, pause the group, and wait for an upgrade.
-4. After upgrading, old clients resume and process the migration commit along with any subsequent AppDataUpdate commits.
+The single-GCE-commit form originally proposed leaves a window where an old peer would receive a commit that *both* bumps the version floor *and* strips the legacy mutable-metadata / membership / permissions extensions. An old peer cannot decode that commit cleanly: by the time it observes the new floor and decides to pause, the legacy state it relies on for catch-up has already been removed.
 
-After migration, the group MUST reject any further GCE proposals. All state updates MUST use `AppDataUpdate` proposals.
+The shipped flow splits the migration into two commits:
+
+**Step A — legacy GCE bump.** Issue a standard GCE commit that *only* writes `minimum_supported_protocol_version` (XIP-72) into the legacy mutable-metadata extension. The target version is taken from `EnableProposalsOptions::min_version` (default: `xmtp_configuration::PROPOSALS_MIN_PROTOCOL_VERSION`, currently `"1.11.0"`). The bump is semver-aware and idempotent — if the floor is already at or above the target the step is skipped, so concurrent migrators don't downgrade each other.
+
+**Step B — proposal-then-commit bootstrap.** Run the standard MLS proposal-then-commit sequence (Section 1.3) to:
+
+1. Add the `AppDataDictionary` extension populated from the legacy state at the ComponentIds in Section 2.3.
+2. Add the `ProposalSupport` extension and updated `RequiredCapabilities`.
+3. Remove the legacy `MutableMetadata`, `GroupMembership`, and `GroupPermissions` `Extension::Unknown` variants.
+
+Old peers process Step A first, see the version mismatch in `validate_one_commit`, land in `paused_for_version`, and never process Step B's legacy-extension-stripping commit. Step B then runs across the upgraded peer set.
+
+A pre-flight `all_members_support_proposals` check still runs before Step A unless `EnableProposalsOptions::force` is set; `force` is for post-d14n environments where capability advertisement is universal.
+
+After migration, the group MUST reject any further GCE proposals. All state updates MUST use `AppDataUpdate` proposals — including subsequent bumps to the version floor, which target `MinimumSupportedProtocolVersion` (`0x800A`) directly. A migrated peer raising the floor via an AppDataUpdate to `0x800A` pauses lower-version peers identically to the legacy GCE form.
 
 ### 3.3 Alternative: Capability Negotiation
 
@@ -414,9 +367,9 @@ As an alternative to min group version, groups MAY use capability-based negotiat
 2. All members' key packages advertise support for the `AppDataUpdate` proposal type.
 3. The group has proposal support enabled (Section 1).
 
-When all three criteria are met, any member MAY initiate the same migration procedure (Section 3.2, steps 2a-2d) without setting a min version bump.
+When all three criteria are met, any member MAY initiate the same Step B migration procedure (Section 3.2) without first running Step A's legacy version-floor bump.
 
-This approach avoids pausing any members but requires waiting for every member to upgrade before the group can transition. It is suitable for groups where pausing members is unacceptable, but delays the migration until full adoption.
+This approach avoids pausing any members but requires waiting for every member to upgrade before the group can transition. It is suitable for groups where pausing members is unacceptable, but delays the migration until full adoption. The shipped implementation does not use this path on its own — it always runs Step A's idempotent floor bump as well, so pre-1.11 peers pause if they ever rejoin a group whose other members are already migrating.
 
 ### 3.4 Post-Migration State Updates
 
@@ -424,12 +377,19 @@ After migration, the intent handlers change as follows:
 
 | Intent | Before Migration | After Migration |
 | --- | --- | --- |
-| MetadataUpdate | GCE commit with full extensions | AppDataUpdate proposal for specific ComponentId |
-| UpdateAdminList | GCE commit with full extensions | AppDataUpdate proposal for `0x9000` or `0x9001` |
-| UpdatePermission | GCE commit with full extensions | AppDataUpdate proposal for `0x8800` |
-| UpdateGroupMembership | GCE proposal + commit | AppDataUpdate proposal for `0x9810` + Add/Remove proposals |
+| MetadataUpdate | GCE commit with full extensions | AppDataUpdate proposal for the relevant ComponentId (`0x8004`–`0x8009`) |
+| UpdateAdminList | GCE commit with full extensions | AppDataUpdate proposal for `AdminList` (`0x8002`) |
+| UpdatePermission | GCE commit with full extensions | AppDataUpdate proposal for `ComponentRegistry` (`0x8000`) |
+| UpdateGroupMembership | GCE proposal + commit | AppDataUpdate proposal for `GroupMembership` (`0x8003`) plus Add/Remove proposals |
+| Bump minimum protocol version | GCE commit | AppDataUpdate proposal for `MinimumSupportedProtocolVersion` (`0x800A`) |
+
+**Wire shape: standalone proposal + commit.** Migrated sender intents publish two messages per metadata update: a standalone `AppDataUpdate` proposal first, then a commit that consumes the proposal store. This is the same MLS proposal-by-reference shape used elsewhere — it is *not* the inline-bundled GCE-proposal-plus-commit pattern from the legacy path.
+
+**Lazy batching.** The commit issued by `stage_app_data_propose_and_commit` has no precondition on the pending proposal store. It sweeps every existing pending proposal — concurrent `AppDataUpdate`s, leaf-node `Update`s, `Add`/`Remove`/`SelfRemove`, PSK, etc. — into the same commit body. Producers of those pending proposals already accepted "ride into the next commit" by leaving them pending; MLS freezes message-send while proposals are pending regardless of which commit ultimately consumes them. The dictionary-update step in receivers iterates only the `AppDataUpdate` proposals; non-AppData proposals ride natively through OpenMLS.
 
 ### 4. Atomic Batching via Custom Proposal
+
+> **Status: deferred from v1.** The shipped implementation does not include `BatchProposal`. Atomic batching of `AppDataUpdate` with `Add`/`Remove` is handled by lazy batching at commit time (Section 3.4) and by the standalone-proposal-plus-commit shape. The design below is preserved as future work.
 
 ### 4.1 Problem Statement
 
@@ -472,6 +432,8 @@ The `BatchProposal` contains standard MLS `Proposal` values (Add, Remove, AppDat
 See Rationale for alternative batching approaches considered.
 
 ### 5. Application Data API
+
+> **Status: not yet shipped.** v1 retains the single-component `app_data` string at `0x8009` (write-only via `update_app_data`, full-replacement semantics). The KeyValue API and `KeyValueDelta` mutations described below are planned but not yet implemented.
 
 ### 5.1 Motivation
 
@@ -572,11 +534,17 @@ Each operation sends only the mutation over the network — not the entire displ
 
 ## Rationale
 
-### Why range-based defaults with an override map
+### Why a per-component registry instead of range-based defaults
 
-A purely range-based model (where the ComponentId alone determines permissions) is simple but inflexible — you cannot make a specific ComponentId more or less restrictive without moving it to a different range. A purely map-based model requires every group to fully configure its permissions at creation time.
+The original draft proposed permission-banded sub-ranges (super-admin / admin / any-member / inbox-id / installation-id) with an optional `PermissionOverrideMap` for groups that needed to customize. The shipped design collapses both into a single per-component registry at `0x8000`.
 
-The hybrid approach provides sensible defaults from the ranges (most groups never need to customize) while allowing per-group overrides for groups that need different policies. The override map is itself a super-admin-only component, which solves the bootstrapping problem — the default range-based permissions are always available, and the override map can only be modified by super admins.
+Reasons for the collapse:
+
+- The override map already had to be a super-admin-only component to bootstrap correctly. Once that's in place, the range defaults are a fallback path nobody actually wants to depend on for production permission decisions — every well-known component has a known policy that can just be stored explicitly.
+- Range-banded ids burn id space. Splitting `0x8000-0xBFFF` into seven sub-ranges forced the well-known mutable components to live in narrow per-permission buckets. The shipped layout (counting up from `0x8000`, immutables counting down from `0xBFFF`) gives the full range to whichever components need it.
+- A registry is the natural data structure for runtime-registered application components anyway. Application components in `0xC000-0xFEFF` need *some* per-id policy lookup; reusing that lookup for well-known ids removes one mechanism from the design.
+
+`COMPONENT_REGISTRY` and `SUPER_ADMIN_LIST` are hardcoded to super-admin-only in code (the registry can't define its own permissions without circular bootstrap). `ADMIN_LIST` is constrained to admin-or-super-admin. Every other id reads its policy from the registry, with deny-by-default for unregistered ids.
 
 ### Why eliminate GCE entirely
 
@@ -588,7 +556,7 @@ A custom MLS proposal works within the existing MLS framing and network transpor
 
 ### Why one-time migration over dual-write
 
-Dual-write (writing to both old extensions and AppDataDictionary during a transition period) doubles the bandwidth cost and requires maintaining both code paths indefinitely. A one-time migration is a clean cutover: once migrated, the old code paths can be removed. The migration is safe because it only happens when all members support the new mechanism.
+Dual-write (writing to both old extensions and AppDataDictionary during a transition period) doubles the bandwidth cost and requires maintaining both code paths indefinitely. A one-time migration is a clean cutover: once migrated, the old code paths can be removed. Mixed-version safety comes from the version-floor pause described in Section 3.2 — peers that don't support `AppDataUpdate` pause the group rather than fork, so the migration can be initiated by any single supporting member without waiting for unanimous adoption.
 
 ### Atomic batching alternatives
 
@@ -607,7 +575,7 @@ Three approaches were considered for atomic batching:
 
 **Commit-level batching** uses standard MLS semantics where multiple proposals in a single commit are applied atomically. No new types or protocol changes are needed, but proposals are sent as separate network messages before the commit, and it doesn't solve batching when Add/Remove and AppDataUpdate proposals originate from different proposers.
 
-The **custom BatchProposal** is recommended because it works within MLS semantics, requires no infrastructure changes, and provides atomicity at the proposal level for any combination of proposal types.
+The **custom BatchProposal** is the form preserved in Section 4 as future work. It is deferred from v1 — the shipped implementation relies on commit-level batching plus the lazy-batching shape (Section 3.4) for the cases that have come up so far.
 
 ### Application ComponentId registration alternatives
 
@@ -622,7 +590,7 @@ The **custom BatchProposal** is recommended because it works within MLS semantic
 
 **First-write-wins** uses no global registration — the first `AppDataUpdate` to a ComponentId in a group implicitly claims it. Simplest to implement but fragile in multi-app scenarios since two apps can independently choose the same ComponentId in different groups.
 
-The **on-chain registry** is recommended because it eliminates collision risk entirely and provides permanent, decentralized allocation.
+The **on-chain registry** is preserved as the target end state but is deferred from v1. v1 ships with **per-group explicit registration**: applications register a component (id, type, policy) into the per-group `COMPONENT_REGISTRY` (`0x8000`) before writing to it. Duplicate ids are rejected at registration time, so the collision surface is bounded to a single group. The shape is closer to "first-register-wins-per-group" than first-write-wins; cross-group coordination is left as an open question (Open Questions §5).
 
 ## Backward Compatibility
 
@@ -646,21 +614,21 @@ Old clients that do not support `AppDataUpdate` cannot join post-migration group
 
 ### BatchProposal
 
-Old clients will reject unknown custom proposal types. The `BatchProposal` (`0xff00`) MUST only be used in groups where all members advertise support for it via `RequiredCapabilities`. Groups that include members without BatchProposal support MUST use individual proposals instead.
+Deferred from v1 (Section 4). When introduced in a later release, the same compatibility considerations apply: old clients reject unknown custom proposal types, so `BatchProposal` (`0xff00`) MUST only be used in groups where all members advertise support for it via `RequiredCapabilities`.
 
 ## Security Considerations
 
 ### Permission Escalation
 
-The ComponentId range model MUST be enforced during proposal validation, not just at the application layer. A malicious proposer could craft an `AppDataUpdate` targeting a super-admin ComponentId. The validator MUST check the proposer's role against the ComponentId range and reject unauthorized updates.
+Permission checks for every `AppDataUpdate` proposal MUST be enforced at proposal validation and again during commit processing — not deferred to the application layer. A malicious proposer could otherwise craft an `AppDataUpdate` targeting a super-admin-only ComponentId (e.g., `COMPONENT_REGISTRY` or `SUPER_ADMIN_LIST`). The validator MUST resolve the proposer's role against the pre-commit `SUPER_ADMIN_LIST` / `ADMIN_LIST` and the pre-commit registry entry for the target id, and reject any unauthorized update.
 
-### Custom Proposal Validation
+### Pre-Commit Permission Evaluation
 
-Each sub-operation in a `BatchProposal` MUST be validated independently against the proposer's permissions. A batch containing one permitted and one unpermitted operation MUST be rejected entirely.
+As detailed in Section 2.4, all permission decisions are made against the pre-commit state of the group. A commit cannot grant a proposer permission and use that permission in the same commit — the dependent write evaluates against the old registry / admin lists and fails. This rules out an entire class of escalation attacks where an attacker tries to atomically rewrite the registry and immediately exercise the rewritten policy. The only exception is the bootstrap commit, which uses a dedicated validator (Section 3.2 Step B); ordinary commits MUST NOT bypass pre-commit evaluation.
 
 ### Ordering Attacks
 
-The MLS extensions draft specifies that `AppDataUpdate` proposals MUST be ordered after `GroupContextExtensions` proposals within a commit. Implementations MUST enforce this ordering to prevent a malicious committer from using a GCE to overwrite AppDataDictionary state set by a prior AppDataUpdate.
+The MLS extensions draft specifies that `AppDataUpdate` proposals MUST be ordered after `GroupContextExtensions` proposals within a commit. Implementations MUST enforce this ordering. Combined with the pre-commit evaluation rule above, this prevents a malicious committer from using a GCE (during the migration window) to overwrite AppDataDictionary state set by a prior AppDataUpdate, or from reordering `AppDataUpdate` proposals to make a dependent write appear authorized.
 
 ### Identity Verification
 
@@ -668,24 +636,26 @@ Proposer identity is derived from the MLS sender leaf index and verified against
 
 ### Threat Model
 
-**Malicious group member:** Could attempt to write to ComponentIds outside their permission range. Mitigated by range-based validation at proposal reception and commit processing.
+**Malicious group member:** Could attempt to write to ComponentIds for which they lack permission. Mitigated by registry-policy enforcement at proposal reception and commit processing.
 
-**Malicious committer:** Could attempt to reorder proposals within a commit to change semantics. Mitigated by MLS ordering constraints and validation during commit processing.
+**Malicious committer:** Could attempt to bundle a registry mutation with a dependent write, or to reorder proposals within a commit to change semantics. Mitigated by pre-commit permission evaluation (Section 2.4) and MLS ordering constraints.
 
-**Malicious node:** Could attempt to drop or reorder messages. AppDataUpdate proposals within a commit are atomic — partial application is not possible. The custom batch proposal further reduces the attack surface by encoding multiple operations in a single message.
+**Malicious node:** Could attempt to drop or reorder messages. AppDataUpdate proposals within a commit are atomic — partial application is not possible.
 
 **Replay attacks:** MLS epoch-based state prevents replay of proposals from previous epochs. Each proposal is bound to the current group epoch.
 
 ## Reference Implementation
 
-The proposal-by-reference foundation is implemented in libxmtp on `main`. Key files:
+The proposal-by-reference foundation and the AppData migration are implemented in libxmtp on `main`. Key files:
 
-- [`crates/xmtp_mls/src/groups/mod.rs`](https://github.com/xmtp/libxmtp/blob/f6b7e6e3cd18d7a71ea3e1d45ac252d74c36a2bb/crates/xmtp_mls/src/groups/mod.rs) — `enable_proposals()`, `all_members_support_proposals()`, capability checks, extension builders
-- [`crates/xmtp_mls/src/groups/mls_sync.rs`](https://github.com/xmtp/libxmtp/blob/f6b7e6e3cd18d7a71ea3e1d45ac252d74c36a2bb/crates/xmtp_mls/src/groups/mls_sync.rs) — Intent handlers for `ProposeMemberUpdate`, `ProposeGroupContextExtensions`, `CommitPendingProposals`, two-phase commit flow, `PublishIntentData`
-- [`crates/xmtp_mls/src/groups/mls_sync/update_group_membership.rs`](https://github.com/xmtp/libxmtp/blob/f6b7e6e3cd18d7a71ea3e1d45ac252d74c36a2bb/crates/xmtp_mls/src/groups/mls_sync/update_group_membership.rs) — Proposal-based and direct-commit membership update paths, `compute_publish_data_for_proposal_based_update`
-- [`crates/xmtp_mls/src/groups/validated_commit.rs`](https://github.com/xmtp/libxmtp/blob/f6b7e6e3cd18d7a71ea3e1d45ac252d74c36a2bb/crates/xmtp_mls/src/groups/validated_commit.rs) — `validate_proposal()`, `UnsupportedProposalType` error, proposal type validation table
-- [`crates/xmtp_mls/src/groups/group_permissions.rs`](https://github.com/xmtp/libxmtp/blob/f6b7e6e3cd18d7a71ea3e1d45ac252d74c36a2bb/crates/xmtp_mls/src/groups/group_permissions.rs) — `PolicySet`, `MembershipPolicies`, `MetadataPolicies`, `PermissionsPolicies`, `evaluate_commit()`
-- [`crates/xmtp_mls/src/groups/intents.rs`](https://github.com/xmtp/libxmtp/blob/f6b7e6e3cd18d7a71ea3e1d45ac252d74c36a2bb/crates/xmtp_mls/src/groups/intents.rs) — `ProposeMemberUpdateIntentData`, `ProposeGroupContextExtensionsIntentData`, `CommitPendingProposalsIntentData`
+- `crates/xmtp_mls_common/src/app_data/component_id.rs` — `ComponentId` definitions, range helpers (`is_xmtp_range`, `is_app_range`, `is_reserved`, `is_immutable`), QUIC vlen TLS codec.
+- `crates/xmtp_mls_common/src/app_data/component_registry.rs` — `ComponentRegistry` at `COMPONENT_REGISTRY` (`0x8000`), `validate_entry`, registry-policy enforcement.
+- `crates/xmtp_mls_common/src/app_data/registry_table.rs` — `WELL_KNOWN` dispatch table and `lookup_component`, plus the `well_known_count_tripwire` change-control test.
+- `crates/xmtp_mls/src/groups/app_data/component_source.rs` — `read_component_bytes`, `read_post_commit_component_bytes`, unknown-component tolerance at the three receive-side sites.
+- `crates/xmtp_mls/src/groups/app_data/mod.rs` — `stage_app_data_propose_and_commit`, `consume_proposal_store` integration, lazy-batching behavior.
+- `crates/xmtp_mls/src/groups/mod.rs` — `enable_proposals()`, `EnableProposalsOptions` (`force`, `min_version`), two-step bootstrap.
+- `crates/xmtp_mls/src/groups/validated_commit.rs` — `ValidatedCommit::from_staged_commit` migrated-branch handling, `validate_one_app_data_update_with_old_value`, steady-state pause via `AppDataUpdate(MinimumSupportedProtocolVersion)`.
+- `crates/xmtp_configuration/src/common/mls.rs` — `PROPOSALS_MIN_PROTOCOL_VERSION` constant (`"1.11.0"`).
 
 The `AppDataUpdate` and `AppDataDictionary` APIs are available in OpenMLS behind the `extensions-draft-08` feature flag:
 
@@ -699,51 +669,59 @@ The `AppDataUpdate` and `AppDataDictionary` APIs are available in OpenMLS behind
 
 1. **Enable proposals succeeds** — All members support `PROPOSAL_SUPPORT_EXTENSION_ID`. After `enable_proposals()`, the group context contains the extension and subsequent updates use proposal-by-reference.
 2. **Enable proposals fails with unsupported member** — One member's key package does not include `PROPOSAL_SUPPORT_EXTENSION_ID`. The group remains in direct-commit mode.
-3. **AppDataUpdate accepted for AnyMember range** — A regular member sends an `AppDataUpdate` targeting `0x9800` (GroupName). The proposal is accepted and the component value is updated.
-4. **AppDataUpdate rejected for SuperAdmin range** — A regular member sends an `AppDataUpdate` targeting `0x8800` (PermissionPolicies). The proposal is rejected with `InsufficientPermissions`.
-5. **AppDataUpdate rejected for immutable component** — A super admin sends an `AppDataUpdate` targeting `0x8000` (ConversationType) which already has a value. The proposal is rejected because immutable components cannot be modified.
-6. **AppDataUpdate rejected for reserved range** — Any member sends an `AppDataUpdate` targeting `0xa500` (reserved). The proposal is rejected unconditionally (`Deny`).
-7. **BatchProposal atomic success** — A `BatchProposal` containing an Add proposal and an AppDataUpdate (GroupMembership) is committed. Both are applied atomically.
-8. **BatchProposal atomic failure** — A `BatchProposal` containing one valid AppDataUpdate and one targeting a super-admin ComponentId from a regular member. The entire batch is rejected.
-9. **Migration preserves state** — A group migrates from GCE to `AppDataDictionary`. All state (membership, metadata, permissions) is readable from the new ComponentIds and matches the pre-migration values.
-10. **Old clients pause on version bump** — After migration bumps `minimum_supported_protocol_version`, an old client pauses the group. After upgrading, the client resumes and processes all missed commits.
-11. **KeyValueDelta Insert fails on existing key** — An `Insert` mutation targets a key that already exists. The proposal is rejected.
-12. **KeyValueDelta Update fails on missing key** — An `Update` mutation targets a key that does not exist. The proposal is rejected.
+3. **AppDataUpdate accepted when registry policy allows it** — A regular member sends an `AppDataUpdate` targeting `GroupName` (`0x8004`), whose registry entry allows any member. The proposal is accepted and the component value is updated.
+4. **AppDataUpdate rejected when policy requires super admin** — A regular member sends an `AppDataUpdate` targeting `SUPER_ADMIN_LIST` (`0x8001`, hardcoded super-admin-only). The proposal is rejected with `InsufficientPermissions`.
+5. **AppDataUpdate rejected for immutable component** — A super admin sends an `AppDataUpdate` targeting `ConversationType` (`0xBFFF`) which already has a value. The proposal is rejected because immutable components cannot be modified.
+6. **AppDataUpdate rejected for reserved range** — Any member sends an `AppDataUpdate` targeting `0xFF50` (reserved). The proposal is rejected unconditionally.
+7. **AppDataUpdate rejected for unregistered id** — A member sends an `AppDataUpdate` targeting an id in the application range (`0xC000-0xFEFF`) with no entry in `COMPONENT_REGISTRY`. The proposal is rejected (deny-by-default).
+8. **Pre-commit permission evaluation** — Super-admin Alice proposes an `AppDataUpdate` to `COMPONENT_REGISTRY` (`0x8000`) that relaxes the policy for some application id `X` from super-admin-only to any-member. Regular member Bob proposes an `AppDataUpdate` to `X`. Both proposals are pending; a commit consumes both. The commit MUST be rejected: Bob's write is evaluated against the pre-commit registry (still super-admin-only for `X`), so Bob lacks permission. Alice's registry change in the same commit does not unlock Bob's write — the policy change only takes effect for *subsequent* commits.
+9. **Unknown-component tolerance** — A commit contains an `AppDataUpdate(Update)` for an id in `0x8000-0xFEFF` that the receiver has no `Component` impl for. The receiver stores the payload verbatim and does not reject the commit.
+10. **Migration preserves state** — A group migrates from GCE to `AppDataDictionary` via the two-step bootstrap. All state (membership, metadata, permissions) is readable from the new ComponentIds and matches the pre-migration values.
+11. **Old clients pause on Step A version bump** — Step A bumps `minimum_supported_protocol_version` to `PROPOSALS_MIN_PROTOCOL_VERSION` (`"1.11.0"`). A pre-1.11 client pauses *before* observing Step B's legacy-extension-stripping commit. After upgrading, the client resumes and processes both Step A and Step B.
+12. **Steady-state floor bump via AppDataUpdate** — A migrated peer raises the floor by sending an `AppDataUpdate` to `MinimumSupportedProtocolVersion` (`0x800A`). Lower-version peers pause identically to the legacy GCE path.
+
+**Deferred test cases** (re-enable when their feature ships):
+
+- *BatchProposal atomic success / failure* — pair with Section 4.
+- *KeyValueDelta Insert fails on existing key* / *Update fails on missing key* — pair with Section 5.
 
 ## Open Questions
 
 1. **Migration threshold**: Should the percentage of members required before initiating a version bump be configurable per-group, or should there be a single protocol-wide default (e.g., 100%)?
-2. **BatchProposal nesting**: Should `BatchProposal` support nesting (a batch containing another batch)? If not, validation MUST reject nested batches.
-3. **BatchProposal size limit**: What is the maximum number of sub-proposals allowed in a single `BatchProposal`? Too many could pass the blockchain size limit.
-4. **KeyValueDelta Upsert**: Should `KeyValueDelta` support an `Upsert` operation (insert-or-update) in addition to separate `Insert` and `Update`? Upsert simplifies client code but weakens conflict detection.
-5. **Component data size limit**: Should there be a maximum byte size per ComponentId value? Large components could bloat the GroupContext and degrade performance.
-6. **On-chain registry timing**: Should the on-chain ComponentId registry be part of v1, or should v1 launch with hash-based namespacing and migrate to the registry later?
+2. **KeyValue API (Section 5)**: shape and timing for the delta-mutation client API. v1 still exposes a single opaque `app_data` string at `0x8009`.
+3. **KeyValueDelta Upsert**: Should `KeyValueDelta` support an `Upsert` operation (insert-or-update) in addition to separate `Insert` and `Update`? Upsert simplifies client code but weakens conflict detection.
+4. **Component data size limit**: Should there be a maximum byte size per ComponentId value? Large components could bloat the GroupContext and degrade performance.
+5. **Cross-group component allocation**: Section 2.2.2 ships as per-group runtime registration. A global allocator (on-chain or otherwise) is deferred — does the per-group form hold up in practice, or does it need a global namespace before broad application adoption? The 32-byte stable-identifier approach sketched in Section 2.2.2 is one candidate: it lets apps reference components by a 32-byte handle and lets the SDK resolve to the per-group 16-bit ComponentId, so multi-app groups don't need to coordinate on 16-bit slots.
+6. **`BatchProposal` (Section 4)**: deferred from v1. Open whether the lazy-batching shape covers the use cases or whether the explicit batch wrapper is still worth shipping.
 
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
-## Implementation Steps
+## Implementation Status
 
-- ~~TLS Map (byte exact serialization)~~
-- Batched proposals (plus control over batching)
-- ~~Permission architecture (range, overrides, mixing)~~
-- Immutable data
-- App data handler implementations
-- Group context migration (validate equivalency, bypass permissions at cutover)
-- Proposal validation
-- Commit validation
-- Welcome validation
-- Post migration default changes
-- API changes
-- SDK changes
-- Extra tests (not covered by any individual task).
+Landed on `main`:
 
-### Optional implementation Steps
+- TLS Map / Set component formats (byte-exact serialization).
+- `ComponentRegistry` permission architecture at `0x8000` (replaces the original range + override-map split).
+- Immutable component handling (counting down from `0xBFFF`).
+- AppData handler implementations for all well-known mutable components.
+- Two-step bootstrap migration (legacy GCE version bump → proposal-then-commit cutover). Makes pre-d14n migrations safe: lower-version peers pause on the Step A floor bump and never see Step B strip the legacy extensions.
+- Proposal, commit, and welcome validation on both pre- and post-migration paths.
+- Post-migration intent handlers (Section 3.4) — `MetadataUpdate`, `UpdateAdminList`, `UpdatePermission`, `UpdateGroupMembership`, plus steady-state `MinimumSupportedProtocolVersion` bumps via AppDataUpdate.
+- `EnableProposalsOptions { force, min_version }` API surface, exposed through mobile / WASM / node bindings.
+- Unknown-component tolerance at the three receive-side sites.
+- Versioned `InboxId` TLS wire format on all inbox-id-bearing components.
+- `LibXMTPVersion` semver-compliant ordering via the `semver` crate.
 
-- Lazy commits
-- App component ids registration
-- Pre d14n migrations (for some groups do proposals/app data updates before d14n)?
-- InboxId encoding change
-- User sub maps (maps inside of inbox id maps)
-- Leaf node updates (commit size optimization)
+Deferred:
+
+- `BatchProposal` (Section 4).
+- KeyValue Application Data API and `KeyValueDelta` mutations (Section 5).
+- Cross-group ComponentId allocator (the on-chain registry sketched in Section 2.2.2).
+- Protocol-version leaf-node extension / server-side `GetGroupVersionSupport` query (Section 3.1) — migration uses the XIP-72 version-floor mechanism without the separate readiness signals.
+
+Optional future work:
+
+- User sub-maps (maps nested inside inbox-id-keyed maps).
+- Leaf-node updates for commit-size optimization.
