@@ -92,6 +92,12 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SH
 "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in
 [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
+XIP-83 specifies a **control protocol** with two backend bindings. The proto and requirements below
+are written against the v3 `MlsApi` (`xmtp.mls.api.v1.Subscribe`); the decentralized backend carries
+the identical control protocol on `xmtp.xmtpv4.message_api.QueryApi.Subscribe`, differing only in its
+data model (per-originator vector cursors, envelope delivery). See [Decentralized (d14n)
+binding](#decentralized-d14n-binding); all other requirements apply to both bindings unchanged.
+
 ### Overview
 
 ```mermaid
@@ -398,6 +404,51 @@ separately, because it requires a WebSocket ingress on the node (or a bridging p
 on experimental tooling. Standard gRPC-Web will not close this gap on its own: bidirectional streaming
 over `fetch` is explicitly *not planned*, pending browser **WebTransport** support — which is the more
 durable long-term primitive for in-browser full-duplex once its server/client tooling matures.
+
+### Decentralized (d14n) binding
+
+The proto and requirements above are written against the v3 `MlsApi` (`xmtp.mls.api.v1`), but XIP-83 is
+a **control protocol**, not a single RPC. The same protocol has a second binding on the decentralized
+backend's client-facing `QueryApi` (`xmtp.xmtpv4.message_api`), added as a new bidirectional RPC
+alongside the existing server-streaming `SubscribeTopics`:
+
+```protobuf
+service QueryApi {
+  // ... existing QueryEnvelopes, SubscribeTopics, GetInboxIds, GetNewestEnvelope ...
+  rpc Subscribe(stream SubscribeRequest) returns (stream SubscribeResponse) {}
+}
+```
+
+The **control protocol is identical** — `Mutate` (adds/removes, `history_only`, `mutate_id`),
+`Started`, `CatchupComplete`, `TopicsLive`, `Ping` / `Pong`, the catch-up waves, and the half-close
+bounded catch-up — and every server and client requirement above applies unchanged. The two bindings
+differ only where the backend's data model differs:
+
+- **The resume cursor is a per-originator vector, not a scalar.** A v3 subscription resumes from a
+  single monotonic `id_cursor`; a decentralized subscription resumes from a `Cursor`
+  (`map<uint32, uint64> node_id_to_sequence_id`), because its envelopes originate from multiple nodes
+  and there is no single global sequence. Each `Subscription` therefore carries `last_seen` — the same
+  `Cursor` type `SubscribeTopics` already uses — in place of `id_cursor`. The no-redelivery guarantee
+  (server requirement 2) is evaluated **per originator**: an envelope is delivered iff its
+  `(originator_node_id, originator_sequence_id)` is beyond the subscription's recorded position for
+  that originator, with originators absent from the cursor map treated as sequence `0`. "From the
+  beginning" is an empty cursor rather than `0`.
+- **Delivery is the unified envelope stream.** Responses carry `OriginatorEnvelope`s (the decentralized
+  wire type) rather than typed `GroupMessage` / `WelcomeMessage`, and the client demultiplexes by each
+  envelope's target topic. `Started` / `CatchupComplete` / `TopicsLive` / `Ping` / `Pong` are
+  structurally identical, re-declared in the `xmtpv4` package.
+- **Topics need no translation.** Subscriptions already use the XIP-49 kind-prefixed binary topic,
+  which *is* the decentralized backend's native topic representation — the convergence this XIP relies
+  on elsewhere — so a subscription crosses backends with no reformatting. A topic whose kind the node
+  does not serve fails the stream with `INVALID_ARGUMENT`, as on v3.
+
+This binding is **additive**, exactly as on v3: `SubscribeTopics` — the immutable server-streaming
+ancestor whose `STARTED` / `CATCHUP_COMPLETE` lifecycle `Started` / `CatchupComplete` echo — is
+unchanged, and clients opt in by calling `Subscribe`. Because bidirectional streaming requires HTTP/2,
+`QueryApi.Subscribe` serves native clients (which speak HTTP/2 gRPC to the node); browser and other
+gRPC-web / connect-web clients, which cannot open a bidirectional stream, remain on `SubscribeTopics`
+behind a liveness watchdog — the same division as the v3 browser story above. A node MAY implement
+either binding independently; a client falls back on `UNIMPLEMENTED`.
 
 ## Rationale
 
